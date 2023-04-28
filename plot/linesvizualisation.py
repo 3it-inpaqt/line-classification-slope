@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from numpy import ndarray
 import numpy as np
+from utils.angleoperations import calculate_angle
 from matplotlib.figure import Figure
 
 
@@ -23,7 +24,10 @@ def create_multiplots(batch: ndarray):
 
     for i, ax in enumerate(axes.flatten()):
         if i < n:
-            ax.imshow(batch[:, :, i], cmap='gray')
+            image = batch[:, :, i]
+            angle_radian, angle_degree = calculate_angle(image)
+            ax.imshow(image, cmap='gray')
+            ax.set_title('Angle: {:.2f} | {:.2f}°'.format(angle_radian, angle_degree))
             ax.axis('off')
         else:
             fig.delaxes(ax) # if not there, problem with range in the array and out of bound error
