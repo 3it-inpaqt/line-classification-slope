@@ -7,3 +7,4 @@ pandas
 tqdm
 scikit-learn
 scikit-image
+scikit-spatial

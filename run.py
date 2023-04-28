@@ -1,20 +1,13 @@
-from linegeneration.generatelines import generate_image
+from linegeneration.generatelines import create_batch
 from utils.angleoperations import calculate_angle
+from plot.linesvizualisation import create_multiplots
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    # Generates image
+    # Generates images
     size = (18, 18)
-    image = generate_image(size)
-    angle_radian, angle_degree = calculate_angle(image)
+    n = 40
+    batch = create_batch(n, size)
+    fig, axes = create_multiplots(batch)
 
-    # Generating figure
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
-    ax.axis('off')
-    ax.imshow(image, cmap='Greys')
-    plt.tight_layout()
     plt.show()
-    print('Angle in radian: ', angle_radian)
-    print('Angle in degree: ', angle_degree)
