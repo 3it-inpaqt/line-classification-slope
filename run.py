@@ -7,7 +7,7 @@ if __name__ == '__main__':
     # Generates images
     size = (18, 18)
     n = 40
-    batch = create_batch(n, size)
-    fig, axes = create_multiplots(batch)
+    batch, angle_list = create_batch(n, size)
+    fig, axes = create_multiplots(batch, angle_list)
 
     plt.show()

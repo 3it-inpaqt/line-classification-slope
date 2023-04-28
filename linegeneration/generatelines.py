@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import ndarray
 from skimage.draw import line
+from utils.angleoperations import calculate_angle
 
 
 def generate_image(size: tuple) -> ndarray:
@@ -34,6 +35,12 @@ def create_batch(n: int, size: tuple[int, int]) -> ndarray:
     size_batch = size + (n,)  # concatenate tuple for correct size definition in the array
     batch = np.zeros(size_batch)
 
+    angle_list = []
+
     for k in range(n):
-        batch[:, :, k] = generate_image(size)
-    return batch
+        image = generate_image(size)
+        batch[:, :, k] = image
+        angle_radian, angle_degree = calculate_angle(image)
+        angle_list.append((angle_radian,angle_degree))
+
+    return batch, angle_list

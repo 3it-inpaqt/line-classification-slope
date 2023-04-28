@@ -5,7 +5,7 @@ from utils.angleoperations import calculate_angle
 from matplotlib.figure import Figure
 
 
-def create_multiplots(batch: ndarray):
+def create_multiplots(batch: ndarray, angle_list: list[float]):
     """
     Generate figures with several plots to see different lines orientation
 
@@ -25,7 +25,7 @@ def create_multiplots(batch: ndarray):
     for i, ax in enumerate(axes.flatten()):
         if i < n:
             image = batch[:, :, i]
-            angle_radian, angle_degree = calculate_angle(image)
+            angle_radian, angle_degree = angle_list[i]
             ax.imshow(image, cmap='gray')
             ax.set_title('Angle: {:.2f} | {:.2f}°'.format(angle_radian, angle_degree))
             ax.axis('off')
