@@ -25,7 +25,8 @@ def create_multiplots(batch: ndarray, angle_list: list[float]):
     for i, ax in enumerate(axes.flatten()):
         if i < n:
             image = batch[:, :, i]
-            angle_radian, angle_degree = angle_list[i]
+            angle_radian = angle_list[i]
+            angle_degree = np.rad2deg(angle_radian)
             ax.imshow(image, cmap='gray')
             ax.set_title('Angle: {:.2f} | {:.2f}°'.format(angle_radian, angle_degree))
             ax.axis('off')

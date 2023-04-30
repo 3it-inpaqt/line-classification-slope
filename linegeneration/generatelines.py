@@ -40,7 +40,7 @@ def create_batch(n: int, size: tuple[int, int]) -> ndarray:
     for k in range(n):
         image = generate_image(size)
         batch[:, :, k] = image
-        angle_radian, angle_degree = calculate_angle(image)
-        angle_list.append((angle_radian,angle_degree))
+        angle_radian = calculate_angle(image)
+        angle_list.append(angle_radian)
 
     return batch, angle_list
