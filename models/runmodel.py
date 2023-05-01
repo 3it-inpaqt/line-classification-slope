@@ -48,14 +48,14 @@ print((train_x.shape, len(train_y)), (val_x.shape, len(val_y)))
 # Converting training images into torch format
 n_train = int(0.9*n)
 train_x = train_x.reshape(n_train, 1, N, N)
-train_x = torch.from_numpy(train_x)
+train_x = torch.tensor(train_x, dtype=torch.float32)
 
 # Converting the target into torch format
-train_y = torch.from_numpy(np.array(train_y))
+train_y = torch.tensor(np.array(train_y), dtype=torch.float32)
 
 # Converting rest of data
-val_x = torch.from_numpy(val_x)
-val_y = torch.from_numpy(np.array(val_y))
+val_x = torch.tensor(val_x, dtype=torch.float32)
+val_y = torch.tensor(np.array(val_y), dtype=torch.float32)
 
 # shape of training data
 print(train_x.shape, train_y.shape)
