@@ -1,6 +1,7 @@
 import numpy as np
 np.seterr(divide='ignore')
 
+
 def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
     """
     Calculate the angle of a lign with respect to the
@@ -15,6 +16,8 @@ def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
     else:
         slope = (y1 - y2) / (x1 - x2)
         angle = np.arctan(slope)
+        if angle < 0:
+            angle += np.pi
         return angle
 
 
@@ -24,4 +27,4 @@ def normalize_angle(angle: float) -> float:
     :param angle: angle of a line
     :return: normalized angle value
     """
-    return angle / np.pi
+    return angle / (2*np.pi)

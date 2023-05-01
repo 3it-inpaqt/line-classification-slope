@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
+from utils.angleoperations import normalize_angle
 
 def create_multiplots(image_set: ndarray, angles: ndarray) -> Tuple[Figure, Axes]:
     """
@@ -30,8 +31,9 @@ def create_multiplots(image_set: ndarray, angles: ndarray) -> Tuple[Figure, Axes
             image = image_set[i, :, :]
             angle_radian = angles[i]
             angle_degree = np.rad2deg(angle_radian)
+            normalized_angle = normalize_angle(angle_radian)
             ax.imshow(image, cmap='gray')
-            ax.set_title('Angle: {:.2f} | {:.2f}°'.format(angle_radian, angle_degree))
+            ax.set_title('Angle: {:.2f} | {:.2f}° \n Normalized value: {:.2f}'.format(angle_radian, angle_degree, normalized_angle), fontsize=20)
             ax.axis('off')
         else:
             fig.delaxes(ax)  # if not there, problem with range in the array and out of bound error
