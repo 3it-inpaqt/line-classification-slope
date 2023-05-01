@@ -29,7 +29,8 @@ def train(model, optimizer, criterion, train_x, train_y, val_x, val_y, n_epochs)
         # prediction for training and validation set
         output_train = model(x_train)
         output_val = model(x_val)
-
+        print('output_train shape: ', output_train.shape)
+        print('y_train shape: ', y_train.shape)
         # computing the training and validation loss
         loss_train = criterion(output_train, y_train)
         loss_val = criterion(output_val, y_val)
