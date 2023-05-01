@@ -15,17 +15,16 @@ if __name__ == '__main__':
 
     n = 10000
     N = 18
-    size = (N, N)
 
     # Read data
-    batch, angle_list = create_batch(n, size)
+    batch, angle_list = create_batch(n, N)
     # Reshape batch to 2D array
     batch_2d = batch.reshape(n, N * N)
     # Convert angle value from [0,pi] to [0,1]
     normalize_angle = [theta/np.pi for theta in angle_list]
 
     # train-test split for model evaluation
-    X_train, X_test, y_train, y_test = train_test_split(batch_2d, normalize_angle, train_size=0.7, shuffle=True)
+    X_train, X_test, y_train, y_test = train_test_split(batch, normalize_angle, train_size=0.7, shuffle=True)
 
     # Convert to 2D PyTorch tensors
     X_train = torch.tensor(X_train, dtype=torch.float32)
@@ -35,15 +34,19 @@ if __name__ == '__main__':
 
     # Define the model
     model = nn.Sequential(
-        nn.Linear(N*N, 32),
+        nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, stride=1, padding=1),
+        nn.MaxPool2d(kernel_size=2, stride=2),
         nn.ReLU(),
-        nn.Conv2d(32, 24, kernel_size=3, padding=1),
+        nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=1),
+        nn.MaxPool2d(kernel_size=2, stride=2),
         nn.ReLU(),
-        nn.Conv2d(24, 12, kernel_size=3, padding=1),
+        nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1),
+        nn.MaxPool2d(kernel_size=2, stride=2),
         nn.ReLU(),
-        nn.Conv2d(12, 6, kernel_size=3, padding=1),
-        nn.ReLU(),
-        nn.Linear(6, 1)
+        nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Linear(in_features=128 * 2 * 2, out_features=1),
+        nn.Sigmoid()
     )
 
     # loss function and optimizer
