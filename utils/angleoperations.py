@@ -1,9 +1,19 @@
-from numpy import ndarray
 import numpy as np
 
 
-def calculate_angle(image: ndarray) -> tuple[float, float]:
-    y, x = np.nonzero(image)                                                        # retrieve the 1 positions
-    angle_radian = np.mean(np.arctan2(-(y.mean() - y), x.mean() - x)) + np.pi/2     # calculate angle
+def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
+    """
+    Calculate the angle of a lign with respect to the
+    :param x1: x position of first point
+    :param y1: y position of first point
+    :param x2: x position of second point
+    :param y2: y position of second point
+    :return:
+    """
+    try:
+        slope = (y1 - y2) / (x1 - x2)
+        angle = np.arctan(slope)
+        return angle
 
-    return angle_radian
+    except ZeroDivisionError:
+        return np.pi/2

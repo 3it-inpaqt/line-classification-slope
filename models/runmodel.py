@@ -58,8 +58,8 @@ val_x = torch.tensor(val_x.reshape(((n-n_train), 1, N, N)), dtype=torch.float32)
 val_y = torch.tensor(np.array(val_y), dtype=torch.float32)
 
 # shape of data
-print("Shape of training data", train_x.shape, train_y.shape)
-print("Shape of val data", val_x.shape, val_y.shape)
+# print("Shape of training data", train_x.shape, train_y.shape)
+# print("Shape of val data", val_x.shape, val_y.shape)
 
 """ Run model """
 
