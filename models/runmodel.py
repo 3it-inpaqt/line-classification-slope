@@ -23,7 +23,7 @@ batch, angle_list = create_batch(n, N)
 normalize_angle = [theta/np.pi for theta in angle_list]
 
 """ Define model """
-model = AngleNet(N)
+model = AngleNet()
 
 # loss function and optimizer
 loss_fn = nn.MSELoss()  # mean square error
