@@ -8,7 +8,7 @@ import torch.optim as optim
 import tqdm
 from sklearn.model_selection import train_test_split
 
-from linegeneration.generatelines import create_batch
+from linegeneration.generatelines import create_image_set
 
 
 if __name__ == '__main__':
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     N = 18
 
     # Read data
-    batch, angle_list = create_batch(n, N)
+    batch, angle_list = create_image_set(n, N)
     # Reshape batch to 2D array
     batch_2d = batch.reshape(n, N * N)
     # Convert angle value from [0,pi] to [0,1]
