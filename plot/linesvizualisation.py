@@ -13,7 +13,7 @@ def create_multiplots(batch: ndarray, angle_list: list[float]):
     :return: a figure with subplots
     """
 
-    p, _, n = batch.shape
+    n, p, _ = batch.shape
     # Compute the number of rows and columns required to display n subplots
     nrows = int(np.ceil(np.sqrt(n)))
     ncols = int(np.ceil(n / nrows))
@@ -24,7 +24,7 @@ def create_multiplots(batch: ndarray, angle_list: list[float]):
 
     for i, ax in enumerate(axes.flatten()):
         if i < n:
-            image = batch[:, :, i]
+            image = batch[i, :, :]
             angle_radian = angle_list[i]
             angle_degree = np.rad2deg(angle_radian)
             ax.imshow(image, cmap='gray')

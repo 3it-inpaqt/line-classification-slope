@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     # Generates images
-    size = (18, 18)
-    n = 100
-    batch, angle_list = create_batch(n, size)
+    N = 18
+    n = 25
+    batch, angle_list = create_batch(n, N)
     fig, axes = create_multiplots(batch, angle_list)
 
     plt.show()

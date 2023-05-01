@@ -24,22 +24,20 @@ def generate_image(size: tuple) -> ndarray:
     return img
 
 
-def create_batch(n: int, size: tuple[int, int]) -> ndarray:
+def create_batch(n: int, N: int) -> ndarray:
     """
     Generate a batch of arrays with various lines orientation
 
     :param n: number of image to generate
-    :param size: size of each image
-    :return: 3d numpy array, (size) x n
+    :param N: side of each image
+    :return: 3d numpy array, n x N x N
     """
-    size_batch = size + (n,)  # concatenate tuple for correct size definition in the array
-    batch = np.zeros(size_batch)
-
+    batch = np.zeros((n, N, N))
     angle_list = []
 
     for k in range(n):
-        image = generate_image(size)
-        batch[:, :, k] = image
+        image = generate_image((N, N))
+        batch[k, :, :] = image
         angle_radian = calculate_angle(image)
         angle_list.append(angle_radian)
 

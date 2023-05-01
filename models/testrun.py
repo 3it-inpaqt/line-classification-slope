@@ -13,7 +13,7 @@ from linegeneration.generatelines import create_batch
 
 if __name__ == '__main__':
 
-    n = 100000
+    n = 10000
     N = 18
     size = (N, N)
 
@@ -35,11 +35,13 @@ if __name__ == '__main__':
 
     # Define the model
     model = nn.Sequential(
-        nn.Linear(N*N, 24),
+        nn.Linear(N*N, 32),
         nn.ReLU(),
-        nn.Linear(24, 12),
+        nn.Conv2d(32, 24, kernel_size=3, padding=1),
         nn.ReLU(),
-        nn.Linear(12, 6),
+        nn.Conv2d(24, 12, kernel_size=3, padding=1),
+        nn.ReLU(),
+        nn.Conv2d(12, 6, kernel_size=3, padding=1),
         nn.ReLU(),
         nn.Linear(6, 1)
     )
