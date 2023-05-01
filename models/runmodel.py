@@ -45,13 +45,17 @@ print(model)
 train_x, val_x, train_y, val_y = train_test_split(batch, normalize_angle, test_size=0.1)
 print((train_x.shape, len(train_y)), (val_x.shape, len(val_y)))
 
-# converting training images into torch format
+# Converting training images into torch format
 n_train = int(0.9*n)
 train_x = train_x.reshape(n_train, 1, N, N)
 train_x = torch.from_numpy(train_x)
 
-# converting the target into torch format
+# Converting the target into torch format
 train_y = torch.from_numpy(np.array(train_y))
+
+# Converting rest of data
+val_x = torch.from_numpy(val_x)
+val_y = torch.from_numpy(np.array(val_y))
 
 # shape of training data
 print(train_x.shape, train_y.shape)
