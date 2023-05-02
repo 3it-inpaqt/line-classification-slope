@@ -61,7 +61,7 @@ if __name__ == '__main__':
                 # take a batch
                 X_batch = X_train[start:start+batch_size]
                 y_batch = y_train[start:start+batch_size]
-                X_batch = X_batch.flatten(1) # flatten array for matrix multiplication
+                X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
                 # forward pass
                 y_pred = model(X_batch)
                 loss = loss_fn(y_pred, y_batch)
@@ -92,4 +92,4 @@ if __name__ == '__main__':
     plt.show()
 
     # Save the state dictionary
-    save_model(model, 'best_model.pt')
+    save_model(model, 'best_model')

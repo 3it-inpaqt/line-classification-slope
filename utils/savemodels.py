@@ -13,23 +13,30 @@ def save_model(model, filename='model'):
     """
     # Define path to 'saved' folder
     path = '.\saved'
-    print(path)
 
+    # Add extension if not provided
+    if not ('.pt' in filename):
+        filename += '.pt'
+        print(filename)
+    print('if condition skipped')
+    print(filename[:-3])
     # Check if directory exists, create if it does not
-    if not os.path.exists(path):
+    if os.path.exists(path):
+        print(f'Output directory {path} exists, saving file')
+    else:
         os.makedirs(path)
         print(f'Output directory created: {path}')
-    else:
-        print(f'Output directory {path} exists, saving file')
 
     # Append index to filename to avoid overwriting previously saved models
     index = 0
-    while os.path.exists(os.path.join(path, filename)):
+    indexed_name = filename  # avoid repetition in the name, as filename is being written over and over
+    while os.path.exists(os.path.join(path, indexed_name)):
+        print(os.path.join(path, indexed_name))
         index += 1
-        filename = f"{filename}_{index}.pt"
-
+        indexed_name = f"{filename[:-3]}_{index}.pt"  # makes sure extension is not in the middle of the name
+    print(indexed_name)
     # Save the model to a file
-    filepath = os.path.join(path, filename)
+    filepath = os.path.join(path, indexed_name)
     print(filepath)
     with open(filepath, 'w') as f:
         torch.save(model.state_dict(), filepath)
