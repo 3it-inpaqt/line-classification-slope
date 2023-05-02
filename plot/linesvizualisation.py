@@ -8,7 +8,8 @@ from matplotlib.axes import Axes
 
 from utils.angleoperations import normalize_angle
 
-def create_multiplots(image_set: ndarray, angles: ndarray) -> Tuple[Figure, Axes]:
+
+def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles=None) -> Tuple[Figure, Axes]:
     """
     Generate figures with several plots to see different lines orientation
 
@@ -33,7 +34,10 @@ def create_multiplots(image_set: ndarray, angles: ndarray) -> Tuple[Figure, Axes
             angle_degree = np.rad2deg(angle_radian)
             normalized_angle = normalize_angle(angle_radian)
             ax.imshow(image, cmap='gray')
-            ax.set_title('Angle: {:.2f} | {:.2f}° \n Normalized value: {:.2f}'.format(angle_radian, angle_degree, normalized_angle), fontsize=20)
+            title = 'Angle: {:.2f} | {:.2f}° \n Normalized value: {:.2f}'.format(angle_radian, angle_degree, normalized_angle)
+            if prediction_angles is not None:
+                title += '\n Predicted value: {:.2f}'.format(prediction_angles[i])
+            ax.set_title(title, fontsizze=20)
             ax.axis('off')
         else:
             fig.delaxes(ax)  # if not there, problem with range in the array and out of bound error

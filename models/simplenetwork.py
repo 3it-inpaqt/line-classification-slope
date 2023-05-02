@@ -10,8 +10,8 @@ import tqdm
 from sklearn.model_selection import train_test_split
 
 from linegeneration.generatelines import create_image_set
-from utils.savemodels import save_model
-from plot.linesvizualisation import create_multiplots
+from utils.savemodel import save_model
+from models.model import AngleNet
 
 # Read data
 n = 10000  # number of images to create
@@ -30,15 +30,7 @@ X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # Define the model
-model = nn.Sequential(
-    nn.Linear(N*N, 24),
-    nn.ReLU(),
-    nn.Linear(24, 12),
-    nn.ReLU(),
-    nn.Linear(12, 6),
-    nn.ReLU(),
-    nn.Linear(6, 1)
-)
+model = AngleNet(N)
 
 # loss function and optimizer
 loss_fn = nn.MSELoss()  # mean square error
@@ -87,7 +79,7 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 
 # Save the state dictionary
-save_model(model, 'best_model')
+save_model(model.state_dict, 'best_model')
 
 # Plot accuracy
 plt.figure(1)
@@ -96,18 +88,3 @@ print("RMSE: %.2f" % np.sqrt(best_mse))
 plt.plot(history)
 plt.show()
 
-# Plot comparison of angle calculated and angle predicted
-image_set_test, angles_test = create_image_set(n, N)  # generate new image set to test the network on new images
-tensor_image_test = torch.tensor(image_set_test, dtype=torch.float32).flatten(1)  # convert ndarray to tensor and flatten it
-angles_test_prediction = model(tensor_image_test)  # feedforward of the test images
-
-print('angle object', angles_test_prediction.detach().numpy())
-
-# fig, axes = create_multiplots(image_set_test, angles_test)
-# for i, ax in enumerate(axes.flatten()):
-#     title = ax.get_title()
-#     predicted_value = angles_test_prediction[i]
-#     new_title = title + '\n Predicted value: {:.2f}'.format(predicted_value)
-#     ax.set_title(new_title)
-#
-# plt.show()
