@@ -36,6 +36,7 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles=Non
             ax.imshow(image, cmap='gray')
             title = 'Angle: {:.2f} | {:.2f}° \n Normalized value: {:.2f}'.format(angle_radian, angle_degree, normalized_angle)
             if prediction_angles is not None:
+                print(prediction_angles[i])
                 title += '\n Predicted value: {:.2f}'.format(prediction_angles[i])
             ax.set_title(title, fontsizze=20)
             ax.axis('off')

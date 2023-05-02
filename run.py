@@ -14,7 +14,7 @@ if __name__ == '__main__':
     model = AngleNet(N)
     model_name = 'best_model.pt'
     path = f"saved\{model_name}"
-    model.load_state_dict(torch.load(path))
+    model.load_state_dict(torch.load(path), strict=False)
 
     # Apply model
     image_set_test, angles_test = create_image_set(n, N)  # generate new image set to test the network on new images
