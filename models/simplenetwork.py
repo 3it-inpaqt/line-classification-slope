@@ -11,7 +11,6 @@ from sklearn.model_selection import train_test_split
 
 from linegeneration.generatelines import create_image_set
 from utils.savemodel import save_model
-from models.model import AngleNet
 from utils.angleoperations import normalize_angle
 
 # Read data
@@ -32,8 +31,15 @@ X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # Define the model
-model = AngleNet(N)
-
+model = nn.Sequential(
+        nn.Linear(N*N, 24),
+        nn.ReLU(),
+        nn.Linear(24, 12),
+        nn.ReLU(),
+        nn.Linear(12, 6),
+        nn.ReLU(),
+        nn.Linear(6, 1)
+    )
 # loss function and optimizer
 loss_fn = nn.MSELoss()  # mean square error
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
@@ -81,11 +87,11 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 
 # Save the state dictionary
-save_model(model.state_dict, 'best_model')
+save_model(model, 'best_model')
 
 # Plot accuracy
 plt.figure(1)
-print("MSE: %.2f" % best_mse)
+print("MSE: %.4f" % best_mse)
 print("RMSE: %.2f" % np.sqrt(best_mse))
 plt.xlabel('Epoch')
 plt.ylabel('Mean Square Error (MSE)')
