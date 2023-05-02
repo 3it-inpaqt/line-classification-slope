@@ -85,6 +85,7 @@ save_model(model.state_dict, 'best_model')
 plt.figure(1)
 print("MSE: %.2f" % best_mse)
 print("RMSE: %.2f" % np.sqrt(best_mse))
+plt.xlabel('Epoch')
+plt.ylabel('Mean Square Error (MSE)')
 plt.plot(history)
 plt.show()
-
