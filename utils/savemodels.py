@@ -17,9 +17,7 @@ def save_model(model, filename='model'):
     # Add extension if not provided
     if not ('.pt' in filename):
         filename += '.pt'
-        print(filename)
-    print('if condition skipped')
-    print(filename[:-3])
+
     # Check if directory exists, create if it does not
     if os.path.exists(path):
         print(f'Output directory {path} exists, saving file')
@@ -34,10 +32,9 @@ def save_model(model, filename='model'):
         print(os.path.join(path, indexed_name))
         index += 1
         indexed_name = f"{filename[:-3]}_{index}.pt"  # makes sure extension is not in the middle of the name
-    print(indexed_name)
+
     # Save the model to a file
     filepath = os.path.join(path, indexed_name)
-    print(filepath)
     with open(filepath, 'w') as f:
         torch.save(model.state_dict(), filepath)
         print(f"Model saved to {filepath}")
