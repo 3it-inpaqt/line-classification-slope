@@ -36,9 +36,9 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles=Non
             ax.imshow(image, cmap='gray')
             title = 'Angle: {:.2f} | {:.2f}° \n Normalized value: {:.2f}'.format(angle_radian, angle_degree, normalized_angle)
             if prediction_angles is not None:
-                print(prediction_angles[i])
-                title += '\n Predicted value: {:.2f}'.format(prediction_angles[i])
-            ax.set_title(title, fontsizze=20)
+                prediction_angle = prediction_angles[i][0]  # the angle is a ndarray type with one element only for index i
+                title += '\n Predicted value: {:.2f}'.format(prediction_angle)
+            ax.set_title(title, fontsize=20)
             ax.axis('off')
         else:
             fig.delaxes(ax)  # if not there, problem with range in the array and out of bound error

@@ -21,9 +21,10 @@ def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
         return angle
 
 
-def normalize_angle(angle: float) -> float:
+def normalize_angle(angle):
     """
     Normalize angle in radian to a value between 0 and 1
+    angle can be a float or a ndarray, it doesn't matter
     :param angle: angle of a line
     :return: normalized angle value
     """

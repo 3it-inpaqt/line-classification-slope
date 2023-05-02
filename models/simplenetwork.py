@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 from linegeneration.generatelines import create_image_set
 from utils.savemodel import save_model
 from models.model import AngleNet
+from utils.angleoperations import normalize_angle
 
 # Read data
 n = 10000  # number of images to create
@@ -19,6 +20,7 @@ N = 18  # size of the images (NxN)
 
 # Read data
 X, y = create_image_set(n, N)
+y = normalize_angle(y)
 
 # train-test split for model evaluation
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
