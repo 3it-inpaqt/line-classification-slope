@@ -4,7 +4,7 @@ import torch
 os.umask(0)  # unmask user to let python write files and directories
 
 
-def save_model(model, filename='model.pt'):
+def save_model(model, filename='model'):
     """
 
     :param model: Pytorch model to save
@@ -26,10 +26,11 @@ def save_model(model, filename='model.pt'):
     index = 0
     while os.path.exists(os.path.join(path, filename)):
         index += 1
-        filename = f"model_{index}.pt"
+        filename = f"{filename}_{index}.pt"
 
     # Save the model to a file
     filepath = os.path.join(path, filename)
+    print(filepath)
     with open(filepath, 'w') as f:
         torch.save(model.state_dict(), filepath)
         print(f"Model saved to {filepath}")
