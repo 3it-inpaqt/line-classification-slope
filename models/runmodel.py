@@ -1,5 +1,5 @@
 from models.network import AngleNet
-from linegeneration.generatelines import create_batch
+from linegeneration.generatelines import create_image_set
 from models.train import train
 
 import numpy as np
