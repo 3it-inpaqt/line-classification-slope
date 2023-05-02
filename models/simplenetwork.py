@@ -2,6 +2,7 @@ import copy
 
 import matplotlib.pyplot as plt
 import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -100,11 +101,13 @@ image_set_test, angles_test = create_image_set(n, N)  # generate new image set t
 tensor_image_test = torch.tensor(image_set_test, dtype=torch.float32).flatten(1)  # convert ndarray to tensor and flatten it
 angles_test_prediction = model(tensor_image_test)  # feedforward of the test images
 
-fig, axes = create_multiplots(image_set_test, angles_test)
-for i, ax in enumerate(axes.flatten()):
-    title = ax.get_title()
-    predicted_value = angles_test_prediction[i]
-    new_title = title + '\n Predicted value: {:.2f}'.format(predicted_value)
-    ax.set_title(new_title)
+print('angle object', angles_test_prediction.detach().numpy())
 
-plt.show()
+# fig, axes = create_multiplots(image_set_test, angles_test)
+# for i, ax in enumerate(axes.flatten()):
+#     title = ax.get_title()
+#     predicted_value = angles_test_prediction[i]
+#     new_title = title + '\n Predicted value: {:.2f}'.format(predicted_value)
+#     ax.set_title(new_title)
+#
+# plt.show()

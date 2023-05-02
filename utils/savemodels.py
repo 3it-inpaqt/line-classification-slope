@@ -1,8 +1,6 @@
 import os
 import torch
 
-os.umask(0)  # unmask user to let python write files and directories
-
 
 def save_model(model, filename='model'):
     """
@@ -35,6 +33,5 @@ def save_model(model, filename='model'):
 
     # Save the model to a file
     filepath = os.path.join(path, indexed_name)
-    with open(filepath, 'w') as f:
-        torch.save(model.state_dict(), filepath)
-        print(f"Model saved to {filepath}")
+    torch.save(model.state_dict(), filepath)
+    print(f"Model saved to {filepath}")
