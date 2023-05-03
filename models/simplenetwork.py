@@ -19,10 +19,10 @@ N = 18  # size of the images (NxN)
 
 # Read data
 X, y = create_image_set(n, N)
-y = normalize_angle(y)
+y_normalized = normalize_angle(y)
 
 # train-test split for model evaluation
-X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y_normalized, train_size=0.7, shuffle=True)
 
 # Convert to 2D PyTorch tensors
 X_train = torch.tensor(X_train, dtype=torch.float32)
@@ -96,4 +96,8 @@ print("RMSE: %.2f" % np.sqrt(best_mse))
 plt.xlabel('Epoch')
 plt.ylabel('Mean Square Error (MSE)')
 plt.plot(history)
+# Add a text box to the plot
+textstr = f'Best MSE: {best_mse}'
+props = dict(boxstyle='round', facecolor='white', alpha=0.5)
+plt.text(0.05, 0.95, textstr, fontsize=14, verticalalignment='top', bbox=props)
 plt.show()

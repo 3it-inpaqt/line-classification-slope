@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 
 from models.model import AngleNet
+from utils.statistics import calculate_std_dev
 
 if __name__ == '__main__':
     # Generates images
@@ -28,3 +29,8 @@ if __name__ == '__main__':
 
     plt.tight_layout()
     plt.show()
+
+    # Calculate standard deviation
+    std_dev = calculate_std_dev(angles_test, angles_test_prediction_numpy)
+
+    print('Standard deviation: ', std_dev)
