@@ -5,6 +5,7 @@ import torch
 
 from models.model import AngleNet
 from utils.statistics import calculate_std_dev
+from utils.angleoperations import normalize_angle
 
 if __name__ == '__main__':
     # Generates images
@@ -19,6 +20,7 @@ if __name__ == '__main__':
 
     # Apply model
     image_set_test, angles_test = create_image_set(n, N)  # generate new image set to test the network on new images
+    angles_test = normalize_angle(angles_test)
     tensor_image_test = torch.tensor(image_set_test, dtype=torch.float32)  # convert ndarray to tensor and flatten it
     tensor_image_test = tensor_image_test.flatten(1)
     angles_test_prediction = model(tensor_image_test)  # feedforward of the test images
