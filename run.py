@@ -14,13 +14,13 @@ if __name__ == '__main__':
 
     # Load model
     model = AngleNet(N)
-    model_name = 'best_model.pt'
+    model_name = 'best_model_1.pt'
     path = f"saved\{model_name}"
     model.load_state_dict(torch.load(path), strict=False)
 
     # Apply model
     image_set_test, angles_test = create_image_set(n, N)  # generate new image set to test the network on new images
-    angles_test = normalize_angle(angles_test)
+    angles_test_normalized = normalize_angle(angles_test)
     tensor_image_test = torch.tensor(image_set_test, dtype=torch.float32)  # convert ndarray to tensor and flatten it
     tensor_image_test = tensor_image_test.flatten(1)
     angles_test_prediction = model(tensor_image_test)  # feedforward of the test images
