@@ -18,6 +18,8 @@ def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
         angle = np.arctan(slope)
         if angle < 0:
             angle += np.pi
+        elif angle > np.pi:
+            angle -= np.pi
         return angle
 
 

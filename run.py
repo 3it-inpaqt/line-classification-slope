@@ -10,7 +10,7 @@ from utils.angleoperations import normalize_angle
 if __name__ == '__main__':
     # Generates images
     N = 18
-    n = 25
+    n = 16
 
     # Load model
     model = AngleNet(N)
