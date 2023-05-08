@@ -15,6 +15,7 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles=Non
 
     :param image_set: size of the image
     :param angles: array containing the angles for each image of the set
+    :param prediction_angles: optional, value of predicted angles by a neural network (ndarray)
     :return: a figure with subplots
     """
 

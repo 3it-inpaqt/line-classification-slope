@@ -3,17 +3,16 @@ import numpy as np
 from numpy import ndarray
 
 
-def calculate_std_dev(expected_output: ndarray, predicted_output: ndarray) -> float:
+def calculate_std_dev(pred_angles: ndarray, known_angles: ndarray) -> float:
     """
-    Calculate the standard deviation between expected outputs and predicted ones
-    :param expected_output:
-    :param predicted_output:
-    :return: standard deviation of the data set
+    Calculates the standard deviation between predicted and known angles.
+    :param pred_angles: Array of predicted angles
+    :param known_angles: Array of known (expected) angles
+    :return: Standard deviation between predicted and known angles
     """
-    # Calculate the mean
-    mean = np.mean(expected_output)
+    residuals = pred_angles - known_angles
+    mean_residuals = np.mean(residuals)
+    variance_residuals = np.sum((residuals - mean_residuals) ** 2) / (len(residuals) - 1)
+    std_dev_residuals = np.sqrt(variance_residuals)
+    return std_dev_residuals
 
-    # Calculate the standard deviation
-    std_dev = np.sqrt(np.sum((predicted_output - expected_output)**2) / (len(expected_output)))
-
-    return std_dev

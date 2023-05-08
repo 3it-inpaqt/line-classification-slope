@@ -26,13 +26,13 @@ if __name__ == '__main__':
     angles_test_prediction = model(tensor_image_test)  # feedforward of the test images
     angles_test_prediction_numpy = angles_test_prediction.detach().numpy()
 
-    # Generate plot
-    fig, axes = create_multiplots(image_set_test, angles_test, angles_test_prediction_numpy)
-
-    plt.tight_layout()
-    plt.show()
+    # # Generate plot
+    # fig, axes = create_multiplots(image_set_test, angles_test, angles_test_prediction_numpy)
+    #
+    # plt.tight_layout()
+    # plt.show()
 
     # Calculate standard deviation
-    std_dev = calculate_std_dev(angles_test, angles_test_prediction_numpy)
+    std_dev = calculate_std_dev(angles_test_normalized, angles_test_prediction_numpy)
 
     print('Standard deviation: ', std_dev)
