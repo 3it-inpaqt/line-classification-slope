@@ -10,3 +10,4 @@ scikit-image
 scikit-spatial
 os
 tkinter
+PIL

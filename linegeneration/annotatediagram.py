@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import filedialog
 
 import matplotlib.pyplot as plt
@@ -8,6 +9,7 @@ from matplotlib.figure import Figure
 import os
 
 from utils.angleoperations import calculate_angle
+from utils.dirandfile import list_files, create_txt_file, create_directory
 
 
 # Initialize variables
@@ -17,7 +19,9 @@ lines = []
 
 # Load diagram to use
 directory = "C:\\Users\\wilan\\OneDrive\\Documents\\M1 GP\\Stage Sherbrooke\\Data\\interpolated_img\\interpolated_img\\2.0mV\\single\\eva_dupont_ferrier"
-os.chdir(directory)
+files_list = list_files(directory)
+current_image_index = 0
+file = files_list[current_image_index]
 
 # Set file to write coordinates of line in
 
@@ -27,11 +31,9 @@ def reset():
     Function to handle reset button click
     :return:
     """
-    global x1, y1, x2, y2, positions_list, angles_list, points, line, fig, ax
-    fig.clf()  # Clear entire figure
-    ax = fig.add_subplot(111)  # Add new blank Axes object
-    ax.set_xlim([0, 10])  # Set x limits
-    ax.set_ylim([0, 10])  # Set y limits
+    global x1, y1, x2, y2, positions_list, angles_list, points, line, ax
+    ax.cla()  # Clear current Axes object
+    ax.axis('off')  # Hide axis
     ax.set_aspect('equal')  # Set aspect ratio to be equal
     ax.set_title('Click to add points and create lines')  # Set title
     x1, y1, x2, y2 = None, None, None, None
@@ -90,38 +92,71 @@ def on_click(event):
         fig.canvas.draw()
 
 
-# create tkinter window
+def change_background():
+    """
+    Function to change background image
+    """
+    global ax, line, points, fig
+
+    # get selected file from dropdown
+    selected_file = bg_var.get()
+
+    # clear current Axes object
+    ax.clear()
+    ax = fig.add_subplot(111)
+
+    # load selected file as image
+    img = plt.imread(selected_file)
+    plt.axis('off')
+
+    # create new Axes object with the selected image as background
+    ax.imshow(img)
+    ax.set_xlim([0, img.shape[1]])
+    ax.set_ylim([0, img.shape[0]])
+    ax.axis('off')
+    # redraw canvas
+    fig.canvas.draw()
+
+
+# Create tkinter window
 root = tk.Tk()
 root.title("Image Annotation")
 
-# create matplotlib figure
+# Create matplotlib figure
 fig = Figure(figsize=(5, 5), dpi=100)
 ax = fig.add_subplot(111)
 
-
-ax.set_xlim([0, 10])  # Set x limits
-ax.set_ylim([0, 10])  # Set y limits
 ax.set_aspect('equal')  # Set aspect ratio to be equal
 ax.set_title('Click to add points and create lines')  # Set title
+ax.axis('off')
 
 line, = ax.plot([], [], 'r-', lw=2)
 points = ax.scatter([], [], c='b', marker='o')
 
-# create canvas to display figure
+# Create canvas to display figure
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-# create button to reset points
+# Create button to reset points
 reset_button = tk.Button(root, text="Reset Points", command=reset)
-reset_button.pack(side=tk.BOTTOM)
+reset_button.pack(side=tk.RIGHT)
 
-# create label to display angle
+# Create label to display angle
 angle_var = tk.StringVar()
 angle_var.set("Angle: ")
 angle_label = tk.Label(root, textvariable=angle_var)
 angle_label.pack(side=tk.BOTTOM)
 
-# bind mouse click event to canvas
+# Create dropdown menu to select background image
+bg_var = tk.StringVar(value=files_list[0])
+bg_dropdown = tk.OptionMenu(root, bg_var, *files_list)
+bg_dropdown.pack(side=tk.TOP)
+
+# create button to change background image
+bg_button = tk.Button(root, text="Change Background", command=change_background)
+bg_button.pack(side=tk.TOP)
+
+# Bind mouse click event to canvas
 canvas.mpl_connect('button_press_event', on_click)
 
 root.mainloop()
