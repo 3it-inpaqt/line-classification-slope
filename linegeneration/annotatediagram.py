@@ -10,10 +10,14 @@ import numpy as np
 from utils.angleoperations import calculate_angle
 
 
-# initialize variables
+# Initialize variables
 x1, y1, x2, y2 = None, None, None, None
 positions_list, angles_list = [], []
 lines = []
+
+# Load diagram to use
+
+# Set file to write coordinates of line in
 
 
 def reset():
@@ -66,7 +70,7 @@ def on_click(event):
                     color = 'blue'
                 line, = ax.plot([x1, x2], [y1, y2], color=color)
 
-                # calculate angle and add to lists
+            # calculate angle and add to lists
             angle = calculate_angle(x1, y1, x2, y2)
             positions_list.append([(x1, y1), (x2, y2)])
             angles_list.append(angle)
