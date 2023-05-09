@@ -9,3 +9,4 @@ scikit-learn
 scikit-image
 scikit-spatial
 os
+tkinter
