@@ -13,26 +13,26 @@ from utils.angleoperations import calculate_angle
 # initialize variables
 x1, y1, x2, y2 = None, None, None, None
 positions_list, angles_list = [], []
+lines = []
 
 
 def reset():
-    # function to handle reset button click
-    global x1, y1, x2, y2, positions_list, angles_list, points, line
-    # clear lists
+    """
+    Function to handle reset button click
+    :return:
+    """
+    global x1, y1, x2, y2, positions_list, angles_list, points, line, fig, ax
+    fig.clf()  # Clear entire figure
+    ax = fig.add_subplot(111)  # Add new blank Axes object
+    ax.set_xlim([0, 10])  # Set x limits
+    ax.set_ylim([0, 10])  # Set y limits
+    ax.set_aspect('equal')  # Set aspect ratio to be equal
+    ax.set_title('Click to add points and create lines')  # Set title
+    x1, y1, x2, y2 = None, None, None, None
     positions_list = []
     angles_list = []
-    # remove line and points from plot
-    if line is not None:
-        line.remove()
-    if points is not None:
-        points.remove()
-    # redraw empty plot
-    line, = ax.plot([], [], color='red')
     points = None
-    # reset points
-    x1, y1, x2, y2 = None, None, None, None
-    # clear angle label
-    angle_var.set("")
+    line = None
     fig.canvas.draw()
 
 
@@ -42,27 +42,46 @@ def on_click(event):
     :param event:
     :return:
     """
-    global x1, y1, x2, y2, positions_list, angles_list, points
-    if x1 is None and y1 is None:
-        # first click
-        x1, y1 = event.xdata, event.ydata
-    elif x2 is None and y2 is None:
-        # second click
-        x2, y2 = event.xdata, event.ydata
-        # draw line and calculate angle
-        line.set_data([x1, x2], [y1, y2])
-        angle = calculate_angle(x1, y1, x2, y2)
-        angle_var.set("Angle: {:.2f}".format(angle))
-        # add to lists
-        positions_list.append((x1, y1, x2, y2))
-        angles_list.append(angle)
-        # remove points and update scatter plot
-        if points is not None:
-            points.remove()
-        points = ax.scatter([x1, x2], [y1, y2], color='red')
-        # reset points
-        x1, y1, x2, y2 = None, None, None, None
-    fig.canvas.draw()
+    global x1, y1, x2, y2, positions_list, angles_list, points, line, points, fig, ax
+    if event.inaxes == ax:
+        if x1 is None and y1 is None:
+            # first click
+            x1, y1 = event.xdata, event.ydata
+            # draw point on plot
+            points, = ax.plot(x1, y1, 'o', color='black')
+        elif x2 is None and y2 is None:
+            # second click
+            x2, y2 = event.xdata, event.ydata
+            # draw line on plot
+            if line is not None:
+                if abs(x2 - x1) > abs(y2 - y1):
+                    color = 'red'
+                else:
+                    color = 'blue'
+                line, = ax.plot([x1, x2], [y1, y2], color=color)
+            else:
+                if abs(x2 - x1) > abs(y2 - y1):
+                    color = 'red'
+                else:
+                    color = 'blue'
+                line, = ax.plot([x1, x2], [y1, y2], color=color)
+
+                # calculate angle and add to lists
+            angle = calculate_angle(x1, y1, x2, y2)
+            positions_list.append([(x1, y1), (x2, y2)])
+            angles_list.append(angle)
+
+            # update angle label
+            angle_var.set(f"Angle: {angle:.2f} degrees")
+
+            # remove points and update scatter plot
+            if points is not None:
+                points.remove()
+            points = ax.scatter([x1, x2], [y1, y2], color=color)
+
+            # reset points
+            x1, y1, x2, y2 = None, None, None, None
+        fig.canvas.draw()
 
 
 # create tkinter window
@@ -72,10 +91,14 @@ root.title("Image Annotation")
 # create matplotlib figure
 fig = Figure(figsize=(5, 5), dpi=100)
 ax = fig.add_subplot(111)
+
+ax.set_xlim([0, 10])  # Set x limits
+ax.set_ylim([0, 10])  # Set y limits
+ax.set_aspect('equal')  # Set aspect ratio to be equal
+ax.set_title('Click to add points and create lines')  # Set title
+
 line, = ax.plot([], [], 'r-', lw=2)
 points = ax.scatter([], [], c='b', marker='o')
-ax.set_xlim(0, 1)
-ax.set_ylim(0, 1)
 
 # create canvas to display figure
 canvas = FigureCanvasTkAgg(fig, master=root)
