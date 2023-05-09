@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
-import numpy as np
+import os
 
 from utils.angleoperations import calculate_angle
 
@@ -16,6 +16,8 @@ positions_list, angles_list = [], []
 lines = []
 
 # Load diagram to use
+directory = "C:\\Users\\wilan\\OneDrive\\Documents\\M1 GP\\Stage Sherbrooke\\Data\\interpolated_img\\interpolated_img\\2.0mV\\single\\eva_dupont_ferrier"
+os.chdir(directory)
 
 # Set file to write coordinates of line in
 
@@ -95,6 +97,7 @@ root.title("Image Annotation")
 # create matplotlib figure
 fig = Figure(figsize=(5, 5), dpi=100)
 ax = fig.add_subplot(111)
+
 
 ax.set_xlim([0, 10])  # Set x limits
 ax.set_ylim([0, 10])  # Set y limits
