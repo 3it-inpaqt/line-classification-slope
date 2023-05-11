@@ -1,11 +1,11 @@
-from linegeneration.generatelines import create_image_set
-from plot.linesvizualisation import create_multiplots
+from linegeneration.generate_lines import create_image_set
+from plot.lines_visualisation import create_multiplots
 import matplotlib.pyplot as plt
 import torch
 
 from models.model import AngleNet
 from utils.statistics import calculate_std_dev
-from utils.angleoperations import normalize_angle
+from utils.angle_operations import normalize_angle
 
 if __name__ == '__main__':
     # Generates images

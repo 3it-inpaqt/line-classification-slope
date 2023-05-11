@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 from numpy import ndarray
 from skimage.draw import line
-from utils.angleoperations import calculate_angle
+from utils.angle_operations import calculate_angle
 
 
 def generate_image(size: tuple) -> Tuple[ndarray, float]:

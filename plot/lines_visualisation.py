@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
-from utils.angleoperations import normalize_angle
+from utils.angle_operations import normalize_angle
 
 
 def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles=None) -> Tuple[Figure, Axes]:

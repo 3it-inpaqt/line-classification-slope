@@ -10,4 +10,10 @@ scikit-image
 scikit-spatial
 os
 tkinter
-PIL
+pillow~=9.0
+configargparse~=1.5
+shapely==1.7.1
+seaborn
+imageio
+pyyaml~=6.0
+codetiming

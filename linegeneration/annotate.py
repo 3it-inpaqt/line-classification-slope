@@ -8,8 +8,8 @@ from matplotlib.figure import Figure
 
 import os
 
-from utils.angleoperations import calculate_angle
-from utils.dirandfile import list_files, create_txt_file, create_directory
+from utils.angle_operations import calculate_angle
+from utils.misc import list_files, create_txt_file, create_directory
 
 
 # Initialize variables

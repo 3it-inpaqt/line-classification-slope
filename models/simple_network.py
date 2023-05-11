@@ -9,9 +9,9 @@ import torch.optim as optim
 import tqdm
 from sklearn.model_selection import train_test_split
 
-from linegeneration.generatelines import create_image_set
-from utils.savemodel import save_model
-from utils.angleoperations import normalize_angle
+from linegeneration.generate_lines import create_image_set
+from utils.save_model import save_model
+from utils.angle_operations import normalize_angle
 
 # Read data
 n = 10000  # number of images to create
