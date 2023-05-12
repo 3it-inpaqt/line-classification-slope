@@ -153,3 +153,34 @@ def yaml_preprocess(item: Any) -> Union[str, int, float, List, Dict]:
     except TypeError:
         # Not iterable, then convert to string
         return str(item)
+
+
+def format_string(input_string):
+    """
+    Format the Dataset Name from json file to match the settings research group name
+    :param input_string: Typically "QDSD - Michel Pioro Ladriere"
+    :return: formatted string, no more spaces, small caps only and no useless characters
+    """
+    # Replace spaces with underscores
+    formatted_string = input_string.replace(' ', '_')
+
+    # Remove first 7 characters (QDSD - )
+    formatted_string = formatted_string[7:]
+
+    # Convert to lowercase
+    formatted_string = formatted_string.lower()
+
+    return formatted_string
+
+
+def convert_coordinate_dic(label_dic):
+    """
+    Dictionary containing a list of dictionary for the initial and final coordinates of a line points
+    :param label_dic:
+    :return: tuple of coordinate x1, y1, x2, y2
+    """
+    line = label_dic['line']
+    x1, y1 = line[0]['x'], line[0]['y']
+    x2, y2 = line[1]['x'], line[1]['y']
+
+    return x1, y1, x2, y2

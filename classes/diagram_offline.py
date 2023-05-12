@@ -82,10 +82,14 @@ class DiagramOffline(Diagram):
         :param label_offset: The width of the border to ignore during the patch labeling, in number of pixel (x, y)
         :return: A generator of patches.
         """
+        # TODO Change this function so it returns the patch with the line intersecting it. The any should be changed to find which one
         patch_size_x, patch_size_y = patch_size
         overlap_size_x, overlap_size_y = overlap
         label_offset_x, label_offset_y = label_offset
         diagram_size_y, diagram_size_x = self.values.shape
+
+        patches_intersected = []  # contains the patch where there is at least one line intersecting
+        lines_intersecting = []  # contains the lines that intersect patch with corresponding index in list patches_intersected
 
         # Extract each patches
         i = 0
@@ -114,17 +118,15 @@ class DiagramOffline(Diagram):
                 # Extract patch value
                 # Invert Y axis because the diagram origin (0,0) is top left
                 patch = self.values[diagram_size_y - end_y:diagram_size_y - start_y, start_x:end_x]
-                # Label is True if any line intersect the patch shape
-                # TODO : Change labels type from booleans to actual line, get a list of lines
-                label = [line for line in self.transition_lines if line.intersects(patch_shape)]
+                # Find all the lines intersection the patch
+                patch_intersecting_lines = [line for line in self.transition_lines if line.intersects(patch_shape)]
 
-                # Verification plots
-                # plot_diagram(self.x[start_x:end_x], self.y[start_y:end_y],
-                #              self.values[diagram_size_y-end_y:diagram_size_y-start_y, start_x:end_x],
-                #              self.file_basename + f' - patch {i:n} - line {label} - REAL',
-                #              'nearest', self.x[1] - self.x[0])
-                # self.plot((start_x_v, end_x_v, start_y_v, end_y_v), f' - patch {i:n} - line {label}')
-                yield patch, label
+                if len(patch_intersecting_lines) > 0:
+                    patches_intersected.append(patch)
+                    lines_intersecting.append(patch_intersecting_lines)
+                    # TODO Then we can differentiate patch with one lines and more lines
+
+        return patches_intersected, lines_intersecting
 
     def get_charge(self, coord_x: int, coord_y: int) -> ChargeRegime:
         """

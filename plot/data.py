@@ -375,15 +375,16 @@ def plot_patch_sample(dataset: Dataset, number_per_class: int, show_offset: bool
     nb_classes = len(QDSDLines.classes)
     data_per_class = [list() for _ in range(nb_classes)]
 
-    # # Random sample
-    # for data, label in data_loader:
-    #     # label = int(label)  # Convert boolean to integer
-    #     if len(data_per_class[label]) < number_per_class:
-    #         data_per_class[label].append(data)
-    #
-    #         # Stop if we sampled enough data
-    #         if all([len(cl) == number_per_class for cl in data_per_class]):
-    #             break
+    # Random sample TODO Fix this part for labels being line and not bool
+    for data, label in data_loader:
+        print(label)
+        label = int(label)  # Convert boolean to integer
+        if len(data_per_class[label]) < number_per_class:
+            data_per_class[label].append(data)
+
+            # Stop if we sampled enough data
+            if all([len(cl) == number_per_class for cl in data_per_class]):
+                break
 
     # Create subplots
     fig, axs = plt.subplots(nrows=nb_classes, ncols=number_per_class,
@@ -428,6 +429,7 @@ def plot_samples(samples: List, title: str, file_name: str, confidences: List[Un
     :param show_offset: If True draws the offset rectangle (ignored if both offset x and y are 0)
     """
     plot_length = ceil(sqrt(len(samples)))
+    nb_samples = len(samples)
 
     if plot_length <= 1:
         return  # FIXME: deal with 1 or 0 sample
@@ -463,7 +465,7 @@ def plot_samples(samples: List, title: str, file_name: str, confidences: List[Un
 
     fig.suptitle(title)
 
-    save_plot(f'.\saved\samples_{file_name}')
+    save_plot(f'samples_{file_name}')
 
 
 # def plot_data_space_distribution(datasets: Sequence[Dataset], title: str, file_name: str) -> None:
