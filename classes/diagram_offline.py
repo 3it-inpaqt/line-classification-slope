@@ -124,7 +124,6 @@ class DiagramOffline(Diagram):
                 if len(patch_intersecting_lines) > 0:
                     patches_intersected.append(patch)
                     lines_intersecting.append(patch_intersecting_lines)
-                    # TODO Then we can differentiate patch with one lines and more lines
 
         return patches_intersected, lines_intersecting
 

@@ -2,9 +2,10 @@ import io
 from copy import copy
 # from functools import partial
 from math import ceil, sqrt
+from random import sample
 # from multiprocessing import Pool
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Iterable, List, Optional, Tuple, Union, Any
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -15,11 +16,13 @@ from matplotlib.cm import ScalarMappable
 from matplotlib.colors import LinearSegmentedColormap, Normalize
 from matplotlib.legend_handler import HandlerBase
 from shapely.geometry import LineString, Polygon
-from torch.utils.data import DataLoader, Dataset
+import torch
+# from torch.utils.data import DataLoader, Dataset
 
 # from utils.misc import get_nb_loader_workers
 from utils.output import save_plot
 from utils.settings import settings
+from utils.logger import logger
 
 LINE_COLOR = 'blue'
 NO_LINE_COLOR = 'tab:red'
@@ -358,45 +361,42 @@ def plot_diagram(x_i, y_i,
     return save_plot(f'diagram_{image_name}', allow_overwrite=allow_overwrite, save_in_buffer=save_in_buffer)
 
 
-def plot_patch_sample(dataset: Dataset, number_per_class: int, show_offset: bool = True) -> None:
+def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], sample_number: int, show_offset: bool = True) -> None:
     """
     Plot randomly sampled patches grouped by class.
 
-    :param dataset: The patches dataset to sample from.
-    :param number_per_class: The number of sample per class.
+    :param patches_list: The patches list to sample from.
+    :param lines_list: List of the lines intersecting the patches
+    :param sample_number: The number of patches to sample
     :param show_offset: If True draws the offset rectangle (ignored if both offset x and y are 0)
     """
-    # Local import to avoid circular mess
-    from classes.qdsd import QDSDLines
 
-    # Data loader for random sample
-    data_loader = DataLoader(dataset, shuffle=True)
-    print('data loader: ', data_loader)
-    nb_classes = len(QDSDLines.classes)
-    data_per_class = [list() for _ in range(nb_classes)]
+    # Check if sample number is not greater than the amount of available data
+    if sample_number > len(lines_list):
+        sample_number = len(lines_list)
+        logger.warning(f'{len(lines_list)} diagrams available but number of sampled diagram was set to {sample_number}. Only {len(lines_list)} will be sampled')
 
-    # Random sample TODO Fix this part for labels being line and not bool
-    for data, label in data_loader:
-        print(label)
-        label = int(label)  # Convert boolean to integer
-        if len(data_per_class[label]) < number_per_class:
-            data_per_class[label].append(data)
+    nrows = ceil(np.sqrt(sample_number))
+    ncols = ceil(sample_number / nrows)
+    # Select a random sample of indices
+    indices = sample(range(len(patches_list)), k=sample_number)
 
-            # Stop if we sampled enough data
-            if all([len(cl) == number_per_class for cl in data_per_class]):
-                break
-
+    print(len(lines_list))
+    print(len(patches_list))
     # Create subplots
-    fig, axs = plt.subplots(nrows=nb_classes, ncols=number_per_class,
-                            figsize=(number_per_class * 2, nb_classes * 2 + 1))
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
 
-    for i, cl in enumerate(data_per_class):
-        axs[i, 0].set_title(f'{number_per_class} examples of "{QDSDLines.classes[i].capitalize()}"', loc='left',
-                            fontsize='xx-large', fontweight='bold')
-        for j, class_data in enumerate(cl):
-            axs[i, j].imshow(class_data.reshape(settings.patch_size_x, settings.patch_size_y),
-                             interpolation='nearest',
-                             cmap='copper')
+    for i, ax in enumerate(axes.flatten()):
+        if i < sample_number:
+            index = indices[i]
+            print(index)
+            line = lines_list[index]
+            patch = patches_list[index]
+
+            x, y = line.xy
+            ax.set_title('Examples of patches with one line (in blue)', fontsize='xx-large', fontweight='bold')
+            ax.imshow(patch, interpolation='nearest', cmap='copper')
+            ax.plot(x, y, color='blue')
 
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
@@ -406,12 +406,11 @@ def plot_patch_sample(dataset: Dataset, number_per_class: int, show_offset: bool
                                          linewidth=2, edgecolor='fuchsia', facecolor='none')
 
                 # Add the offset rectangle to the axes
-                axs[i, j].add_patch(rect)
+                ax.add_patch(rect)
 
-            axs[i, j].axis('off')
-
-        if settings.test_noise:
-            plt.suptitle(f'Gaussian noise: {settings.test_noise:.0%}')
+            ax.axis('off')
+        else:
+            fig.delaxes(ax)  # if there is no more patches but some axes are still to be filled, it deletes these axes and leaves a blank space
 
     save_plot('patch_sample')
 

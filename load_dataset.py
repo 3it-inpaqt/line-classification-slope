@@ -6,7 +6,9 @@ from utils.output import init_out_directory, ExistingRunName
 from utils.logger import logger
 from pathlib import Path
 from classes.qdsd import DATA_DIR
-from plot.data import plot_samples, plot_patch_sample
+from plot.data import plot_patch_sample
+
+import matplotlib.pyplot as plt
 
 run_name = settings.run_name
 
@@ -67,7 +69,7 @@ def load_patches(diagrams):
 
 if __name__ == '__main__':
     diagrams_exp = load_diagram()
-    patches_list = load_patches(diagrams_exp)
+    patches_one_line, one_line_list, patches_multi_line, multi_line_list = load_patches(diagrams_exp)
 
-    # samples_patches = [patch for patch in patches_list[::5]]
+    plot_patch_sample(patches_one_line, one_line_list, sample_number=25)
 
