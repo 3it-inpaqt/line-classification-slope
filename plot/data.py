@@ -371,19 +371,19 @@ def plot_patch_sample(dataset: Dataset, number_per_class: int, show_offset: bool
 
     # Data loader for random sample
     data_loader = DataLoader(dataset, shuffle=True)
-
+    print('data loader: ', data_loader)
     nb_classes = len(QDSDLines.classes)
     data_per_class = [list() for _ in range(nb_classes)]
 
-    # Random sample
-    for data, label in data_loader:
-        label = int(label)  # Convert boolean to integer
-        if len(data_per_class[label]) < number_per_class:
-            data_per_class[label].append(data)
-
-            # Stop of we sampled enough data
-            if all([len(cl) == number_per_class for cl in data_per_class]):
-                break
+    # # Random sample
+    # for data, label in data_loader:
+    #     # label = int(label)  # Convert boolean to integer
+    #     if len(data_per_class[label]) < number_per_class:
+    #         data_per_class[label].append(data)
+    #
+    #         # Stop if we sampled enough data
+    #         if all([len(cl) == number_per_class for cl in data_per_class]):
+    #             break
 
     # Create subplots
     fig, axs = plt.subplots(nrows=nb_classes, ncols=number_per_class,
@@ -437,7 +437,8 @@ def plot_samples(samples: List, title: str, file_name: str, confidences: List[Un
 
     for i, s in enumerate(samples):
         ax = axs[i // plot_length, i % plot_length]
-        ax.imshow(s.reshape(settings.patch_size_x, settings.patch_size_y), interpolation='nearest', cmap='copper')
+        # print(s)
+        ax.imshow(s[0].reshape(settings.patch_size_x, settings.patch_size_y), interpolation='nearest', cmap='copper')
 
         if confidences:
             # If it's a tuple we assume it is: mean, std, entropy
@@ -462,27 +463,27 @@ def plot_samples(samples: List, title: str, file_name: str, confidences: List[Un
 
     fig.suptitle(title)
 
-    save_plot(f'sample_{file_name}')
+    save_plot(f'.\saved\samples_{file_name}')
 
 
-def plot_data_space_distribution(datasets: Sequence[Dataset], title: str, file_name: str) -> None:
-    """
-    Plot the pixel values distribution for each dataset.
-
-    :param datasets: The list of dataset to plot.
-    :param title: The title of the plot.
-    :param file_name: The file name of the plot if saved.
-    """
-    # Create subplots
-    fig, axes = plt.subplots(nrows=1, ncols=len(datasets), figsize=(len(datasets) * 6, 8))
-
-    for i, dataset in enumerate(datasets):
-        # Plot the distribution
-        sns.histplot(dataset._patches.flatten(), ax=axes[i], kde=True, stat='count', bins=200)
-        axes[i].set_title(dataset.role.capitalize())
-
-    fig.suptitle(title)
-    save_plot(f'data_distribution_{file_name}')
+# def plot_data_space_distribution(datasets: Sequence[Dataset], title: str, file_name: str) -> None:
+#     """
+#     Plot the pixel values distribution for each dataset.
+#
+#     :param datasets: The list of dataset to plot.
+#     :param title: The title of the plot.
+#     :param file_name: The file name of the plot if saved.
+#     """
+#     # Create subplots
+#     fig, axes = plt.subplots(nrows=1, ncols=len(datasets), figsize=(len(datasets) * 6, 8))
+#
+#     for i, dataset in enumerate(datasets):
+#         # Plot the distribution
+#         sns.histplot(dataset._patches.flatten(), ax=axes[i], kde=True, stat='count', bins=200)
+#         axes[i].set_title(dataset.role.capitalize())
+#
+#     fig.suptitle(title)
+#     save_plot(f'data_distribution_{file_name}')
 
 
 class TextHandler(HandlerBase):

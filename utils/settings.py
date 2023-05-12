@@ -62,7 +62,7 @@ class Settings:
 
     # If True add color for pretty console output.
     # Should be disabled on Windows.
-    console_color: bool = True
+    console_color: bool = False
 
     # If True show matplotlib images when they are ready.
     show_images: bool = False

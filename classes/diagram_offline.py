@@ -115,7 +115,8 @@ class DiagramOffline(Diagram):
                 # Invert Y axis because the diagram origin (0,0) is top left
                 patch = self.values[diagram_size_y - end_y:diagram_size_y - start_y, start_x:end_x]
                 # Label is True if any line intersect the patch shape
-                label = any([line.intersects(patch_shape) for line in self.transition_lines])
+                # TODO : Change labels type from booleans to actual line, get a list of lines
+                label = [line for line in self.transition_lines if line.intersects(patch_shape)]
 
                 # Verification plots
                 # plot_diagram(self.x[start_x:end_x], self.y[start_y:end_y],
