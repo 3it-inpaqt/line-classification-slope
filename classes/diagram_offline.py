@@ -3,7 +3,7 @@ import json
 import zipfile
 from pathlib import Path
 from random import randrange
-from typing import Generator, IO, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Any, IO, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import torch
@@ -73,16 +73,15 @@ class DiagramOffline(Diagram):
         return self.values[diagram_size_y - end_y:diagram_size_y - coord_y, coord_x:end_x]
 
     def get_patches(self, patch_size: Tuple[int, int] = (10, 10), overlap: Tuple[int, int] = (0, 0),
-                    label_offset: Tuple[int, int] = (0, 0)) -> Generator:
+                    label_offset: Tuple[int, int] = (0, 0)) -> Any:
         """
         Create patches from diagrams sub-area.
 
         :param patch_size: The size of the desired patches, in number of pixels (x, y)
         :param overlap: The size of the patches overlapping, in number of pixels (x, y)
         :param label_offset: The width of the border to ignore during the patch labeling, in number of pixel (x, y)
-        :return: A generator of patches.
+        :return: A tuple of patches and associated intersecting lines.
         """
-        # TODO Change this function so it returns the patch with the line intersecting it. The any should be changed to find which one
         patch_size_x, patch_size_y = patch_size
         overlap_size_x, overlap_size_y = overlap
         label_offset_x, label_offset_y = label_offset

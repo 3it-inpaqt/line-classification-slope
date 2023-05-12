@@ -55,21 +55,26 @@ def load_patches(diagrams):
 
     for diagram in diagrams:
         diagram_patches, lines_patches = diagram.get_patches((settings.patch_size_x, settings.patch_size_y), (0, 0), (0, 0))
+        # print(len(diagram_patches))
+        # print(len(lines_patches))
         for patch, lines in zip(diagram_patches, lines_patches):
             if len(lines) == 1:
                 patches_one_line.extend(patch)
                 one_line_list.extend(lines)
+                # print(len(patches_one_line))
+                # print(len(one_line_list))
             else:
                 for line in lines:
                     patches_multi_line.extend(patch)
                     multi_line_list.extend(line)
-
+        print(patch)
     return patches_one_line, one_line_list, patches_multi_line, multi_line_list
 
 
 if __name__ == '__main__':
     diagrams_exp = load_diagram()
     patches_one_line, one_line_list, patches_multi_line, multi_line_list = load_patches(diagrams_exp)
-
-    plot_patch_sample(patches_one_line, one_line_list, sample_number=25)
+    print(len(patches_one_line))
+    print(len(one_line_list))
+    # plot_patch_sample(patches_one_line, one_line_list, sample_number=25)
 
