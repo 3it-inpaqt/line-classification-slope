@@ -379,12 +379,14 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     nrows = ceil(np.sqrt(sample_number))
     ncols = ceil(sample_number / nrows)
     # Select a random sample of indices
+    # TODO You did an extend on N tensors to a list and they have shape 18x18 with len 18 hence the factor 18 between nbr of lines and nbr of patches
     indices = sample(range(len(patches_list)), k=sample_number)
 
     print(len(lines_list))
     print(len(patches_list))
     # Create subplots
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
+    fig.suptitle('Examples of patches with one line (in blue)', fontsize='xx-large', fontweight='bold')
 
     for i, ax in enumerate(axes.flatten()):
         if i < sample_number:
@@ -394,7 +396,6 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
             patch = patches_list[index]
 
             x, y = line.xy
-            ax.set_title('Examples of patches with one line (in blue)', fontsize='xx-large', fontweight='bold')
             ax.imshow(patch, interpolation='nearest', cmap='copper')
             ax.plot(x, y, color='blue')
 
