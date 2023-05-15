@@ -379,7 +379,6 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     nrows = ceil(np.sqrt(sample_number))
     ncols = ceil(sample_number / nrows)
     # Select a random sample of indices
-    # TODO You did an extend on N tensors to a list and they have shape 18x18 with len 18 hence the factor 18 between nbr of lines and nbr of patches
     indices = sample(range(len(patches_list)), k=sample_number)
 
     print(len(lines_list))
@@ -391,13 +390,24 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     for i, ax in enumerate(axes.flatten()):
         if i < sample_number:
             index = indices[i]
-            print(index)
+            # print(index)
             line = lines_list[index]
             patch = patches_list[index]
 
-            x, y = line.xy
+            height, width = patch.shape[:2]  # Get the height and width of the image
+            ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
+            ax.set_ylim([height, 0])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
+
+            x_lim, y_lim = line.xy
+            m, b = np.polyfit(x_lim, y_lim, 1)
+            x_left = 0
+            x_right = patch.shape[1] - 1  # subtract 1 because the indexing starts from 0
+            y_left = m * x_left + b
+            y_right = m * x_right + b
+            # print("line x: ", x, "line y: ", y)
+
             ax.imshow(patch, interpolation='nearest', cmap='copper')
-            ax.plot(x, y, color='blue')
+            ax.plot([x_left, x_right], [y_left, y_right], color='blue')
 
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
@@ -416,7 +426,7 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     save_plot('patch_sample')
 
 
-def plot_samples(samples: List, title: str, file_name: str, confidences: List[Union[float, Tuple[float]]] = None,
+def plot_samples(samples: List[torch.Tensor], title: str, file_name: str = None, confidences: List[Union[float, Tuple[float]]] = None,
                  show_offset: bool = True) -> None:
     """
     Plot a group of patches.
@@ -429,7 +439,6 @@ def plot_samples(samples: List, title: str, file_name: str, confidences: List[Un
     :param show_offset: If True draws the offset rectangle (ignored if both offset x and y are 0)
     """
     plot_length = ceil(sqrt(len(samples)))
-    nb_samples = len(samples)
 
     if plot_length <= 1:
         return  # FIXME: deal with 1 or 0 sample
@@ -464,8 +473,8 @@ def plot_samples(samples: List, title: str, file_name: str, confidences: List[Un
         ax.axis('off')
 
     fig.suptitle(title)
-
-    save_plot(f'samples_{file_name}')
+    if file_name is not None:
+        save_plot(f'samples_{file_name}')
 
 
 # def plot_data_space_distribution(datasets: Sequence[Dataset], title: str, file_name: str) -> None:

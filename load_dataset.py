@@ -6,7 +6,7 @@ from utils.output import init_out_directory, ExistingRunName
 from utils.logger import logger
 from pathlib import Path
 from classes.qdsd import DATA_DIR
-from plot.data import plot_patch_sample
+from plot.data import plot_patch_sample, plot_samples
 
 import matplotlib.pyplot as plt
 
@@ -79,4 +79,5 @@ if __name__ == '__main__':
     # print(len(patches_one_line))
     # print(len(one_line_list))
     plot_patch_sample(patches_one_line, one_line_list, sample_number=25)
+    # plot_samples(patches_one_line, title='Patches')
 

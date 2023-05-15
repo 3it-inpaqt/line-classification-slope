@@ -117,7 +117,7 @@ class DiagramOffline(Diagram):
                 # Extract patch value
                 # Invert Y axis because the diagram origin (0,0) is top left
                 patch = self.values[diagram_size_y - end_y:diagram_size_y - start_y, start_x:end_x]
-                print(patch.shape)
+                # print(patch.shape)
                 # Find all the lines intersection the patch
                 patch_intersecting_lines = [line for line in self.transition_lines if line.intersects(patch_shape)]
 
