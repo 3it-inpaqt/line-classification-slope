@@ -1,14 +1,19 @@
 from typing import List
+import torch
+
+import matplotlib.pyplot as plt
 
 from classes.diagram_offline import DiagramOffline
+from plot.lines_visualisation import create_multiplots
+from utils.statistics import calculate_std_dev
+from utils.angle_operations import angles_from_list, normalize_angle
 from utils.settings import settings
 from utils.output import init_out_directory, ExistingRunName
 from utils.logger import logger
 from pathlib import Path
 from classes.qdsd import DATA_DIR
-from plot.data import plot_patch_sample, plot_samples
-
-import matplotlib.pyplot as plt
+from plot.data import plot_patch_sample
+from models.model import AngleNet
 
 run_name = settings.run_name
 
@@ -47,64 +52,59 @@ def load_patches(diagrams):
     :return:
     """
     # Patches with one line
-    patches_one_line = []
-    one_line_list = []
-    # Patches with several lines
-    # patches_multi_line = []
-    # multi_line_list = []
+    patches = []
+    lines = []
 
     for diagram in diagrams:
         diagram_patches, lines_patches = diagram.get_patches((settings.patch_size_x, settings.patch_size_y), (6, 6),
                                                              (0, 0))
-        # print('len ', len(diagram_patches))
-        # print(lines_patches)
-        for patch, lines in zip(diagram_patches, lines_patches):
-            # print(patch.shape)
-            # print(len(lines))
-            # if len(lines) == 1:
-            patches_one_line.append(patch)
-            one_line_list.append(lines)
-            # print(len(patches_one_line))
-            # print(len(one_line_list))
-            # else:
-            #     for line in lines:
-            #         patches_multi_line.append(patch)
-            #         multi_line_list.append(line)
-            # break
+        patches.extend(diagram_patches)
+        lines.extend(lines_patches)
 
-        # break
-        # print(patch)
-    # print(one_line_list[318])
-    return patches_one_line, one_line_list  # , patches_multi_line, multi_line_list
+    return patches, lines
 
 
 if __name__ == '__main__':
     diagrams_exp = load_diagram()
-    print('diagram ', len(diagrams_exp))
-    patches_one_line, one_line_list = load_patches(diagrams_exp)
-    # print(len(patches_one_line))
-    # print(one_line_list)
-    plot_patch_sample(patches_one_line, one_line_list, sample_number=25)
-    # plot_samples(patches_one_line, one_line_list, title='Patches', file_name='test')
+    # print('diagram ', len(diagrams_exp))
+    patches_list, lines_list = load_patches(diagrams_exp)
+    plot_patch_sample(patches_list, lines_list, sample_number=25, show_offset=False)
 
-    """ Test plot for one patch """
-    # index = 0  # visible line by eye
-    # fig, ax = plt.subplots(nrows=1, ncols=1)
-    # line = one_line_list[index]
-    # patch = patches_one_line[index]
-    # # print(line)
-    # # height, width = patch.shape[:2]  # Get the height and width of the image
-    # # ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
-    # # ax.set_ylim([height, 0])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
-    #
-    # x_lim, y_lim = line[0], line[1]
-    # # print(x_lim, y_lim)
-    #
-    # ax.plot(x_lim, y_lim, color='blue')
-    # ax.imshow(patch, interpolation='nearest', cmap='copper')
-    #
-    # ax.set_xlim(0, settings.patch_size_x)
-    # ax.set_ylim(0, settings.patch_size_y)
-    # ax.axis('off')
-    #
-    # plt.show()
+    # Calculate angles by hand for verification
+    angles_lines = angles_from_list(lines_list)
+    angles_lines_normalized = normalize_angle(angles_lines)
+
+    # Reshape patches for neural network
+    # Get the number of images and the size of each image
+    n = len(patches_list)
+    N = patches_list[0].shape[0]
+
+    # Create an empty tensor with the desired shape
+    stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
+
+    # Fill the 3D tensor with the image data
+    for i, image_tensor in enumerate(patches_list):
+        stacked_patches[i] = image_tensor
+
+    tensor_patches = stacked_patches.flatten(1)
+
+    # Load model
+    N = 18
+    model = AngleNet(N)
+    model_name = 'best_model_1.pt'
+    path = f"saved\{model_name}"
+    model.load_state_dict(torch.load(path), strict=False)
+
+    angles_test_prediction = model(tensor_patches)  # feedforward of the test images
+    angles_test_prediction_numpy = angles_test_prediction.detach().numpy()  # convert to numpy array (remove gradient)
+
+    # Generate plot
+    fig, axes = create_multiplots(stacked_patches, angles_lines_normalized, angles_test_prediction_numpy, number_sample=25)
+
+    plt.tight_layout()
+    plt.show()
+
+    # Calculate standard deviation
+    std_dev = calculate_std_dev(angles_lines_normalized, angles_test_prediction_numpy)
+
+    # print('Standard deviation: ', std_dev)

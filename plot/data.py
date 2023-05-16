@@ -381,8 +381,8 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     # Select a random sample of indices
     indices = sample(range(len(patches_list)), k=sample_number)
 
-    print(len(lines_list))
-    print(len(patches_list))
+    # print(len(lines_list))
+    # print(len(patches_list))
     # Create subplots
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
     fig.suptitle('Examples of patches with one line (in blue)', fontsize='xx-large', fontweight='bold')

@@ -156,18 +156,18 @@ class DiagramOffline(Diagram):
                     # print(len(patch_intersecting_lines))
                     patches_intersected.append(patch)
                     for line in patch_intersecting_lines:
-                        print(line[0])
-                        print(line[1])
+                        # print(line[0])
+                        # print(line[1])
                         x_line_patch = [self.voltage_to_coord_x(x) - patch_x for x in line[0]]
                         y_line_patch = [self.voltage_to_coord_y(y) - patch_y for y in line[1]]
 
-                        print('x_line_patch: ', x_line_patch)
-                        print('y_line_patch: ', y_line_patch)
+                        # print('x_line_patch: ', x_line_patch)
+                        # print('y_line_patch: ', y_line_patch)
                         lines_intersecting.append((x_line_patch, y_line_patch))
 
-                print('patch x coo: ', start_x)
-                print('patch y coo: ', start_y)
-                print('------------------------')
+                # print('patch x coo: ', start_x)
+                # print('patch y coo: ', start_y)
+                # print('------------------------')
         return patches_intersected, lines_intersecting
 
     def get_charge(self, coord_x: int, coord_y: int) -> ChargeRegime:

@@ -26,7 +26,7 @@ if __name__ == '__main__':
     angles_test_prediction = model(tensor_image_test)  # feedforward of the test images
     angles_test_prediction_numpy = angles_test_prediction.detach().numpy()
 
-    # # Generate plot
+    # Generate plot
     fig, axes = create_multiplots(image_set_test, angles_test, angles_test_prediction_numpy)
 
     plt.tight_layout()
