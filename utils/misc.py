@@ -4,6 +4,7 @@ from dataclasses import asdict, is_dataclass
 from copy import copy
 
 from math import ceil
+import random
 import numpy as np
 import torch
 
@@ -184,3 +185,24 @@ def convert_coordinate_dic(label_dic):
     x2, y2 = line[1]['x'], line[1]['y']
 
     return x1, y1, x2, y2
+
+
+def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int = 1) -> Tuple[Any]:
+    """
+    Select two elements from two different list with same index randomly
+    :param list1:
+    :param list2:
+    :param num_elements: number of elements to select
+    :return:
+    """
+    # Randomly select indices without replacement
+    indices = random.randint(0, len(list1) - 1)
+    print('list 1: ', len(list1))
+    print('list 2: ', len(list2))
+    print(list2)
+    print('---------------------------')
+    # Use the selected indices to get the corresponding elements from both lists
+    selected_elements1 = list1[indices]
+    selected_elements2 = list2[indices]
+
+    return selected_elements1, selected_elements2, indices

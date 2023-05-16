@@ -5,6 +5,8 @@ import random
 import torch
 import torchvision.transforms.functional as TF
 
+from utils.misc import random_select_elements
+
 from typing import Tuple, List
 np.seterr(divide='ignore')
 
@@ -80,69 +82,51 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
     return np.array(angle_list)
 
 
-def rotate_line(line_coords, index, angle):
-    """
-    Rotate a line using its coordinates
-    :param line_coords: Tuple containing coordinates lists
-    :param index: What index to select to rotate the line
-    :param angle: Angle of rotation
-    :return:
-    """
-    # Select the line coordinates using the provided index
-    line = line_coords[index]
+def rotate_line(line_coords, angle):
+    print('line coords: ', line_coords)
+    x_coords, y_coords = line_coords
+    angle_radians = np.radians(angle)
 
-    # Extract the x and y coordinates of the line
-    x_coords, y_coords = line
+    # Convert the angle to a Torch tensor
+    angle_tensor = torch.tensor(angle_radians, dtype=torch.float32)
 
-    # Convert the coordinates to torch tensors
-    x_tensor = torch.tensor(x_coords)
-    y_tensor = torch.tensor(y_coords)
+    # Create the rotation matrix with the same data type as the angle_tensor
+    rotation_matrix = torch.tensor([[torch.cos(angle_tensor), -torch.sin(angle_tensor)],
+                                    [torch.sin(angle_tensor), torch.cos(angle_tensor)]], dtype=angle_tensor.dtype)
 
-    # Calculate the center point of the line
-    center = torch.tensor([(x_tensor[0] + x_tensor[1]) / 2, (y_tensor[0] + y_tensor[1]) / 2])
+    # Create the line coordinates tensor
+    line_coords_tensor = torch.tensor([x_coords, y_coords], dtype=angle_tensor.dtype)
 
-    # Define the rotation matrix based on the provided angle
-    rotation_matrix = torch.tensor([[torch.cos(torch.deg2rad(angle)), -torch.sin(torch.deg2rad(angle))],
-                                    [torch.sin(torch.deg2rad(angle)), torch.cos(torch.deg2rad(angle))]])
+    # Apply the rotation matrix to the line coordinates
+    rotated_line_coords_tensor = torch.matmul(rotation_matrix, line_coords_tensor)
 
-    # Apply the rotation to the line coordinates
-    rotated_coords = torch.matmul(rotation_matrix, torch.stack([x_tensor - center[0], y_tensor - center[1]]))
-    rotated_coords = rotated_coords + center.unsqueeze(1)
+    # Convert the rotated line coordinates tensor back to a list of tuples
+    rotated_line_coords = [(rotated_line_coords_tensor[0].tolist(), rotated_line_coords_tensor[1].tolist())]
 
-    # Convert the rotated coordinates back to lists
-    rotated_x_coords = rotated_coords[0].tolist()
-    rotated_y_coords = rotated_coords[1].tolist()
-
-    # Update the line coordinates with the rotated coordinates
-    line_coords[index] = (rotated_x_coords, rotated_y_coords)
-
-    # Return the updated line coordinates
-    return line_coords
+    return rotated_line_coords
 
 
-def random_rotate_images(images_list, lines_list, angle_range=(-90, 90)):
+def random_rotate_images(images_list, lines_list):
     """
     Rotate images randomly with corresponding line
     :param images_list:
     :param lines_list:
-    :param angle_range:
     :return:
     """
-    # Randomly select an index
-    index = random.randint(0, len(images_list) - 1)
+    # Randomly select the image tensor and associated line coordinates
+    image_tensor, line_coords, indices = random_select_elements(images_list, lines_list)
+    print('Image shape: ', image_tensor.shape)
 
-    # Select the image tensor and associated line coordinates
-    image_tensor = images_list[index]
-    line_coords = lines_list[index]
-
-    # Generate a random angle within the specified range
-    angle = random.uniform(angle_range[0], angle_range[1])
-
-    # Rotate the image tensor
-    rotated_tensor = TF.rotate(image_tensor, angle)
-
+    # Rotate the tensor assuming image_tensor is a Torch tensor with shape [H, W]
+    rotated_tensor_image = torch.transpose(image_tensor, 0, 1).flip(1)
     # Rotate the line coordinates
-    rotated_line_coords = rotate_line(line_coords, index, angle)
+    rotated_line_coords = rotate_line(line_coords, 90)
 
-    # Return the rotated image tensor and updated line coordinates
-    return rotated_tensor, rotated_line_coords
+    # Update the rotated image tensor and line coordinates
+    rotated_tensors = images_list.copy()
+    rotated_lines = lines_list.copy()
+
+    rotated_tensors[indices] = rotated_tensor_image
+    rotated_lines[indices] = rotated_line_coords
+
+    return rotated_tensors, rotated_lines
