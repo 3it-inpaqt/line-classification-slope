@@ -68,39 +68,40 @@ if __name__ == '__main__':
     diagrams_exp = load_diagram()
     # print('diagram ', len(diagrams_exp))
     patches_list, lines_list = load_patches(diagrams_exp)
-    print('lines list:', lines_list[:10])
+    # print('lines list:', lines_list[:10])
     # plot_patch_sample(patches_list, lines_list, sample_number=25, show_offset=False)
 
     # Rotate some patches randomly
     rotated_patches, rotated_lines = patches_list.copy(), lines_list.copy()
     number_rotated = len(rotated_lines)//2
-    for _ in range(number_rotated):
+    for q in range(number_rotated):
+        print(f'iteration #{q}')
         rotated_patches, rotated_lines = random_rotate_images(rotated_patches, rotated_lines)
-
+        print('---------------------------')
     # Calculate angles by hand for verification
-    angles_lines = angles_from_list(lines_list)
-    angles_lines_normalized = normalize_angle(angles_lines)
-
-    angles_lines_rotated = angles_from_list(rotated_lines)
-    angles_lines_rotated_normalized = normalize_angle(angles_lines_rotated)
+    # angles_lines = angles_from_list(lines_list)
+    # angles_lines_normalized = normalize_angle(angles_lines)
+    #
+    # angles_lines_rotated = angles_from_list(rotated_lines)
+    # angles_lines_rotated_normalized = normalize_angle(angles_lines_rotated)
 
     # Reshape patches for neural network
     # Get the number of images and the size of each image
-    n = len(patches_list)
-    N = patches_list[0].shape[0]
-
-    # Create an empty tensor with the desired shape
-    stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
-    stacked_patches_rotated = torch.empty(n, N, N, dtype=torch.float32)
+    # n = len(patches_list)
+    # N = patches_list[0].shape[0]
+    #
+    # # Create an empty tensor with the desired shape
+    # stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
+    # stacked_patches_rotated = torch.empty(n, N, N, dtype=torch.float32)
 
     # Fill the 3D tensor with the image data
-    for i, image_tensor in enumerate(patches_list):
-        stacked_patches[i] = image_tensor
-    for i, image_tensor in enumerate(rotated_patches):
-        stacked_patches_rotated[i] = image_tensor
-
-    tensor_patches = stacked_patches.flatten(1)
-    tensor_patches_rotated = stacked_patches_rotated.flatten(1)
+    # for i, ima'ge_tensor in enumerate(patches_list):
+    #     stacked_patches[i] = image_tensor
+    # for i, image_tensor in enumerate(rotated_patches):
+    #     stacked_patches_rotated[i] = image_tensor
+    #
+    # tensor_patches = stacked_patches.flatten(1)
+    # tensor_patch'es_rotated = stacked_patches_rotated.flatten(1)
 
     # # Load model
     # N = 18
