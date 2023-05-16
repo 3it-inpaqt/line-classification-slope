@@ -396,18 +396,13 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
 
             height, width = patch.shape[:2]  # Get the height and width of the image
             ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
-            ax.set_ylim([height, 0])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
+            ax.set_ylim([0, height])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
 
-            x_lim, y_lim = line.xy
-            m, b = np.polyfit(x_lim, y_lim, 1)
-            x_left = 0
-            x_right = patch.shape[1] - 1  # subtract 1 because the indexing starts from 0
-            y_left = m * x_left + b
-            y_right = m * x_right + b
-            # print("line x: ", x, "line y: ", y)
+            x_lim, y_lim = line[0], line[1]
+            # y_lim[0], y_lim[1] = y_lim[1], y_lim[0]
 
-            ax.imshow(patch, interpolation='nearest', cmap='copper')
-            ax.plot([x_left, x_right], [y_left, y_right], color='blue')
+            ax.imshow(patch, extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
+            ax.plot(x_lim, y_lim,  color='blue', alpha=0.4)
 
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
@@ -426,12 +421,13 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     save_plot('patch_sample')
 
 
-def plot_samples(samples: List[torch.Tensor], title: str, file_name: str = None, confidences: List[Union[float, Tuple[float]]] = None,
+def plot_samples(samples: List[torch.Tensor], lines: List[Any], title: str, file_name: str = None, confidences: List[Union[float, Tuple[float]]] = None,
                  show_offset: bool = True) -> None:
     """
     Plot a group of patches.
 
     :param samples: The list of patches to plot.
+    :param lines: The lines associated
     :param title: The title of the plot.
     :param file_name: The file name of the plot if saved.
     :param confidences: The list of confidence score for the prediction of each sample. If it's a tuple then we assume
@@ -449,7 +445,11 @@ def plot_samples(samples: List[torch.Tensor], title: str, file_name: str = None,
     for i, s in enumerate(samples):
         ax = axs[i // plot_length, i % plot_length]
         # print(s)
-        ax.imshow(s[0].reshape(settings.patch_size_x, settings.patch_size_y), interpolation='nearest', cmap='copper')
+        ax.imshow(s.reshape(settings.patch_size_x, settings.patch_size_y), interpolation='nearest', cmap='copper')
+
+        # line = lines[i]
+        # x_lim, y_lim = line[0], line[1]
+        # ax.plot(x_lim, y_lim, color='blue')
 
         if confidences:
             # If it's a tuple we assume it is: mean, std, entropy
@@ -473,28 +473,9 @@ def plot_samples(samples: List[torch.Tensor], title: str, file_name: str = None,
         ax.axis('off')
 
     fig.suptitle(title)
+    plt.show()
     if file_name is not None:
         save_plot(f'samples_{file_name}')
-
-
-# def plot_data_space_distribution(datasets: Sequence[Dataset], title: str, file_name: str) -> None:
-#     """
-#     Plot the pixel values distribution for each dataset.
-#
-#     :param datasets: The list of dataset to plot.
-#     :param title: The title of the plot.
-#     :param file_name: The file name of the plot if saved.
-#     """
-#     # Create subplots
-#     fig, axes = plt.subplots(nrows=1, ncols=len(datasets), figsize=(len(datasets) * 6, 8))
-#
-#     for i, dataset in enumerate(datasets):
-#         # Plot the distribution
-#         sns.histplot(dataset._patches.flatten(), ax=axes[i], kde=True, stat='count', bins=200)
-#         axes[i].set_title(dataset.role.capitalize())
-#
-#     fig.suptitle(title)
-#     save_plot(f'data_distribution_{file_name}')
 
 
 class TextHandler(HandlerBase):

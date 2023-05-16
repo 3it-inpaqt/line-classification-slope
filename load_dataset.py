@@ -50,34 +50,61 @@ def load_patches(diagrams):
     patches_one_line = []
     one_line_list = []
     # Patches with several lines
-    patches_multi_line = []
-    multi_line_list = []
+    # patches_multi_line = []
+    # multi_line_list = []
 
     for diagram in diagrams:
-        diagram_patches, lines_patches = diagram.get_patches((settings.patch_size_x, settings.patch_size_y), (0, 0), (0, 0))
-        # print(len(diagram_patches))
-        # print(len(lines_patches))
+        diagram_patches, lines_patches = diagram.get_patches((settings.patch_size_x, settings.patch_size_y), (6, 6),
+                                                             (0, 0))
+        # print('len ', len(diagram_patches))
+        # print(lines_patches)
         for patch, lines in zip(diagram_patches, lines_patches):
             # print(patch.shape)
             # print(len(lines))
-            if len(lines) == 1:
-                patches_one_line.append(patch)
-                one_line_list.extend(lines)
-                # print(len(patches_one_line))
-                # print(len(one_line_list))
-            else:
-                for line in lines:
-                    patches_multi_line.append(patch)
-                    multi_line_list.extend(line)
+            # if len(lines) == 1:
+            patches_one_line.append(patch)
+            one_line_list.append(lines)
+            # print(len(patches_one_line))
+            # print(len(one_line_list))
+            # else:
+            #     for line in lines:
+            #         patches_multi_line.append(patch)
+            #         multi_line_list.append(line)
+            # break
+
+        # break
         # print(patch)
-    return patches_one_line, one_line_list, patches_multi_line, multi_line_list
+    # print(one_line_list[318])
+    return patches_one_line, one_line_list  # , patches_multi_line, multi_line_list
 
 
 if __name__ == '__main__':
     diagrams_exp = load_diagram()
-    patches_one_line, one_line_list, patches_multi_line, multi_line_list = load_patches(diagrams_exp)
+    print('diagram ', len(diagrams_exp))
+    patches_one_line, one_line_list = load_patches(diagrams_exp)
     # print(len(patches_one_line))
-    # print(len(one_line_list))
+    # print(one_line_list)
     plot_patch_sample(patches_one_line, one_line_list, sample_number=25)
-    # plot_samples(patches_one_line, title='Patches')
+    # plot_samples(patches_one_line, one_line_list, title='Patches', file_name='test')
 
+    """ Test plot for one patch """
+    # index = 0  # visible line by eye
+    # fig, ax = plt.subplots(nrows=1, ncols=1)
+    # line = one_line_list[index]
+    # patch = patches_one_line[index]
+    # # print(line)
+    # # height, width = patch.shape[:2]  # Get the height and width of the image
+    # # ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
+    # # ax.set_ylim([height, 0])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
+    #
+    # x_lim, y_lim = line[0], line[1]
+    # # print(x_lim, y_lim)
+    #
+    # ax.plot(x_lim, y_lim, color='blue')
+    # ax.imshow(patch, interpolation='nearest', cmap='copper')
+    #
+    # ax.set_xlim(0, settings.patch_size_x)
+    # ax.set_ylim(0, settings.patch_size_y)
+    # ax.axis('off')
+    #
+    # plt.show()

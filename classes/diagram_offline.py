@@ -54,6 +54,36 @@ class DiagramOffline(Diagram):
         max_x, max_y = self.get_max_patch_coordinates()
         return randrange(max_x), randrange(max_y)
 
+    def voltage_to_coord_x(self, x: float) -> Tuple[int, int]:
+        """
+        Convert a voltage to a coordinate in the diagram relatively to the origin chosen.
+
+        :param x: The voltage x-axis to convert.
+        :return: The coordinate x in the diagram.
+        """
+        return round(((x - self.x_axes[0]) / settings.pixel_size))
+
+    def voltage_to_coord_y(self, y: float) -> Tuple[int, int]:
+        """
+        Convert a voltage to a coordinate in the diagram relatively to the origin chosen.
+
+        :param y: The voltage y-axis to convert.
+        :return: The coordinate y in the diagram.
+        """
+        return round(((y - self.y_axes[0]) / settings.pixel_size))
+
+    def coord_to_voltage(self, x: int, y: int) -> Tuple[float, float]:
+        """
+        Convert a coordinate in the diagram to a voltage.
+
+        :param x: The coordinate (x axes) to convert.
+        :param y: The coordinate (y axes) to convert.
+        :return: The voltage (x, y) in this diagram.
+        """
+        x_volt = self.x_axes[0] + x * settings.pixel_size
+        y_volt = self.y_axes[0] + y * settings.pixel_size
+        return x_volt, y_volt
+
     def get_patch(self, coordinate: Tuple[int, int], patch_size: Tuple[int, int]) -> torch.Tensor:
         """
         Extract one patch in the diagram (data only, no label).
@@ -118,13 +148,26 @@ class DiagramOffline(Diagram):
                 # Invert Y axis because the diagram origin (0,0) is top left
                 patch = self.values[diagram_size_y - end_y:diagram_size_y - start_y, start_x:end_x]
                 # print(patch.shape)
+
                 # Find all the lines intersection the patch
-                patch_intersecting_lines = [line for line in self.transition_lines if line.intersects(patch_shape)]
+                patch_intersecting_lines = [line.xy for line in self.transition_lines if line.intersects(patch_shape)]
 
                 if len(patch_intersecting_lines) > 0:
+                    # print(len(patch_intersecting_lines))
                     patches_intersected.append(patch)
-                    lines_intersecting.append(patch_intersecting_lines)
+                    for line in patch_intersecting_lines:
+                        print(line[0])
+                        print(line[1])
+                        x_line_patch = [self.voltage_to_coord_x(x) - patch_x for x in line[0]]
+                        y_line_patch = [self.voltage_to_coord_y(y) - patch_y for y in line[1]]
 
+                        print('x_line_patch: ', x_line_patch)
+                        print('y_line_patch: ', y_line_patch)
+                        lines_intersecting.append((x_line_patch, y_line_patch))
+
+                print('patch x coo: ', start_x)
+                print('patch y coo: ', start_y)
+                print('------------------------')
         return patches_intersected, lines_intersecting
 
     def get_charge(self, coord_x: int, coord_y: int) -> ChargeRegime:
