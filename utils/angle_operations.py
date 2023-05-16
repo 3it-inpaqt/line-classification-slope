@@ -101,8 +101,8 @@ def rotate_line(line_coords, angle):
     rotated_line_coords_tensor = torch.matmul(rotation_matrix, line_coords_tensor)
 
     # Convert the rotated line coordinates tensor back to a list of tuples
-    rotated_line_coords = [(rotated_line_coords_tensor[0].tolist(), rotated_line_coords_tensor[1].tolist())]
-
+    rotated_line_coords = (rotated_line_coords_tensor[0].tolist(), rotated_line_coords_tensor[1].tolist())
+    print('rotated line coords: ', rotated_line_coords)
     return rotated_line_coords
 
 
