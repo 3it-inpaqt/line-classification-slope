@@ -197,9 +197,9 @@ def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int
     """
     # Randomly select indices without replacement
     indices = random.randint(0, len(list1) - 1)
-    print('list 1: ', len(list1))
-    print('list 2: ', len(list2))
-    print(list2)
+    # print('list 1: ', len(list1))
+    # print('list 2: ', len(list2))
+    # print(list2)
 
     # Use the selected indices to get the corresponding elements from both lists
     selected_elements1 = list1[indices]

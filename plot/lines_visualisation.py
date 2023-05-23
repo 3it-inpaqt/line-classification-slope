@@ -37,7 +37,7 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
             angle_radian = angles[i]
             angle_degree = np.rad2deg(angle_radian)
             normalized_angle = normalize_angle(angle_radian)
-            ax.imshow(image, cmap='gray')
+            ax.imshow(image, cmap='copper')
             title = 'Angle: {:.3f} | {:.3f}° \n Normalized value: {:.3f}'.format(angle_radian, angle_degree, normalized_angle)
             if prediction_angles is not None:
                 prediction_angle = prediction_angles[i][0]  # the angle is a ndarray type with one element only for index i
