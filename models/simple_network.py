@@ -9,20 +9,26 @@ import torch.optim as optim
 import tqdm
 from sklearn.model_selection import train_test_split
 
-from linegeneration.generate_lines import create_image_set
+# from linegeneration.generate_lines import create_image_set
 from utils.save_model import save_model
-from utils.angle_operations import normalize_angle
+# from utils.angle_operations import normalize_angle
+from utils.misc import load_list_from_file
 
 # Read data
-n = 10000  # number of images to create
-N = 18  # size of the images (NxN)
+# n = 10000  # number of images to create
+# N = 18  # size of the images (NxN)
 
-# Read data
-X, y = create_image_set(n, N)
-y_normalized = normalize_angle(y)
+X, y = torch.load('./saved/single_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles.txt')]
+
+N = X[0].shape[0]
+
+# Read Synthetic data
+# X, y = create_image_set(n, N)
+# y_normalized = normalize_angle(y)
 
 # train-test split for model evaluation
-X_train, X_test, y_train, y_test = train_test_split(X, y_normalized, train_size=0.7, shuffle=True)
+# X_train, X_test, y_train, y_test = train_test_split(X, y_normalized, train_size=0.7, shuffle=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
 
 # Convert to 2D PyTorch tensors
 X_train = torch.tensor(X_train, dtype=torch.float32)
@@ -32,7 +38,7 @@ y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # Define the model
 model = nn.Sequential(
-        nn.Linear(N*N, 24),
+        nn.Linear(N, 24),
         nn.ReLU(),
         nn.Linear(24, 12),
         nn.ReLU(),
@@ -91,13 +97,17 @@ save_model(model, 'best_model')
 
 # Plot accuracy
 plt.figure(1)
+plt.suptitle('Training on the experimental patches (not rotated)')
 print("MSE: %.4f" % best_mse)
-print("RMSE: %.2f" % np.sqrt(best_mse))
+print("RMSE: %.4f" % np.sqrt(best_mse))
 plt.xlabel('Epoch')
 plt.ylabel('Mean Square Error (MSE)')
 plt.plot(history)
+
 # Add a text box to the plot
-textstr = f'Best MSE: {best_mse}'
-props = dict(boxstyle='round', facecolor='white', alpha=0.5)
-plt.text(0.05, 0.95, textstr, fontsize=14, verticalalignment='top', bbox=props)
+textstr = f'Best MSE: {best_mse:.4f} \n RMSE: {np.sqrt(best_mse):.4f}'
+text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
+                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
+                    horizontalalignment='right', verticalalignment='top')
+
 plt.show()

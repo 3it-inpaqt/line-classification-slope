@@ -3,7 +3,8 @@ from numpy import ndarray
 import random
 
 import torch
-import torchvision.transforms.functional as F
+import torchvision.transforms.functional as f
+from PIL import Image
 
 from utils.misc import random_select_elements
 
@@ -89,6 +90,7 @@ def rotate_line(line, angle):
     :param angle:
     :return: Rotated line
     """
+
     # Extract line coordinates
     x1, x2 = line[0]
     y1, y2 = line[1]
@@ -96,8 +98,8 @@ def rotate_line(line, angle):
     angle_rad = np.deg2rad(angle)
 
     # Create a 2x2 rotation matrix
-    rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)],
-                                [np.sin(angle), np.cos(angle)]])
+    rotation_matrix = np.array([[np.cos(angle_rad), -np.sin(angle_rad)],
+                                [np.sin(angle_rad), np.cos(angle_rad)]])
 
     # Apply rotation to line coordinates
     rotated_line = np.dot(rotation_matrix, np.array([[x1, x2], [y1, y2]]))
@@ -108,59 +110,22 @@ def rotate_line(line, angle):
     return [rotated_x1, rotated_x2], [rotated_y1, rotated_y2]
 
 
-def rotate_image(image, angle):
+def random_choice_rotate(images_list, lines_list):
     """
-    Rotate image tensor by an angle given by the user. Make sure the angle is in degrees.
-    :param image:
-    :param angle:
-    :return:
-    """
-    # Get image dimensions
-    height, width = image.shape[-2:]
-    angle_rad = np.deg2rad(angle)
+    Randomly rotates image and lines by an angle choosen in [0,90,180,270].
 
-    # Create a grid of coordinates for each pixel in the image
-    grid_y, grid_x = torch.meshgrid(torch.arange(height), torch.arange(width))
-    grid = torch.stack((grid_x, grid_y), dim=-1).float()
-
-    # Convert the grid to the range [-1, 1]
-    grid_normalized = (grid * 2 / torch.tensor([width - 1, height - 1])) - 1
-
-    # Apply rotation to the grid coordinates
-    rotation_matrix = torch.tensor([[torch.cos(angle_rad), -torch.sin(angle_rad)],
-                                    [torch.sin(angle_rad), torch.cos(angle_rad)]])
-    rotated_grid = torch.matmul(grid_normalized, rotation_matrix)
-
-    # Convert the rotated grid back to the range [0, width-1] and [0, height-1]
-    rotated_grid = ((rotated_grid + 1) / 2) * torch.tensor([width - 1, height - 1])
-
-    # Apply the inverse transformation to the image
-    rotated_image = F.grid_sample(image.unsqueeze(0).unsqueeze(0), rotated_grid.unsqueeze(0))
-
-    return rotated_image.squeeze()
-
-
-def random_rotate_images(images_list, lines_list):
-    """
-    Rotate images randomly with corresponding line
+    Tip: 'resample=Image.BILINEAR' argument is added to the F.rotate function. This argument specifies the resampling method used
+    during rotation. Additionally, the 'expand=False' argument is provided to prevent the output image from being expanded
+    to fit the rotated image entirely.
     :param images_list:
     :param lines_list:
     :return:
     """
-    # Randomly select the image tensor and associated line coordinates
-    image_tensor, line_coords, indices = random_select_elements(images_list, lines_list)
-    # print('Image shape: ', image_tensor.shape)
+    from utils.misc import generate_random_angle
 
-    # Rotate the tensor assuming image_tensor is a Torch tensor with shape [H, W]
-    rotated_tensor_image = torch.transpose(image_tensor, 0, 1).flip(1)
-    # Rotate the line coordinates
-    rotated_line_coords = rotate_line(line_coords, 90)
+    angles = [generate_random_angle() for _ in range(len(images_list))]
+    print(images_list[0].size())
+    rotated_images_list = [f.rotate(image.permute(1, 2, 0), angle, interpolation=Image.BILINEAR, expand=False).permute(2, 0, 1) for image, angle in zip(images_list, angles)]
+    rotated_lines_list = [rotate_line(line, angle) for line, angle in zip(lines_list, angles)]
 
-    # Update the rotated image tensor and line coordinates
-    rotated_tensors = images_list.copy()
-    rotated_lines = lines_list.copy()
-
-    rotated_tensors[indices] = rotated_tensor_image
-    rotated_lines[indices] = rotated_line_coords
-
-    return rotated_tensors, rotated_lines
+    return rotated_images_list, rotated_lines_list

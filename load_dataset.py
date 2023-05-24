@@ -3,18 +3,18 @@ import torch
 
 import matplotlib.pyplot as plt
 from numpy import pi
+from random import sample
 
 from classes.diagram_offline import DiagramOffline
-from plot.lines_visualisation import create_multiplots
-from utils.statistics import mean_square_error, calculate_std_dev, calculate_average_error
-from utils.angle_operations import angles_from_list, normalize_angle, random_rotate_images
+
+from utils.angle_operations import angles_from_list, normalize_angle, random_choice_rotate
 from utils.settings import settings
 from utils.output import init_out_directory, ExistingRunName
 from utils.logger import logger
+from utils.misc import save_list_to_file
 from pathlib import Path
 from classes.qdsd import DATA_DIR
 # from plot.data import plot_patch_sample
-from models.model import AngleNet
 
 run_name = settings.run_name
 
@@ -61,7 +61,6 @@ def load_patches(diagrams):
                                                              (0, 0))
         patches.extend(diagram_patches)
         lines.extend(lines_patches)
-
     return patches, lines
 
 
@@ -69,78 +68,38 @@ if __name__ == '__main__':
     diagrams_exp = load_diagram()
     # print('diagram ', len(diagrams_exp))
     patches_list, lines_list = load_patches(diagrams_exp)
-    # print('lines list:', lines_list[:10])
+
     # plot_patch_sample(patches_list, lines_list, sample_number=25, show_offset=False)
 
-    # Rotate some patches randomly
-    rotated_patches, rotated_lines = patches_list.copy(), lines_list.copy()
-    number_rotated = len(rotated_lines)//2
-    for q in range(number_rotated):
-        # print(f'iteration #{q}')
-        rotated_patches, rotated_lines = random_rotate_images(rotated_patches, rotated_lines)
-        # print('---------------------------')
-    # Calculate angles by hand for verification
-    angles_lines = angles_from_list(lines_list)
-    angles_lines_normalized = normalize_angle(angles_lines)
+    # Rotate some patches and lines randomly
+    rotated_patches, rotated_lines = random_choice_rotate(patches_list, lines_list)
 
-    # angles_lines_rotated = angles_from_list(rotated_lines)
-    # angles_lines_rotated_normalized = normalize_angle(angles_lines_rotated)
-
-    # Reshape patches for neural network
-    # Get the number of images and the size of each image
-    n = len(patches_list)
-    N = patches_list[0].shape[0]
-
-    # Create an empty tensor with the desired shape
-    stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
-    # stacked_patches_rotated = torch.empty(n, N, N, dtype=torch.float32)
-
-    # Fill the 3D tensor with the image data
-    for i, image_tensor in enumerate(patches_list):
-        stacked_patches[i] = image_tensor
-    # for i, image_tensor in enumerate(rotated_patches):
-    #     stacked_patches_rotated[i] = image_tensor
+    # # Calculate angles by hand for verification
+    # angles_lines = angles_from_list(lines_list)
+    # angles_lines_normalized = normalize_angle(angles_lines)
     #
-    tensor_patches = stacked_patches.flatten(1)
-    # tensor_patches_rotated = stacked_patches_rotated.flatten(1)
-
-    # Load model
-    N = 18
-    model = AngleNet(N)
-    model_name = 'best_model_1.pt'
-    path = f"saved\{model_name}"
-    model.load_state_dict(torch.load(path), strict=False)
-
-    angles_test_prediction = model(tensor_patches)  # feedforward of the test images
-    angles_test_prediction_numpy = angles_test_prediction.detach().numpy()  # convert to numpy array (remove gradient)
-
-    # angles_test_prediction_rotated = model(tensor_patches_rotated)
-    # angles_test_prediction_numpy_rotated = angles_test_prediction_rotated.detach().numpy()
-
-    # Generate plot
-    fig1, axes1 = create_multiplots(stacked_patches, angles_lines, angles_test_prediction_numpy, number_sample=25)
-    plt.tight_layout()
-    plt.show()
-
-    # fig2, axes2 = create_multiplots(stacked_patches_rotated, angles_lines_rotated, angles_test_prediction_numpy_rotated, number_sample=25)
-    # plt.tight_layout()
-    # plt.show()
-
-    # Calculate mean square error, standard deviation and average error
-    std_dev = calculate_std_dev(angles_lines_normalized, angles_test_prediction_numpy)
-    # std_dev_rotated = calculate_std_dev(angles_lines_rotated_normalized, angles_test_prediction_numpy_rotated)
-
-    mse = mean_square_error(angles_lines_normalized, angles_test_prediction_numpy)
-    # mse_rotated = mean_square_error(angles_lines_rotated_normalized, angles_test_prediction_numpy_rotated)
-
-    avg_error = calculate_average_error(angles_lines_normalized*pi, angles_test_prediction_numpy*pi)
-    # avg_error_rotated = calculate_average_error(angles_lines_rotated_normalized*pi, angles_test_prediction_numpy_rotated*(2*pi))
-
-    print('MSE regular set: ', "{:.4f}".format(mse))
-    # print('MSE rotated set: ', "{:.4f}".format(mse_rotated))
-
-    print('Average error regular set (°): ', "{:.4f}".format(avg_error))
-    # print('Average error rotated set (°): ', "{:.4f}".format(avg_error_rotated))
-
-    print('Standard deviation: ', std_dev)
-    # print('Standard deviation (rotated set): ', std_dev_rotated)
+    # # angles_lines_rotated = angles_from_list(rotated_lines)
+    # # angles_lines_rotated_normalized = normalize_angle(angles_lines_rotated)
+    #
+    # # Reshape patches for neural network
+    # # Get the number of images and the size of each image
+    # n = len(patches_list)
+    # N = patches_list[0].shape[0]
+    #
+    # # Create an empty tensor with the desired shape
+    # stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
+    # # stacked_patches_rotated = torch.empty(n, N, N, dtype=torch.float32)
+    #
+    # # Fill the 3D tensor with the image data
+    # for i, image_tensor in enumerate(patches_list):
+    #     stacked_patches[i] = image_tensor
+    # # for i, image_tensor in enumerate(rotated_patches):
+    # #     stacked_patches_rotated[i] = image_tensor
+    #
+    # tensor_patches = stacked_patches.flatten(1)
+    # # tensor_patches_rotated = stacked_patches_rotated.flatten(1)
+    # print(tensor_patches.shape)
+    # print(len(angles_lines_normalized))
+    # # Save patches and angles to file for later use
+    # torch.save(tensor_patches, './saved/single_dot_patches.pt')
+    # save_list_to_file(angles_lines_normalized, './saved/single_dot_normalized_angles.txt')

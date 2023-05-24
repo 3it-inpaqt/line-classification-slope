@@ -67,6 +67,7 @@ def save_list_to_file(list1: list, path: str, list2=None) -> Any:
     :return:
     """
     # open file in write mode
+
     with open(path, 'w') as fp:
         if list2 is not None:
             for item1, item2 in enumerate(list1, list2):
@@ -77,6 +78,29 @@ def save_list_to_file(list1: list, path: str, list2=None) -> Any:
                 # write each item on a new line
                 fp.write(f'{item1}\n')
         print('Done')
+
+
+# def load_list_from_file(file_path):
+#     loaded_list = []
+#     with open(file_path, 'r') as file:
+#         for line in file:
+#             line = line.strip()
+#             if line:
+#                 items = line.split(',')
+#                 if len(items) > 1:
+#                     loaded_list.append((items[0], items[1]))
+#                 else:
+#                     loaded_list.append(items[0])
+#
+#     return loaded_list
+
+
+def load_list_from_file(filepath):
+    list_from_file = []
+    with open(filepath) as f:
+        for line in f:
+            list_from_file.append(line.strip())
+    return list_from_file
 
 
 def clip(n, smallest, largest):
@@ -187,7 +211,7 @@ def convert_coordinate_dic(label_dic):
     return x1, y1, x2, y2
 
 
-def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int = 1) -> Tuple[Any]:
+def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int = 1) -> int:
     """
     Select two elements from two different list with same index randomly
     :param list1:
@@ -196,13 +220,22 @@ def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int
     :return:
     """
     # Randomly select indices without replacement
-    indices = random.randint(0, len(list1) - 1)
+    index = random.randint(0, len(list1) - 1)
     # print('list 1: ', len(list1))
     # print('list 2: ', len(list2))
     # print(list2)
 
     # Use the selected indices to get the corresponding elements from both lists
-    selected_elements1 = list1[indices]
-    selected_elements2 = list2[indices]
+    selected_elements1 = list1[index]
+    selected_elements2 = list2[index]
 
-    return selected_elements1, selected_elements2, indices
+    return selected_elements1, selected_elements2, index
+
+
+def generate_random_boolean():
+    return random.choice([True, False])
+
+
+def generate_random_angle():
+    angles = [0, 90, 180, 270]
+    return random.choice(angles)

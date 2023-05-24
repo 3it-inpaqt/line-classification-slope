@@ -152,7 +152,9 @@ class DiagramOffline(Diagram):
                 # Find all the lines intersection the patch
                 patch_intersecting_lines = [line.xy for line in self.transition_lines if line.intersects(patch_shape)]
 
-                if len(patch_intersecting_lines) > 0:
+                if len(patch_intersecting_lines) == 1:
+                    # if len(patch_intersecting_lines) > 1:
+                    #     print('nbr of intersecting lines: ', len(patch_intersecting_lines))
                     # print(len(patch_intersecting_lines))
                     patches_intersected.append(patch)
                     for line in patch_intersecting_lines:
