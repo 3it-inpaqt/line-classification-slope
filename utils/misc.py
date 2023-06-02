@@ -239,3 +239,8 @@ def generate_random_boolean():
 def generate_random_angle():
     angles = [0, 90, 180, 270]
     return random.choice(angles)
+
+
+def generate_random_indices(length, count):
+    indices = random.sample(range(length), count)
+    return indices

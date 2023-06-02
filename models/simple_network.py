@@ -3,6 +3,7 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,13 +11,14 @@ import tqdm
 from sklearn.model_selection import train_test_split
 
 # from linegeneration.generate_lines import create_image_set
-from utils.save_model import save_model
+# from utils.save_model import save_model
 # from utils.angle_operations import normalize_angle
 from utils.misc import load_list_from_file
 
 # Read data
 # n = 10000  # number of images to create
 # N = 18  # size of the images (NxN)
+
 
 X, y = torch.load('./saved/single_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles.txt')]
 
@@ -93,7 +95,7 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 
 # Save the state dictionary
-save_model(model, 'best_model')
+# save_model(model, 'best_model')
 
 # Plot accuracy
 plt.figure(1)

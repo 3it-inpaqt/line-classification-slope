@@ -14,7 +14,7 @@ from utils.logger import logger
 from utils.misc import save_list_to_file
 from pathlib import Path
 from classes.qdsd import DATA_DIR
-# from plot.data import plot_patch_sample
+from plot.data import plot_patch_sample
 
 run_name = settings.run_name
 
@@ -72,7 +72,8 @@ if __name__ == '__main__':
     # plot_patch_sample(patches_list, lines_list, sample_number=25, show_offset=False)
 
     # Rotate some patches and lines randomly
-    rotated_patches, rotated_lines = random_choice_rotate(patches_list, lines_list)
+    rotated_patches, rotated_lines = random_choice_rotate(patches_list, lines_list, len(patches_list)//2)
+    plot_patch_sample(rotated_patches, rotated_lines, sample_number=25, show_offset=False)
 
     # # Calculate angles by hand for verification
     # angles_lines = angles_from_list(lines_list)

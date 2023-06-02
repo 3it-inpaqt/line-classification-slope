@@ -6,7 +6,7 @@ import torch
 import torchvision.transforms.functional as f
 from PIL import Image
 
-from utils.misc import random_select_elements
+from utils.misc import random_select_elements, generate_random_indices
 
 from typing import Tuple, List
 np.seterr(divide='ignore')
@@ -110,7 +110,7 @@ def rotate_line(line, angle):
     return [rotated_x1, rotated_x2], [rotated_y1, rotated_y2]
 
 
-def random_choice_rotate(images_list, lines_list):
+def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
     """
     Randomly rotates image and lines by an angle choosen in [0,90,180,270].
 
@@ -119,13 +119,27 @@ def random_choice_rotate(images_list, lines_list):
     to fit the rotated image entirely.
     :param images_list:
     :param lines_list:
+    :param nbr_to_rotate: Number of images and lines to rotate
     :return:
     """
-    from utils.misc import generate_random_angle
+    # from utils.misc import generate_random_angle
+    #
+    # angles = [generate_random_angle() for _ in range(len(images_list))]
+    # print(images_list[0].size())
+    # rotated_images_list = [f.rotate(image.permute(1, 2, 0), angle, interpolation=Image.BILINEAR, expand=False).permute(2, 0, 1) for image, angle in zip(images_list, angles)]
+    # rotated_lines_list = [rotate_line(line, angle) for line, angle in zip(lines_list, angles)]
+    rotated_images_list, rotated_lines_list = images_list.copy(), lines_list.copy()
 
-    angles = [generate_random_angle() for _ in range(len(images_list))]
-    print(images_list[0].size())
-    rotated_images_list = [f.rotate(image.permute(1, 2, 0), angle, interpolation=Image.BILINEAR, expand=False).permute(2, 0, 1) for image, angle in zip(images_list, angles)]
-    rotated_lines_list = [rotate_line(line, angle) for line, angle in zip(lines_list, angles)]
+    random_indices = generate_random_indices(len(images_list), nbr_to_rotate)
+    for i in random_indices:
+        # Select initial image and lines
+        image = images_list[i]
+        line = lines_list[i]
+        # Rotate image and line by 90°
+        rotated_image = torch.rot90(image)
+        rotated_images_list[i] = rotated_image
+
+        rotated_line = ([-line[1][0], -line[1][1]], [line[0][0], line[0][1]])  # ([-y1, -y2], [x1, x2])
+        rotated_lines_list[i] = rotated_line
 
     return rotated_images_list, rotated_lines_list
