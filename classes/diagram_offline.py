@@ -418,7 +418,7 @@ class DiagramOffline(Diagram):
 
     @staticmethod
     def _load_charge_annotations(charge_areas: Iterable, x, y, pixel_size: float, snap: int = 1) \
-            -> List[Tuple[ChargeRegime, Polygon]]:
+            -> List[Tuple[dict, Polygon]]:
         """
         Load regions annotation for an image.
 
@@ -438,8 +438,7 @@ class DiagramOffline(Diagram):
                                                    True)
 
             area_obj = Polygon(zip(area_x, area_y))
-            processed_areas.append((ChargeRegime(area['value']), area_obj))
-
+            processed_areas.append((ChargeRegime[area['title']], area_obj))
         return processed_areas
 
     @staticmethod

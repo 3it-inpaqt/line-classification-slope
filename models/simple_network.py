@@ -21,6 +21,8 @@ from utils.misc import load_list_from_file
 
 
 X, y = torch.load('./saved/single_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles.txt')]
+# X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
+
 
 N = X[0].shape[0]
 
@@ -99,7 +101,7 @@ model.load_state_dict(best_weights)
 
 # Plot accuracy
 plt.figure(1)
-plt.suptitle('Training on the experimental patches (not rotated)')
+plt.suptitle('Training on the experimental patches (rotated)')
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % np.sqrt(best_mse))
 plt.xlabel('Epoch')

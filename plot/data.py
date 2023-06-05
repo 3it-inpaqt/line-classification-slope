@@ -399,11 +399,13 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
             ax.set_ylim([0, height])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
 
             x_lim, y_lim = line[0], line[1]
+            # line_x = [x / width * width for x in line[0]]
+            # line_y = [y / height * height for y in line[1]]
             # y_lim[0], y_lim[1] = y_lim[1], y_lim[0]
 
             ax.imshow(patch, extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
             ax.plot(x_lim, y_lim,  color='blue', alpha=0.4)
-
+            # ax.plot(line_x, line_y, color='blue', alpha=0.4)
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
                 rect = patches.Rectangle((settings.label_offset_x - 0.5, settings.label_offset_y - 0.5),

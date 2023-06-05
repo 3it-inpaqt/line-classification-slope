@@ -12,6 +12,21 @@ from typing import Tuple, List
 np.seterr(divide='ignore')
 
 
+def center_line(x1: float, y1: float, x2: float, y2: float) -> Tuple[float]:
+    """
+    Calculate the center of a line
+    :param x1:
+    :param y1:
+    :param x2:
+    :param y2:
+    :return: Tuple center x and y coordinates
+    """
+    center_x = (x1 + x2) / 2
+    center_y = (y1 + y2) / 2
+
+    return center_x, center_y
+
+
 def get_point_above_horizontal(x1: float, y1: float, x2: float, y2: float) -> Tuple[float, float, float, float]:
     """
     Get the point above the horizontal line passing through the center of the line between (x1,y1) and (x2,y2).
@@ -84,8 +99,16 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
 
 
 def rotate_line(line, theta=np.pi/2):
+    """
+    Rotate line by an angle theta.
+    Ref: https://www.reddit.com/r/askmath/comments/luimi0/equation_for_finding_the_line_end_point_positions/
+    :param line:
+    :param theta:
+    :return:
+    """
     x1, x2, y1, y2 = line[0][0], line[0][1], line[1][0], line[1][1]
-    return [-y2, -y1], [x2, x1]
+
+    return [x1 * np.cos(theta) - y1 * np.sin(theta), x2 * np.cos(theta) - y2 * np.sin(theta)], [x1 * np.sin(theta) + y1 * np.cos(theta), x2 * np.sin(theta) + y2 * np.cos(theta)]
 
 
 def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
