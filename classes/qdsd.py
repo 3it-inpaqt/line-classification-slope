@@ -19,10 +19,15 @@ class QDSDLines(Dataset):
     Transition line classification task.
     """
 
-    classes = [
-        'no line',  # False (0)
-        'line'  # True (1)
-    ]
+    classes = ['No Line']  # Common class for any dot number
+    if settings.dot_number == 1:  # Single dot
+        classes.append('Line')  # Class line for single dot
+    else:
+        for nb in range(settings.dot_number):
+            # Class of the line with an angle of 180/nb_line.nb, column {nb} is True
+            classes.append(f'Line {180 / settings.dot_number * nb}')
+        classes.append(f'Crosspoint')  # Last class for the case of dot_number is superior at 1
+        # All parameters in the label is True
 
     def __init__(self, patches: List[Tuple], role: str, transform: Optional[List[Callable]] = None):
         """
@@ -33,6 +38,9 @@ class QDSDLines(Dataset):
         :param transform: The list of transformation function to apply on the patches
         :param role: The role of this dataset ("train" or "test" or "validation")
         """
+        if len(patches) == 0:
+            raise RuntimeError(f'The list of {role} patches is empty. It could be because of a missing label, file or '
+                               f'an error in a diagram name.')
 
         self.role = role
 

@@ -2,6 +2,7 @@ import gzip
 import json
 import zipfile
 from pathlib import Path
+import platform
 from random import randrange
 from typing import Any, IO, Iterable, List, Optional, Sequence, Tuple, Union
 
@@ -33,11 +34,11 @@ class DiagramOffline(Diagram):
     transition_lines: Optional[List[LineString]]
 
     # The charge area lines annotations
-    charge_areas: Optional[List[Tuple[ChargeRegime, Polygon]]]
+    charge_areas: Optional[List[Tuple[type(ChargeRegime), Polygon]]]
 
     def __init__(self, file_basename: str, x_axes: Sequence[float], y_axes: Sequence[float], values: torch.Tensor,
                  transition_lines: Optional[List[LineString]],
-                 charge_areas: Optional[List[Tuple[ChargeRegime, Polygon]]]):
+                 charge_areas: Optional[List[Tuple[type(ChargeRegime), Polygon]]]):
         super().__init__(file_basename)
 
         self.x_axes = x_axes
@@ -150,14 +151,17 @@ class DiagramOffline(Diagram):
                 # print(patch.shape)
 
                 # Find all the lines intersection the patch
-                patch_intersecting_lines = [line.xy for line in self.transition_lines if line.intersects(patch_shape)]
+                intersections_list = []
+                # print('Transition lines: ', self.transition_lines)
+                for lines in self.transition_lines:
+                    patch_intersecting_lines = [line.xy for line in lines if line.intersects(patch_shape)]
+                    intersections_list.extend(patch_intersecting_lines)
+                # print("Intersection list: ", intersections_list)
 
-                if len(patch_intersecting_lines) == 1:
-                    # if len(patch_intersecting_lines) > 1:
-                    #     print('nbr of intersecting lines: ', len(patch_intersecting_lines))
-                    # print(len(patch_intersecting_lines))
+                if len(intersections_list) != 0:
                     patches_intersected.append(patch)
                     for line in patch_intersecting_lines:
+                        # print('Line: ', line)
                         # print(line[0])
                         # print(line[1])
                         x_line_patch = [self.voltage_to_coord_x(x) - patch_x for x in line[0]]
@@ -319,7 +323,9 @@ class DiagramOffline(Diagram):
                 nb_no_label += 1
                 continue
 
-            with diagram_name.open('rb') as diagram_file:
+            # Windows needs the 'b' option
+            open_options = 'rb' if platform.system() == 'Windows' else 'r'
+            with diagram_name.open(open_options) as diagram_file:
                 # Load values from CSV file
                 x, y, values = DiagramOffline._load_interpolated_csv(gzip.open(diagram_file))
 
@@ -330,7 +336,6 @@ class DiagramOffline(Diagram):
                 charge_area = None
 
                 if load_lines:
-                    # TODO adapt for double dot (load line_2 too)
                     # Load transition line annotations
                     transition_lines = DiagramOffline._load_lines_annotations(
                         filter(lambda l: l['title'] == 'line_1', current_labels['objects']), x, y,
@@ -405,20 +410,25 @@ class DiagramOffline(Diagram):
          border (in number of pixels)
         :return: The list of line annotation for the image, as shapely.geometry.LineString
         """
-
+        # TODO Change to have separated lines coordinates (x1, x2), (y1, y2) and not a long tuple
         processed_lines = []
         for line in lines:
             line_x = DiagramOffline._coord_to_volt((p['x'] for p in line['line']), x[0], x[-1], pixel_size, snap)
             line_y = DiagramOffline._coord_to_volt((p['y'] for p in line['line']), y[0], y[-1], pixel_size, snap, True)
 
-            line_obj = LineString(zip(line_x, line_y))
-            processed_lines.append(line_obj)
+            for i in range(0, len(line_x), 2):
+                for x1, x2, y1, y2 in zip(line_x[i:i+2], line_x[i+1:i+3], line_y[i:i+2], line_y[i+1:i+3]):
+                    processed_lines.append(([x1, x2], [y1, y2]))
+            # print(processed_lines)
+
+            # line_obj = LineString(zip(line_x, line_y))
+            # processed_lines.append(line_obj)
 
         return processed_lines
 
     @staticmethod
     def _load_charge_annotations(charge_areas: Iterable, x, y, pixel_size: float, snap: int = 1) \
-            -> List[Tuple[dict, Polygon]]:
+            -> List[Tuple[type(ChargeRegime), Polygon]]:
         """
         Load regions annotation for an image.
 

@@ -6,6 +6,7 @@ from numpy import pi
 from random import sample
 
 from classes.diagram_offline import DiagramOffline
+from classes.diagram_ndot_offline import DiagramOfflineNDot
 
 from utils.angle_operations import angles_from_list, normalize_angle, random_choice_rotate
 from utils.settings import settings
@@ -27,11 +28,11 @@ except ExistingRunName:
 
 def load_diagram() -> List["DiagramOffline"]:
     # Load diagrams from files (line and area)
-    diagrams = DiagramOffline.load_diagrams(pixel_size=settings.pixel_size,
+    diagrams = DiagramOfflineNDot.load_diagrams(pixel_size=settings.pixel_size,
                                             research_group=settings.research_group,
                                             diagrams_path=Path(DATA_DIR, 'interpolated_csv.zip'),
                                             labels_path=Path(DATA_DIR, 'labels.json'),
-                                            single_dot=False,
+                                            single_dot=True if settings.dot_number == 1 else False,
                                             load_lines=True,
                                             load_areas=True,
                                             white_list=[settings.test_diagram] if settings.test_diagram else None)
@@ -68,7 +69,6 @@ if __name__ == '__main__':
     diagrams_exp = load_diagram()
     # print('diagram ', len(diagrams_exp))
     patches_list, lines_list = load_patches(diagrams_exp)
-    print(len(patches_list), len(lines_list))
     plot_patch_sample(patches_list, lines_list, sample_number=25, show_offset=False)
 
     # Rotate some patches and lines randomly

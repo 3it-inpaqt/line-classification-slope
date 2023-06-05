@@ -138,11 +138,12 @@ def plot_diagram(x_i, y_i,
             label_x, label_y = list(polygon.centroid.coords)[0]
             charge_text = plt.text(label_x, label_y, str(regime), ha="center", va="center", color='b', weight='bold',
                                    bbox=dict(boxstyle='round', pad=0.2, facecolor='w', alpha=0.5, edgecolor='w'))
-
+    print(transition_lines)
     if transition_lines is not None:
         for i, line in enumerate(transition_lines):
-            line_x, line_y = line.coords.xy
-            plt.plot(line_x, line_y, color='lime', label='Line annotation' if i == 0 else None)
+            for l in line:
+                line_x, line_y = l[0], l[1]
+                plt.plot(line_x, line_y, color='lime', label='Line annotation' if i == 0 else None)
             legend = True
 
     if scan_history is not None and len(scan_history) > 0:
