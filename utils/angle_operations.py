@@ -83,31 +83,9 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
     return np.array(angle_list)
 
 
-def rotate_line(line, angle):
-    """
-    Rotate a line by an angle given by the user. Make sure the angle is in degree.
-    :param line:
-    :param angle:
-    :return: Rotated line
-    """
-
-    # Extract line coordinates
-    x1, x2 = line[0]
-    y1, y2 = line[1]
-
-    angle_rad = np.deg2rad(angle)
-
-    # Create a 2x2 rotation matrix
-    rotation_matrix = np.array([[np.cos(angle_rad), -np.sin(angle_rad)],
-                                [np.sin(angle_rad), np.cos(angle_rad)]])
-
-    # Apply rotation to line coordinates
-    rotated_line = np.dot(rotation_matrix, np.array([[x1, x2], [y1, y2]]))
-    # Extract rotated line coordinates
-    rotated_x1, rotated_x2 = rotated_line[0]
-    rotated_y1, rotated_y2 = rotated_line[1]
-
-    return [rotated_x1, rotated_x2], [rotated_y1, rotated_y2]
+def rotate_line(line, theta=np.pi/2):
+    x1, x2, y1, y2 = line[0][0], line[0][1], line[1][0], line[1][1]
+    return [-y2, -y1], [x2, x1]
 
 
 def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
@@ -122,12 +100,6 @@ def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
     :param nbr_to_rotate: Number of images and lines to rotate
     :return:
     """
-    # from utils.misc import generate_random_angle
-    #
-    # angles = [generate_random_angle() for _ in range(len(images_list))]
-    # print(images_list[0].size())
-    # rotated_images_list = [f.rotate(image.permute(1, 2, 0), angle, interpolation=Image.BILINEAR, expand=False).permute(2, 0, 1) for image, angle in zip(images_list, angles)]
-    # rotated_lines_list = [rotate_line(line, angle) for line, angle in zip(lines_list, angles)]
     rotated_images_list, rotated_lines_list = images_list.copy(), lines_list.copy()
 
     random_indices = generate_random_indices(len(images_list), nbr_to_rotate)
@@ -135,11 +107,12 @@ def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
         # Select initial image and lines
         image = images_list[i]
         line = lines_list[i]
+
         # Rotate image and line by 90°
         rotated_image = torch.rot90(image)
         rotated_images_list[i] = rotated_image
 
-        rotated_line = ([-line[1][0], -line[1][1]], [line[0][0], line[0][1]])  # ([-y1, -y2], [x1, x2])
+        rotated_line = rotate_line(line)
         rotated_lines_list[i] = rotated_line
 
     return rotated_images_list, rotated_lines_list
