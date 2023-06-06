@@ -389,7 +389,8 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
         if i < sample_number:
             index = indices[i]
             # print(index)
-            line = lines_list[index][0]
+            line = lines_list[index]
+            print(line)
             # TODO Take into account line being a list of lines, so with 1 or more elements [([75, 5], [-543, -532]), ([5, -8], [-532, -530])]
             # TODO THE AX PLOT IS NOT CORRECT ONCE AGAIN
             patch = patches_list[index]
@@ -403,8 +404,9 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
             print('-------------------')
             ax.imshow(patch, extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
             for segment in line:
+                print(segment)
                 x_lim, y_lim = segment[0], segment[1]
-                ax.plot(x_lim, y_lim, color='blue', alpha=0.4)
+                ax.plot(x_lim, y_lim, color='blue', alpha=0.7)
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
                 rect = patches.Rectangle((settings.label_offset_x - 0.5, settings.label_offset_y - 0.5),
