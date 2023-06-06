@@ -138,11 +138,11 @@ def plot_diagram(x_i, y_i,
             label_x, label_y = list(polygon.centroid.coords)[0]
             charge_text = plt.text(label_x, label_y, str(regime), ha="center", va="center", color='b', weight='bold',
                                    bbox=dict(boxstyle='round', pad=0.2, facecolor='w', alpha=0.5, edgecolor='w'))
-    print(transition_lines)
+    # print(transition_lines)
     if transition_lines is not None:
         for i, line in enumerate(transition_lines):
             for l in line:
-                line_x, line_y = l[0], l[1]
+                line_x, line_y = l.xy[0], l.xy[1]
                 plt.plot(line_x, line_y, color='lime', label='Line annotation' if i == 0 else None)
             legend = True
 
@@ -380,13 +380,13 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     nrows = ceil(np.sqrt(sample_number))
     ncols = ceil(sample_number / nrows)
     # Select a random sample of indices
-    indices = sample(range(len(patches_list)), k=sample_number)
-
+    indices = sample(range(len(lines_list)), k=sample_number)
+    print(indices)
     # print(len(lines_list))
     # print(len(patches_list))
     # Create subplots
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
-    fig.suptitle('Examples of patches with one line (in blue)', fontsize='xx-large', fontweight='bold')
+    fig.suptitle('Examples of patches line(s) (in blue)', fontsize='xx-large', fontweight='bold')
 
     for i, ax in enumerate(axes.flatten()):
         if i < sample_number:

@@ -154,10 +154,11 @@ class DiagramOffline(Diagram):
                 intersections_list = []
                 # print('Transition lines: ', self.transition_lines)
                 for lines in self.transition_lines:
-                    patch_intersecting_lines = [line for line in lines if (LineString([(line[0][0], line[1][0]), (line[0][1], line[1][1])])).intersects(patch_shape)]
+                    patch_intersecting_lines = [line.xy for line in lines if line.intersects(patch_shape)]
                     intersections_list.extend(patch_intersecting_lines)
                 # print("Intersection list: ", intersections_list)
-
+                # TODO When charing label, line geometry object but when getting patches x and y coordinates. Find a way
+                #  to divide the x and y into [(x1, x2), (y1, y2)]
                 if len(intersections_list) != 0:
                     patches_intersected.append(patch)
                     for line in patch_intersecting_lines:
@@ -167,13 +168,13 @@ class DiagramOffline(Diagram):
                         x_line_patch = [self.voltage_to_coord_x(x) - patch_x for x in line[0]]
                         y_line_patch = [self.voltage_to_coord_y(y) - patch_y for y in line[1]]
 
-                        # print('x_line_patch: ', x_line_patch)
-                        # print('y_line_patch: ', y_line_patch)
+                        print('x_line_patch: ', x_line_patch)
+                        print('y_line_patch: ', y_line_patch)
                         lines_intersecting.append((x_line_patch, y_line_patch))
 
                 # print('patch x coo: ', start_x)
                 # print('patch y coo: ', start_y)
-                # print('------------------------')
+                print('------------------------')
         return patches_intersected, lines_intersecting
 
     def get_charge(self, coord_x: int, coord_y: int) -> ChargeRegime:
@@ -415,14 +416,8 @@ class DiagramOffline(Diagram):
         for line in lines:
             line_x = DiagramOffline._coord_to_volt((p['x'] for p in line['line']), x[0], x[-1], pixel_size, snap)
             line_y = DiagramOffline._coord_to_volt((p['y'] for p in line['line']), y[0], y[-1], pixel_size, snap, True)
-
-            for i in range(0, len(line_x), 2):
-                for x1, x2, y1, y2 in zip(line_x[i:i+2], line_x[i+1:i+3], line_y[i:i+2], line_y[i+1:i+3]):
-                    processed_lines.append(([x1, x2], [y1, y2]))
-            # print(processed_lines)
-
-            # line_obj = LineString(zip(line_x, line_y))
-            # processed_lines.append(line_obj)
+            line_obj = LineString(zip(line_x, line_y))
+            processed_lines.append(line_obj)
 
         return processed_lines
 

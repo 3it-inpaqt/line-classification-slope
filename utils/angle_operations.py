@@ -8,7 +8,7 @@ from PIL import Image
 
 from utils.misc import random_select_elements, generate_random_indices
 
-from typing import Tuple, List
+from typing import Tuple, List, Any
 np.seterr(divide='ignore')
 
 
@@ -139,3 +139,25 @@ def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
         rotated_lines_list[i] = rotated_line
 
     return rotated_images_list, rotated_lines_list
+
+
+def decompose_line(line) -> Tuple[Any]:
+    """
+    Find angle of all the lines composing a single segment
+    :param line:
+    :return:
+    """
+    x_line = line[0]
+    y_line = line[1]
+
+    decomposition = []
+    angles_decomposition = []
+    for i in range(0, len(x_line), 2):
+        for x1, x2, y1, y2 in zip(x_line[i:i + 2], x_line[i + 1:i + 3], y_line[i:i + 2],
+                                  y_line[i + 1:i + 3]):
+            decomposition.append([(x1, x2), (y1, y2)])
+            angles_decomposition.append(calculate_angle(x1, y1, x2, y2))
+
+    return decomposition, angles_decomposition
+
+
