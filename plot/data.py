@@ -143,7 +143,7 @@ def plot_diagram(x_i, y_i,
         for i, line in enumerate(transition_lines):
             for l in line:
                 line_x, line_y = l.xy[0], l.xy[1]
-                plt.plot(line_x, line_y, color='lime', label='Line annotation' if i == 0 else None)
+                plt.plot(line_x, line_y, color='lime')
             legend = True
 
     if scan_history is not None and len(scan_history) > 0:
@@ -381,9 +381,6 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     ncols = ceil(sample_number / nrows)
     # Select a random sample of indices
     indices = sample(range(len(lines_list)), k=sample_number)
-    print(indices)
-    # print(len(lines_list))
-    # print(len(patches_list))
     # Create subplots
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
     fig.suptitle('Examples of patches line(s) (in blue)', fontsize='xx-large', fontweight='bold')
@@ -392,21 +389,22 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
         if i < sample_number:
             index = indices[i]
             # print(index)
-            line = lines_list[index]
+            line = lines_list[index][0]
+            # TODO Take into account line being a list of lines, so with 1 or more elements [([75, 5], [-543, -532]), ([5, -8], [-532, -530])]
+            # TODO THE AX PLOT IS NOT CORRECT ONCE AGAIN
             patch = patches_list[index]
 
             height, width = patch.shape[:2]  # Get the height and width of the image
+            print('Height: ', height)
+            print('Width: ', width)
             ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
             ax.set_ylim([0, height])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
-
-            x_lim, y_lim = line[0], line[1]
-            # line_x = [x / width * width for x in line[0]]
-            # line_y = [y / height * height for y in line[1]]
-            # y_lim[0], y_lim[1] = y_lim[1], y_lim[0]
-
+            print(line)
+            print('-------------------')
             ax.imshow(patch, extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
-            ax.plot(x_lim, y_lim,  color='blue', alpha=0.4)
-            # ax.plot(line_x, line_y, color='blue', alpha=0.4)
+            for segment in line:
+                x_lim, y_lim = segment[0], segment[1]
+                ax.plot(x_lim, y_lim, color='blue', alpha=0.4)
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
                 rect = patches.Rectangle((settings.label_offset_x - 0.5, settings.label_offset_y - 0.5),
@@ -416,7 +414,6 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
 
                 # Add the offset rectangle to the axes
                 ax.add_patch(rect)
-
             ax.axis('off')
         else:
             fig.delaxes(ax)  # if there is no more patches but some axes are still to be filled, it deletes these axes and leaves a blank space

@@ -69,8 +69,10 @@ if __name__ == '__main__':
     diagrams_exp = load_diagram()
     # print('diagram ', len(diagrams_exp))
     patches_list, lines_list = load_patches(diagrams_exp)
-    print(len(lines_list))
-    plot_patch_sample(patches_list, lines_list, sample_number=25, show_offset=False)
+    # print(lines_list)
+    # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=True)
+    # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=True)
+    plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=False)
 
     # Rotate some patches and lines randomly
     # rotated_patches, rotated_lines = random_choice_rotate(patches_list, lines_list, len(patches_list)//2)

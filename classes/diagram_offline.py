@@ -150,31 +150,21 @@ class DiagramOffline(Diagram):
                 patch = self.values[diagram_size_y - end_y:diagram_size_y - start_y, start_x:end_x]
                 # print(patch.shape)
 
-                # Find all the lines intersection the patch
-                intersections_list = []
-                # print('Transition lines: ', self.transition_lines)
+                # Find all the lines intersecting the patch
                 for lines in self.transition_lines:
-                    patch_intersecting_lines = [line.xy for line in lines if line.intersects(patch_shape)]
-                    intersections_list.extend(patch_intersecting_lines)
-                # print("Intersection list: ", intersections_list)
-                # TODO When charing label, line geometry object but when getting patches x and y coordinates. Find a way
-                #  to divide the x and y into [(x1, x2), (y1, y2)]
-                if len(intersections_list) != 0:
-                    patches_intersected.append(patch)
+                    patch_intersecting_lines = [line for line in lines if line.intersects(patch_shape)]
                     for line in patch_intersecting_lines:
-                        # print('Line: ', line)
-                        # print(line[0])
-                        # print(line[1])
-                        x_line_patch = [self.voltage_to_coord_x(x) - patch_x for x in line[0]]
-                        y_line_patch = [self.voltage_to_coord_y(y) - patch_y for y in line[1]]
+                        x_line, y_line = line.xy
+                        segments = [LineString(zip(x_line[i:i+2], y_line[i:i+2])) for i in range(0, len(x_line) - 1)]
+                        # Divide the line in segments and check for each of they intersect the patch to reduce the
+                        # size of the intersecting lines and only take effective crossing
+                        segments_intersecting = [([self.voltage_to_coord_x(x) - patch_x for x in segment.xy[0]],
+                                                  [self.voltage_to_coord_x(y) - patch_y for y in segment.xy[1]])
+                                                 for segment in segments if segment.intersects(patch_shape)]
 
-                        print('x_line_patch: ', x_line_patch)
-                        print('y_line_patch: ', y_line_patch)
-                        lines_intersecting.append((x_line_patch, y_line_patch))
+                        lines_intersecting.append(segments_intersecting)
+                        patches_intersected.append(patch)
 
-                # print('patch x coo: ', start_x)
-                # print('patch y coo: ', start_y)
-                print('------------------------')
         return patches_intersected, lines_intersecting
 
     def get_charge(self, coord_x: int, coord_y: int) -> ChargeRegime:
