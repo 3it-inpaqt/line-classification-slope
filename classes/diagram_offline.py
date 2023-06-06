@@ -154,7 +154,7 @@ class DiagramOffline(Diagram):
                 intersections_list = []
                 # print('Transition lines: ', self.transition_lines)
                 for lines in self.transition_lines:
-                    patch_intersecting_lines = [line.xy for line in lines if line.intersects(patch_shape)]
+                    patch_intersecting_lines = [line for line in lines if (LineString([(line[0][0], line[1][0]), (line[0][1], line[1][1])])).intersects(patch_shape)]
                     intersections_list.extend(patch_intersecting_lines)
                 # print("Intersection list: ", intersections_list)
 
