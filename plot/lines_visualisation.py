@@ -7,6 +7,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
 from utils.angle_operations import normalize_angle
+from utils.settings import Settings
 
 
 def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: ndarray = None, number_sample: float = None) -> Tuple[Figure, Axes]:
@@ -20,7 +21,8 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
     :return: a figure with subplots
     """
 
-    n, p, _ = image_set.shape
+    # n, p, _ = image_set.shape
+    n, p = image_set.shape
     if (number_sample is not None) and (number_sample < n):
         n = number_sample
     # Compute the number of rows and columns required to display n subplots
@@ -33,10 +35,12 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
 
     for i, ax in enumerate(axes.flatten()):
         if i < n:
-            image = image_set[i, :, :]
-            angle_radian = angles[i]
-            angle_degree = np.rad2deg(angle_radian)
-            normalized_angle = normalize_angle(angle_radian)
+            image = np.reshape(image_set[i, :], (Settings.patch_size_x, Settings.patch_size_y))
+            normalized_angle = float(angles[i])
+            print(normalized_angle)
+            angle_radian = normalized_angle * (2 * np.pi)
+            print(angle_radian)
+            angle_degree = angle_radian * 180 / np.pi
             ax.imshow(image, cmap='copper')
             title = 'Angle: {:.3f} | {:.3f}° \n Normalized value: {:.3f}'.format(angle_radian, angle_degree, normalized_angle)
             if prediction_angles is not None:

@@ -69,43 +69,41 @@ if __name__ == '__main__':
     diagrams_exp = load_diagram()
     # print('diagram ', len(diagrams_exp))
     patches_list, lines_list = load_patches(diagrams_exp)
+
+    selected_patches = []
+    selected_lines = []
+
+    for patch, line_list in zip(patches_list, lines_list):
+        if len(line_list) == 1:
+            selected_patches.append(patch)
+            selected_lines.append(line_list)
+
     # print(lines_list)
     # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=True)
     # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=True)
-    plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=False)
+    # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=False)
 
-    # Rotate some patches and lines randomly
-    # rotated_patches, rotated_lines = random_choice_rotate(patches_list, lines_list, len(patches_list)//2)
-    # plot_patch_sample(rotated_patches, rotated_lines, sample_number=25, show_offset=False)
+    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
 
-    # # Calculate angles by hand for verification
-    # angles_lines = angles_from_list(lines_list)
-    # angles_lines_normalized = normalize_angle(angles_lines)
-    #
-    # angles_lines_rotated = angles_from_list(rotated_lines)
-    # angles_lines_rotated_normalized = normalize_angle(angles_lines_rotated)
-    #
+    # Calculate angles by hand for verification
+    angles_lines = angles_from_list(selected_lines)
+    angles_lines_normalized = normalize_angle(angles_lines)
+
     # Reshape patches for neural network
     # Get the number of images and the size of each image
-    # n = len(patches_list)
-    # N = patches_list[0].shape[0]
+    n = len(selected_patches)
+    N = selected_patches[0].shape[0]
 
     # Create an empty tensor with the desired shape
-    # stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
-    # stacked_patches_rotated = torch.empty(n, N, N, dtype=torch.float32)
+    stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
 
-    # # Fill the 3D tensor with the image data
-    # for i, image_tensor in enumerate(patches_list):
-    #     stacked_patches[i] = image_tensor
-    # for i, image_tensor in enumerate(rotated_patches):
-    #     stacked_patches_rotated[i] = image_tensor
+    # Fill the 3D tensor with the image data
+    for i, image_tensor in enumerate(selected_patches):
+        stacked_patches[i] = image_tensor
 
-    # tensor_patches = stacked_patches.flatten(1)
-    # tensor_patches_rotated = stacked_patches_rotated.flatten(1)
-    # print(tensor_patches.shape)
-    # print(len(angles_lines_normalized))
+    tensor_patches = stacked_patches.flatten(1)
+    print(tensor_patches.shape)
+    print(len(angles_lines_normalized))
     # Save patches and angles to file for later use
-    # torch.save(tensor_patches, './saved/single_dot_patches.pt')
-    # save_list_to_file(angles_lines_normalized, './saved/single_dot_normalized_angles.txt')
-    # torch.save(tensor_patches_rotated, './saved/single_dot_patches_rot.pt')
-    # save_list_to_file(angles_lines_rotated_normalized, './saved/single_dot_normalized_angles_rot.txt')
+    torch.save(tensor_patches, './saved/double_dot_patches.pt')
+    save_list_to_file(angles_lines_normalized, './saved/double_dot_normalized_angles.txt')

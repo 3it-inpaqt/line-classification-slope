@@ -23,6 +23,7 @@ import torch
 from utils.output import save_plot
 from utils.settings import settings
 from utils.logger import logger
+from utils.angle_operations import calculate_angle, normalize_angle
 
 LINE_COLOR = 'blue'
 NO_LINE_COLOR = 'tab:red'
@@ -362,16 +363,17 @@ def plot_diagram(x_i, y_i,
     return save_plot(f'diagram_{image_name}', allow_overwrite=allow_overwrite, save_in_buffer=save_in_buffer)
 
 
-def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], sample_number: int, show_offset: bool = True) -> None:
+def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], sample_number: int, show_offset: bool = True, name: str = 'patch_sample') -> None:
     """
     Plot randomly sampled patches grouped by class.
 
+    :param name: File name
     :param patches_list: The patches list to sample from.
     :param lines_list: List of the lines intersecting the patches
     :param sample_number: The number of patches to sample
     :param show_offset: If True draws the offset rectangle (ignored if both offset x and y are 0)
     """
-
+    # TODO Add angle value to the subplot to check it
     # Check if sample number is not greater than the amount of available data
     if sample_number > len(lines_list):
         sample_number = len(lines_list)
@@ -390,37 +392,47 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
             index = indices[i]
             # print(index)
             line = lines_list[index]
-            print(line)
+            # print(line)
             # TODO Take into account line being a list of lines, so with 1 or more elements [([75, 5], [-543, -532]), ([5, -8], [-532, -530])]
             # TODO THE AX PLOT IS NOT CORRECT ONCE AGAIN
             patch = patches_list[index]
 
             height, width = patch.shape[:2]  # Get the height and width of the image
-            print('Height: ', height)
-            print('Width: ', width)
+            # print('Height: ', height)
+            # print('Width: ', width)
             ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
             ax.set_ylim([0, height])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
-            print(line)
-            print('-------------------')
+            # print(line)
+            # print('-------------------')
             ax.imshow(patch, extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
+
             for segment in line:
-                print(segment)
+                # print(segment)
                 x_lim, y_lim = segment[0], segment[1]
                 ax.plot(x_lim, y_lim, color='blue', alpha=0.7)
+
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
                 rect = patches.Rectangle((settings.label_offset_x - 0.5, settings.label_offset_y - 0.5),
                                          settings.patch_size_x - 2 * settings.label_offset_x,
                                          settings.patch_size_y - 2 * settings.label_offset_y,
                                          linewidth=2, edgecolor='fuchsia', facecolor='none')
-
                 # Add the offset rectangle to the axes
                 ax.add_patch(rect)
+
+            # if predicted_angle is not None and angles_list is not None:
+            #     angle = angles_list[index]
+            #     pred_angle = predicted_angle[index]
+            #     angle_degree = angle * 180 / np.pi
+            #     normalized_angle = normalize_angle(angle)
+            #     title = 'Angle: {:.3f} | {:.3f}° \n Normalized value: {:.3f} \n Predicted value: {:.3f}'.format(angle, angle_degree, normalized_angle, pred_angle)
+            #     ax.set_title(title, fontsize=20)
+
             ax.axis('off')
         else:
             fig.delaxes(ax)  # if there is no more patches but some axes are still to be filled, it deletes these axes and leaves a blank space
 
-    save_plot('patch_sample')
+    save_plot(name)
 
 
 def plot_samples(samples: List[torch.Tensor], lines: List[Any], title: str, file_name: str = None, confidences: List[Union[float, Tuple[float]]] = None,
@@ -496,3 +508,56 @@ class TextHandler(HandlerBase):
         fp.set_size(fontsize)
         h.set_font_properties(fp)
         return [h]
+
+
+def plot_patch_test(patches: torch.Tensor, sample_number: int, angles_list: List, predicted_angle: Any, name: str = 'patch_sample') -> None:
+    """
+    Plot randomly sampled patches grouped by class to see if the network works well
+
+    :param name: File name
+    :param patches: The patches list to sample from.
+    :param sample_number: The number of patches to sample
+    :param angles_list: List of angles of lines if required
+    :param predicted_angle: If given, will add the predicted angles value to the plot
+    """
+    # Check if sample number is not greater than the amount of available data
+    n, p = patches.shape
+    if (sample_number is not None) and (sample_number < n):
+        n = sample_number
+        logger.warning(f'{n} diagrams available but number of sampled diagram was set to {sample_number}. Only {n} will be sampled')
+
+    nrows = ceil(np.sqrt(sample_number))
+    ncols = ceil(sample_number / nrows)
+    # Select a random sample of indices
+    indices = sample(range(n), k=sample_number)
+    # Create subplots
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(4 * ncols, 4 * nrows))
+    # fig.suptitle('Lines are in blue', fontsize='xx-large', fontweight='bold')
+    figsize = (4 * ncols, 4 * nrows)
+    plt.tight_layout()
+
+    for i, ax in enumerate(axes.flatten()):
+        if i < sample_number:
+            height, width = settings.patch_size_x, settings.patch_size_y  # Get the height and width of the image
+
+            index = indices[i]
+            image = np.reshape(patches[index, :], (height, width))
+
+            ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
+            ax.set_ylim([0, height])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
+
+            ax.imshow(image, extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
+
+            normalized_angle = float(angles_list[index])
+            angle = normalized_angle*(2*np.pi)
+            pred_angle = predicted_angle[index][0]
+            angle_degree = angle * 180 / np.pi
+
+            title = 'Angle: {:.3f} | {:.3f}° \n Normalized value: {:.3f} \n Predicted value: {:.3f}'.format(angle, angle_degree, normalized_angle, pred_angle)
+            ax.set_title(title, fontsize=20)
+
+            ax.axis('off')
+        else:
+            fig.delaxes(ax)  # if there is no more patches but some axes are still to be filled, it deletes these axes and leaves a blank space
+
+    save_plot(name)

@@ -161,12 +161,12 @@ class DiagramOffline(Diagram):
                         segments_intersecting = [([self.voltage_to_coord_x(x) - patch_x for x in segment.xy[0]],
                                                   [self.voltage_to_coord_y(y) - patch_y for y in segment.xy[1]])
                                                  for segment in segments if segment.intersects(patch_shape)]
-                        print('patch x: ', patch_x)
-                        print('patch y: ', patch_y)
-                        print(segments_intersecting)
+                        # print('patch x: ', patch_x)
+                        # print('patch y: ', patch_y)
+                        # print(segments_intersecting)
                         # print('test x coordinates: ', segments[0].xy[0])
                         # print('test x conversion: ', segments_intersecting[0][0])
-                        print('-----------------------------------')
+                        # print('-----------------------------------')
                         lines_intersecting.append(segments_intersecting)
                         patches_intersected.append(patch)
 

@@ -11,7 +11,7 @@ import tqdm
 from sklearn.model_selection import train_test_split
 
 # from linegeneration.generate_lines import create_image_set
-# from utils.save_model import save_model
+from utils.save_model import save_model
 # from utils.angle_operations import normalize_angle
 from utils.misc import load_list_from_file
 
@@ -20,7 +20,7 @@ from utils.misc import load_list_from_file
 # N = 18  # size of the images (NxN)
 
 
-X, y = torch.load('./saved/single_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles.txt')]
+X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
 
 
@@ -54,7 +54,7 @@ model = nn.Sequential(
 loss_fn = nn.MSELoss()  # mean square error
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
-n_epochs = 100   # number of epochs to run
+n_epochs = 500   # number of epochs to run
 batch_size = 10  # size of each batch
 batch_start = torch.arange(0, len(X_train), batch_size)
 
@@ -97,11 +97,11 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 
 # Save the state dictionary
-# save_model(model, 'best_model')
+save_model(model, 'best_model_DQD')
 
 # Plot accuracy
 plt.figure(1)
-plt.suptitle('Training on the experimental patches (rotated)')
+plt.suptitle('Training on the experimental patches (DQD)')
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % np.sqrt(best_mse))
 plt.xlabel('Epoch')

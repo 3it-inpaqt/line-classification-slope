@@ -89,7 +89,8 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
     :return: List of angles associated with each line
     """
     angle_list = []
-    for line in lines:
+    for line_list in lines:
+        line = line_list[0]
         x1, x2 = line[0][0], line[0][1]
         y1, y2 = line[1][0], line[1][1]
         angle = calculate_angle(x1, y1, x2, y2)
