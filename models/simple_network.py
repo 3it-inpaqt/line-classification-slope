@@ -74,6 +74,7 @@ for epoch in range(n_epochs):
             X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # forward pass
             y_pred = model(X_batch)
+            print('Y pred: ', y_pred)
             loss = loss_fn(y_pred, y_batch)
             # backward pass
             optimizer.zero_grad()
@@ -86,6 +87,7 @@ for epoch in range(n_epochs):
     model.eval()
     X_test = X_test.flatten(1)
     y_pred = model(X_test)
+
     mse = loss_fn(y_pred, y_test)
     mse = float(mse)
     history.append(mse)
@@ -94,24 +96,24 @@ for epoch in range(n_epochs):
         best_weights = copy.deepcopy(model.state_dict())
 
 # restore model and return best accuracy
-model.load_state_dict(best_weights)
-
-# Save the state dictionary
-save_model(model, 'best_model_DQD')
-
-# Plot accuracy
-plt.figure(1)
-plt.suptitle('Training on the experimental patches (DQD)')
-print("MSE: %.4f" % best_mse)
-print("RMSE: %.4f" % np.sqrt(best_mse))
-plt.xlabel('Epoch')
-plt.ylabel('Mean Square Error (MSE)')
-plt.plot(history)
-
-# Add a text box to the plot
-textstr = f'Best MSE: {best_mse:.4f} \n RMSE: {np.sqrt(best_mse):.4f}'
-text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
-                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
-                    horizontalalignment='right', verticalalignment='top')
-
-plt.show()
+# model.load_state_dict(best_weights)
+#
+# # Save the state dictionary
+# # save_model(model, 'best_model_DQD')
+#
+# # Plot accuracy
+# plt.figure(1)
+# plt.suptitle('Training on the experimental patches (DQD)')
+# print("MSE: %.4f" % best_mse)
+# print("RMSE: %.4f" % np.sqrt(best_mse))
+# plt.xlabel('Epoch')
+# plt.ylabel('Mean Square Error (MSE)')
+# plt.plot(history)
+#
+# # Add a text box to the plot
+# textstr = f'Best MSE: {best_mse:.4f} \n RMSE: {np.sqrt(best_mse):.4f}'
+# text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
+#                     bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
+#                     horizontalalignment='right', verticalalignment='top')
+#
+# plt.show()

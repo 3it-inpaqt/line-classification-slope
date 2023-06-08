@@ -384,8 +384,8 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     # Select a random sample of indices
     indices = sample(range(len(lines_list)), k=sample_number)
     # Create subplots
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols)
-    fig.suptitle('Examples of patches line(s) (in blue)', fontsize='xx-large', fontweight='bold')
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(4*ncols, 4*nrows))
+    fig.suptitle('Examples of patches line(s) (in blue)', fontsize='30', fontweight='bold')
 
     for i, ax in enumerate(axes.flatten()):
         if i < sample_number:
@@ -409,8 +409,11 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
             for segment in line:
                 # print(segment)
                 x_lim, y_lim = segment[0], segment[1]
-                ax.plot(x_lim, y_lim, color='blue', alpha=0.7)
-
+                angle = calculate_angle(x_lim[0], y_lim[0], x_lim[1], y_lim[1])
+                angle_deg = angle * 180 / np.pi
+                angle_norm = angle / (2 * np.pi)
+                ax.plot(x_lim, y_lim, color='blue', alpha=0.6, linewidth=5)
+                ax.set_title('Angle: {:.3f} rad \n {:.3f}°'.format(angle, angle_deg), fontsize=20)
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
                 rect = patches.Rectangle((settings.label_offset_x - 0.5, settings.label_offset_y - 0.5),
@@ -523,8 +526,8 @@ def plot_patch_test(patches: torch.Tensor, sample_number: int, angles_list: List
     # Check if sample number is not greater than the amount of available data
     n, p = patches.shape
     if (sample_number is not None) and (sample_number < n):
-        n = sample_number
         logger.warning(f'{n} diagrams available but number of sampled diagram was set to {sample_number}. Only {n} will be sampled')
+        n = sample_number
 
     nrows = ceil(np.sqrt(sample_number))
     ncols = ceil(sample_number / nrows)
