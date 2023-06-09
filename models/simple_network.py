@@ -10,6 +10,7 @@ import torch.optim as optim
 import tqdm
 from sklearn.model_selection import train_test_split
 
+from plot.lines_visualisation import create_multiplots
 from linegeneration.generate_lines import create_image_set
 from utils.save_model import save_model
 from utils.angle_operations import normalize_angle
@@ -35,6 +36,10 @@ N = 18
 X, y = create_image_set(n, N)  # n images of size NxN
 y_normalized = normalize_angle(y)
 
+fig, axes = create_multiplots(X, y, number_sample=16)
+plt.tight_layout()
+plt.show()
+
 # train-test split for model evaluation
 # X_train, X_test, y_train, y_test = train_test_split(X, y_normalized, train_size=0.7, shuffle=True)
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
@@ -48,9 +53,9 @@ y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 # Define the model
 model = nn.Sequential(
         nn.Linear(N*N, 24),
-        nn.ReLU(),
+        nn.Sigmoid(),
         nn.Linear(24, 12),
-        nn.ReLU(),
+        nn.Sigmoid(),
         nn.Linear(12, 6),
         nn.ReLU(),
         nn.Linear(6, 1)
@@ -106,7 +111,7 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 #
 # # Save the state dictionary
-save_model(model, 'best_model_synthetic')
+save_model(model, 'best_model_synthetic_sigmoid')
 
 # Plot accuracy
 plt.figure(1)
