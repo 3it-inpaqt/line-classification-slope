@@ -5,6 +5,7 @@ from numpy import ndarray
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from random import sample
 
 from utils.angle_operations import normalize_angle
 from utils.settings import Settings
@@ -29,13 +30,17 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
     number_rows = int(np.ceil(np.sqrt(n)))
     number_columns = int(np.ceil(n / number_rows))
 
+    # Select a random sample of indices
+    indices = sample(range(len(image_set)), k=number_sample)
+
     # Create a figure and axis objects
     fig, axes = plt.subplots(nrows=number_rows, ncols=number_columns, figsize=(5 * number_columns, 5 * number_rows))
 
     for i, ax in enumerate(axes.flatten()):
         if i < n:
-            image = np.reshape(image_set[i, :], (Settings.patch_size_x, Settings.patch_size_y))
-            normalized_angle = float(angles[i])
+            index = indices[i]
+            image = np.reshape(image_set[index, :], (Settings.patch_size_x, Settings.patch_size_y))
+            normalized_angle = float(angles[index])
             # print(normalized_angle)
             angle_radian = normalized_angle * (2 * np.pi)
             # print(angle_radian)
@@ -43,7 +48,7 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
             ax.imshow(image, cmap='copper')
             title = 'Angle: {:.3f} | {:.3f}° \n Normalized value: {:.4f}'.format(angle_radian, angle_degree, normalized_angle)
             if prediction_angles is not None:
-                prediction_angle = prediction_angles[i][0]  # the angle is a ndarray type with one element only for index i
+                prediction_angle = prediction_angles[index][0]  # the angle is a ndarray type with one element only for index i
                 title += '\n Predicted value: {:.4f}'.format(prediction_angle)
             ax.set_title(title, fontsize=25)
             ax.axis('off')
