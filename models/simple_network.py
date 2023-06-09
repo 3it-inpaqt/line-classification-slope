@@ -54,9 +54,9 @@ y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 # Define the model
 model = nn.Sequential(
         nn.Linear(N, 24),
-        nn.Sigmoid(),
+        nn.LeakyReLU(),
         nn.Linear(24, 12),
-        nn.Sigmoid(),
+        nn.LeakyReLU(),
         nn.Linear(12, 6),
         nn.ReLU(),
         nn.Linear(6, 1)
@@ -112,7 +112,7 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 #
 # # Save the state dictionary
-save_model(model, 'best_model_Dx')
+save_model(model, 'best_model_LeakyReLU_Dx')
 
 # Plot accuracy
 plt.figure(1)
@@ -123,7 +123,7 @@ print("RMSE: %.4f" % np.sqrt(best_mse))
 plt.xlabel('Epoch')
 plt.ylabel('Mean Square Error (MSE)')
 plt.plot(history)
-#
+
 # Add a text box to the plot
 textstr = f'Best MSE: {best_mse:.4f} \n RMSE: {np.sqrt(best_mse):.4f}'
 text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
