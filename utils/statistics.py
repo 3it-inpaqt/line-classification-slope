@@ -72,8 +72,8 @@ def resample_dataset(patch_list, angle_list, line_list, threshold):
     """
     # Remove values above the threshold
 
-    resampled_angles = remove_elements_exceeding_count(np.around(angle_list, 3), angle_list, threshold)
-    resampled_patch = remove_elements_exceeding_count(np.around(angle_list, 3), patch_list, threshold)
-    resampled_lines = remove_elements_exceeding_count(np.around(angle_list, 3), line_list, threshold)
+    resampled_angles = remove_elements_exceeding_count(np.around(angle_list, 2), angle_list, threshold)
+    resampled_patch = remove_elements_exceeding_count(np.around(angle_list, 2), patch_list, threshold)
+    resampled_lines = remove_elements_exceeding_count(np.around(angle_list, 2), line_list, threshold)
 
     return resampled_patch, resampled_angles, resampled_lines

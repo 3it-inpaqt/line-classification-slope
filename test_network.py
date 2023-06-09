@@ -28,17 +28,17 @@ if __name__ == '__main__':
 
     N = 18
     model = AngleNet(N)
-    model_name = 'best_model_DQD_resample_12.pt'
+    model_name = 'best_model_DQD_resample_20.pt'
     path_model = f"saved\model\{model_name}"
     model.load_state_dict(torch.load(path_model), strict=False)
 
-    path_tensor = "saved\double_dot_patches_resample_12.pt"
+    path_tensor = "saved\double_dot_patches_resample_20.pt"
     tensor_patches = torch.load(path_tensor)
 
     angles_test_prediction = model(tensor_patches)  # feedforward of the test images
     angles_test_prediction_numpy = angles_test_prediction.detach().numpy()  # convert to numpy array (remove gradient)
 
-    path_angles = "saved\double_dot_normalized_angles_resample_12.txt"
+    path_angles = "saved\double_dot_normalized_angles_resample_20.txt"
     angles_lines = load_list_from_file(path_angles)
 
     # Generate plot

@@ -22,7 +22,7 @@ from utils.misc import load_list_from_file
 
 # X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
-X, y = torch.load('./saved/double_dot_patches_resample.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample.txt')]
+X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
 
 print(X.shape)
 N = X[0].shape[0]
@@ -103,7 +103,7 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 #
 # # Save the state dictionary
-save_model(model, 'best_model_DQD_resample_12')
+save_model(model, 'best_model_DQD_resample_20')
 #
 # Plot accuracy
 plt.figure(1)

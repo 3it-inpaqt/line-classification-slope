@@ -92,7 +92,7 @@ if __name__ == '__main__':
     angles_lines = angles_from_list(selected_lines)
     angles_lines_normalized = normalize_angle(angles_lines)
 
-    resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 12)
+    resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
     get_angle_stat(resampled_angles)
 
     # Reshape patches for neural network
@@ -111,5 +111,5 @@ if __name__ == '__main__':
     print(tensor_patches.shape)
     print(len(resampled_angles))
     # Save patches and angles to file for later use
-    torch.save(tensor_patches, './saved/double_dot_patches_resample_12.pt')
-    save_list_to_file(resampled_angles, './saved/double_dot_normalized_angles_resample_12.txt')
+    torch.save(tensor_patches, './saved/double_dot_patches_resample_20.pt')
+    save_list_to_file(resampled_angles, './saved/double_dot_normalized_angles_resample_20.txt')
