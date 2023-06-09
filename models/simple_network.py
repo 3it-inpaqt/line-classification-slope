@@ -10,26 +10,30 @@ import torch.optim as optim
 import tqdm
 from sklearn.model_selection import train_test_split
 
-# from linegeneration.generate_lines import create_image_set
+from linegeneration.generate_lines import create_image_set
 from utils.save_model import save_model
-# from utils.angle_operations import normalize_angle
+from utils.angle_operations import normalize_angle
 from utils.misc import load_list_from_file
 
 # Read data
 # n = 10000  # number of images to create
 # N = 18  # size of the images (NxN)
 
+# Load patches
+patches = torch.load('./saved/double_dot_patches.pt'),
+n = patches[0].shape[0]
+N = 18
 
 # X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
-X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
+# X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
 
-print(X.shape)
-N = X[0].shape[0]
+# print(X.shape)
+# N = X[0].shape[0]
 
 # Read Synthetic data
-# X, y = create_image_set(n, N)
-# y_normalized = normalize_angle(y)
+X, y = create_image_set(n, N)  # n images of size NxN
+y_normalized = normalize_angle(y)
 
 # train-test split for model evaluation
 # X_train, X_test, y_train, y_test = train_test_split(X, y_normalized, train_size=0.7, shuffle=True)
@@ -37,14 +41,13 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffl
 
 # Convert to 2D PyTorch tensors
 X_train = torch.tensor(X_train, dtype=torch.float32)
-print(X_train.shape)
 y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
 X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # Define the model
 model = nn.Sequential(
-        nn.Linear(N, 24),
+        nn.Linear(N*N, 24),
         nn.ReLU(),
         nn.Linear(24, 12),
         nn.ReLU(),
@@ -75,7 +78,7 @@ for epoch in range(n_epochs):
             X_batch = X_train[start:start+batch_size]
             y_batch = y_train[start:start+batch_size]
 
-            # X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
+            X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # forward pass
             y_pred = model(X_batch)
             # print('Y pred: ', y_pred)
@@ -103,11 +106,12 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 #
 # # Save the state dictionary
-save_model(model, 'best_model_DQD_resample_20')
-#
+save_model(model, 'best_model_synthetic')
+
 # Plot accuracy
 plt.figure(1)
-plt.suptitle('Training on the experimental patches (DQD)')
+# plt.suptitle('Training on the experimental patches (DQD)')
+plt.suptitle('Training on the synthetic patches')
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % np.sqrt(best_mse))
 plt.xlabel('Epoch')
