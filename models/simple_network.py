@@ -20,8 +20,9 @@ from utils.misc import load_list_from_file
 # N = 18  # size of the images (NxN)
 
 
-X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
+# X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
+X, y = torch.load('./saved/double_dot_patches_resample.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample.txt')]
 
 print(X.shape)
 N = X[0].shape[0]
@@ -73,8 +74,7 @@ for epoch in range(n_epochs):
             # take a batch
             X_batch = X_train[start:start+batch_size]
             y_batch = y_train[start:start+batch_size]
-            break
-            print(y_batch)
+
             # X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # forward pass
             y_pred = model(X_batch)
@@ -103,7 +103,7 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 #
 # # Save the state dictionary
-# # save_model(model, 'best_model_DQD')
+save_model(model, 'best_model_DQD_resample_12')
 #
 # Plot accuracy
 plt.figure(1)

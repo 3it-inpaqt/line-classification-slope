@@ -92,24 +92,24 @@ if __name__ == '__main__':
     angles_lines = angles_from_list(selected_lines)
     angles_lines_normalized = normalize_angle(angles_lines)
 
-    resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 15)
+    resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 12)
     get_angle_stat(resampled_angles)
 
     # Reshape patches for neural network
     # Get the number of images and the size of each image
-    # n = len(selected_patches)
-    # N = selected_patches[0].shape[0]
-    #
-    # # Create an empty tensor with the desired shape
-    # stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
-    #
-    # # Fill the 3D tensor with the image data
-    # for i, image_tensor in enumerate(selected_patches):
-    #     stacked_patches[i] = image_tensor
-    #
-    # tensor_patches = stacked_patches.flatten(1)
-    # print(tensor_patches.shape)
-    # print(len(angles_lines_normalized))
-    # # Save patches and angles to file for later use
-    # torch.save(tensor_patches, './saved/double_dot_patches.pt')
-    # save_list_to_file(angles_lines_normalized, './saved/double_dot_normalized_angles.txt')
+    n = len(resampled_patch)
+    N = resampled_patch[0].shape[0]
+
+    # Create an empty tensor with the desired shape
+    stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
+
+    # Fill the 3D tensor with the image data
+    for i, image_tensor in enumerate(resampled_patch):
+        stacked_patches[i] = image_tensor
+
+    tensor_patches = stacked_patches.flatten(1)
+    print(tensor_patches.shape)
+    print(len(resampled_angles))
+    # Save patches and angles to file for later use
+    torch.save(tensor_patches, './saved/double_dot_patches_resample_12.pt')
+    save_list_to_file(resampled_angles, './saved/double_dot_normalized_angles_resample_12.txt')
