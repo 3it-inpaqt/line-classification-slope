@@ -14,8 +14,8 @@ if __name__ == '__main__':
 
     # Load model
     model = AngleNet(N)
-    model_name = 'best_model_1.pt'
-    path = f"saved\{model_name}"
+    model_name = 'best_model_LeakyReLU.pt'
+    path = f"saved\model\{model_name}"
     model.load_state_dict(torch.load(path), strict=False)
 
     # Apply model

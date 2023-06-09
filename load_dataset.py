@@ -78,7 +78,8 @@ if __name__ == '__main__':
 
     for patch, line_list in zip(patches_list, lines_list):
         if len(line_list) == 1:
-            selected_patches.append(patch)
+            Dx = np.gradient(patch)[0]
+            selected_patches.append(torch.from_numpy(Dx))
             selected_lines.append(line_list)
 
     # print(lines_list)
@@ -86,7 +87,7 @@ if __name__ == '__main__':
     # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=True)
     # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=False)
 
-    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
+    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD_Dx')
 
     # Calculate angles by hand for verification
     angles_lines = angles_from_list(selected_lines)
@@ -111,5 +112,5 @@ if __name__ == '__main__':
     print(tensor_patches.shape)
     print(len(angles_lines))
     # Save patches and angles to file for later use
-    # torch.save(tensor_patches, './saved/double_dot_patches.pt')
+    torch.save(tensor_patches, './saved/double_dot_patches_Dx.pt')
     # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')
