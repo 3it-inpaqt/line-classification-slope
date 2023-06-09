@@ -20,10 +20,11 @@ from utils.misc import load_list_from_file
 # N = 18  # size of the images (NxN)
 
 
-X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
+# X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
+X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
 
-
+print(X.shape)
 N = X[0].shape[0]
 
 # Read Synthetic data
@@ -36,6 +37,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffl
 
 # Convert to 2D PyTorch tensors
 X_train = torch.tensor(X_train, dtype=torch.float32)
+print(X_train.shape)
 y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
 X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
@@ -50,6 +52,7 @@ model = nn.Sequential(
         nn.ReLU(),
         nn.Linear(6, 1)
     )
+
 # loss function and optimizer
 loss_fn = nn.MSELoss()  # mean square error
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
@@ -71,10 +74,11 @@ for epoch in range(n_epochs):
             # take a batch
             X_batch = X_train[start:start+batch_size]
             y_batch = y_train[start:start+batch_size]
-            X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
+
+            # X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # forward pass
             y_pred = model(X_batch)
-            print('Y pred: ', y_pred)
+            # print('Y pred: ', y_pred)
             loss = loss_fn(y_pred, y_batch)
             # backward pass
             optimizer.zero_grad()
@@ -96,24 +100,24 @@ for epoch in range(n_epochs):
         best_weights = copy.deepcopy(model.state_dict())
 
 # restore model and return best accuracy
-# model.load_state_dict(best_weights)
+model.load_state_dict(best_weights)
 #
 # # Save the state dictionary
-# # save_model(model, 'best_model_DQD')
+save_model(model, 'best_model_DQD_resample_20')
 #
-# # Plot accuracy
-# plt.figure(1)
-# plt.suptitle('Training on the experimental patches (DQD)')
-# print("MSE: %.4f" % best_mse)
-# print("RMSE: %.4f" % np.sqrt(best_mse))
-# plt.xlabel('Epoch')
-# plt.ylabel('Mean Square Error (MSE)')
-# plt.plot(history)
+# Plot accuracy
+plt.figure(1)
+plt.suptitle('Training on the experimental patches (DQD)')
+print("MSE: %.4f" % best_mse)
+print("RMSE: %.4f" % np.sqrt(best_mse))
+plt.xlabel('Epoch')
+plt.ylabel('Mean Square Error (MSE)')
+plt.plot(history)
 #
-# # Add a text box to the plot
-# textstr = f'Best MSE: {best_mse:.4f} \n RMSE: {np.sqrt(best_mse):.4f}'
-# text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
-#                     bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
-#                     horizontalalignment='right', verticalalignment='top')
-#
-# plt.show()
+# Add a text box to the plot
+textstr = f'Best MSE: {best_mse:.4f} \n RMSE: {np.sqrt(best_mse):.4f}'
+text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
+                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
+                    horizontalalignment='right', verticalalignment='top')
+
+plt.show()

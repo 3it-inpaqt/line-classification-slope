@@ -1,6 +1,10 @@
 import torch
 import numpy as np
 from numpy import ndarray
+from collections import Counter
+
+import matplotlib.pyplot as plt
+from utils.angle_operations import get_angle_stat
 
 
 def calculate_std_dev(pred_angles: ndarray, known_angles: ndarray) -> float:
@@ -43,3 +47,33 @@ def calculate_average_error(actual_values: ndarray, predicted_values: ndarray) -
     average_error = np.mean(absolute_diffs)
 
     return average_error
+
+
+def remove_elements_exceeding_count(list1, list2, n):
+    """
+    Remove elements from list2 for which amount of element in list 1 exceeds n
+    :param list1:
+    :param list2:
+    :param n:
+    :return:
+    """
+    counts = Counter(list1)
+    return [element2 for element1, element2 in zip(list1, list2) if counts[element1] <= n]
+
+
+def resample_dataset(patch_list, angle_list, line_list, threshold):
+    """
+    Resample dataset to have an even distribution of angles
+    :param line_list:
+    :param patch_list:
+    :param angle_list:
+    :param threshold:
+    :return: Tuple od resampled patches, angles anf lines
+    """
+    # Remove values above the threshold
+
+    resampled_angles = remove_elements_exceeding_count(np.around(angle_list, 2), angle_list, threshold)
+    resampled_patch = remove_elements_exceeding_count(np.around(angle_list, 2), patch_list, threshold)
+    resampled_lines = remove_elements_exceeding_count(np.around(angle_list, 2), line_list, threshold)
+
+    return resampled_patch, resampled_angles, resampled_lines

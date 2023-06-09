@@ -1,10 +1,11 @@
 import numpy as np
 from numpy import ndarray
-import random
+# import random
+import matplotlib.pyplot as plt
 
 import torch
-import torchvision.transforms.functional as f
-from PIL import Image
+# import torchvision.transforms.functional as f
+# from PIL import Image
 
 from utils.misc import random_select_elements, generate_random_indices
 
@@ -160,5 +161,23 @@ def decompose_line(line) -> Tuple[Any]:
             angles_decomposition.append(calculate_angle(x1, y1, x2, y2))
 
     return decomposition, angles_decomposition
+
+
+def get_angle_stat(angles_list):
+    """
+    Get angles statistic of the dataset
+    :param angles_list:
+    :return:
+    """
+    # Adjust the bin size
+    bin_size = 0.01
+    avg = sum(angles_list)/len(angles_list)
+    # Plot histogram
+    plt.hist(angles_list, bins=int((max(angles_list) - min(angles_list)) / bin_size))
+    plt.xlabel('Angles')
+    plt.ylabel('Frequency')
+    plt.title('Distribution of Angles (average: {:.3f})'.format(avg))
+    plt.show()
+
 
 

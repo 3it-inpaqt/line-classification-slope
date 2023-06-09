@@ -244,3 +244,13 @@ def generate_random_angle():
 def generate_random_indices(length, count):
     indices = random.sample(range(length), count)
     return indices
+
+def resample_data(patch_list, line_list):
+    """
+    Resample data to have a better distribution of angles
+    :param patch_list:
+    :param line_list:
+    :return:
+    """
+
+    return None
