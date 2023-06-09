@@ -171,7 +171,7 @@ def get_angle_stat(angles_list):
     """
     # Adjust the bin size
     bin_size = 0.01
-    avg = sum(angles_list/len(angles_list))
+    avg = sum(angles_list)/len(angles_list)
     # Plot histogram
     plt.hist(angles_list, bins=int((max(angles_list) - min(angles_list)) / bin_size))
     plt.xlabel('Angles')

@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from numpy import ndarray
+from collections import Counter
 
 import matplotlib.pyplot as plt
 from utils.angle_operations import get_angle_stat
@@ -48,52 +49,31 @@ def calculate_average_error(actual_values: ndarray, predicted_values: ndarray) -
     return average_error
 
 
-def resample_dataset(patch_list, angle_list, line_list):
+def remove_elements_exceeding_count(list1, list2, n):
+    """
+    Remove elements from list2 for which amount of element in list 1 exceeds n
+    :param list1:
+    :param list2:
+    :param n:
+    :return:
+    """
+    counts = Counter(list1)
+    return [element2 for element1, element2 in zip(list1, list2) if counts[element1] <= n]
+
+
+def resample_dataset(patch_list, angle_list, line_list, threshold):
     """
     Resample dataset to have an even distribution of angles
     :param line_list:
     :param patch_list:
     :param angle_list:
-    :return:
+    :param threshold:
+    :return: Tuple od resampled patches, angles anf lines
     """
-    # Adjust the bin size
-    bin_size = 0.01
-
-    # Create histogram
-    hist, bins = np.histogram(angle_list, bins=int((max(angle_list) - min(angle_list)) / bin_size))
-
     # Remove values above the threshold
-    threshold = 50
-    resampled_angles = []
-    resampled_patch = []
-    resampled_lines = []
 
-    indices = np.where(hist < threshold)
-
-    for i in indices:
-        # Get the angles, patch and lines within the current bin
-        bin_start, bin_end = bin[i], bin[i + 1]
-        in_bin = [(angle, patch, line) for angle, patch, line in zip(angle_list, patch_list, line_list) if bin_start <= angle < bin_end]
-
-        grouped_angles = [in_bin[0][0]]
-        grouped_patch = [in_bin[0][1]]
-        grouped_lines = [in_bin[0][2]]
-
-        for bag in in_bin[1:]:
-            angle = bag[0]
-            patch = bag[1]
-            line = bag[2]
-            if abs(angle - grouped_angles[-1]) <= threshold:
-                grouped_angles.append(angle)
-                grouped_patch.append(patch)
-                grouped_lines.append(line)
-
-        # Add the grouped values to the resampled list
-        resampled_angles.extend(grouped_angles)
-        resampled_patch.extend(grouped_patch)
-        resampled_lines(grouped_lines)
+    resampled_angles = remove_elements_exceeding_count(np.around(angle_list, 3), angle_list, threshold)
+    resampled_patch = remove_elements_exceeding_count(np.around(angle_list, 3), patch_list, threshold)
+    resampled_lines = remove_elements_exceeding_count(np.around(angle_list, 3), line_list, threshold)
 
     return resampled_patch, resampled_angles, resampled_lines
-
-
-

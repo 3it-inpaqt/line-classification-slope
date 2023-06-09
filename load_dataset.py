@@ -3,6 +3,7 @@ import torch
 
 import matplotlib.pyplot as plt
 from numpy import pi
+import numpy as np
 from random import sample
 
 from classes.diagram_offline import DiagramOffline
@@ -91,9 +92,8 @@ if __name__ == '__main__':
     angles_lines = angles_from_list(selected_lines)
     angles_lines_normalized = normalize_angle(angles_lines)
 
-    resampled_patch, resampled_angles = resample_dataset(selected_patches, angles_lines_normalized)
-
-    get_angle_stat(angles_lines_normalized)
+    resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 15)
+    get_angle_stat(resampled_angles)
 
     # Reshape patches for neural network
     # Get the number of images and the size of each image
