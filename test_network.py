@@ -11,26 +11,26 @@ if __name__ == '__main__':
 
     # Load data
 
-    N = 18
-    model = AngleNet(N)
-    model_name = 'best_model_synthetic_LeakyReLU_shade.pt'
+    N = 18  # image size
+    model = AngleNet(N)  # load model template
+    model_name = 'best_model_synthetic_LeakyReLU_shade.pt'  # select model to load, make sure you trained one and save it beforehand
     path_model = f"saved\model\{model_name}"
-    model.load_state_dict(torch.load(path_model), strict=False)
+    model.load_state_dict(torch.load(path_model), strict=False)  # load the file into the preset model
 
-    path_tensor = "saved\double_dot_patches_Dx.pt"
+    path_tensor = "saved\double_dot_patches_Dx.pt"  # select tensor file to use, make sure you loaded patches beforehand
     tensor_patches = torch.load(path_tensor)
 
     angles_test_prediction = model(tensor_patches)  # feedforward of the test images
     angles_test_prediction_numpy = angles_test_prediction.detach().numpy()  # convert to numpy array (remove gradient)
 
-    path_angles = "saved\double_dot_normalized_angles.txt"
-    angles_lines = load_list_from_file(path_angles)
+    path_angles = "saved\double_dot_normalized_angles.txt"  # select angles file to use, make sure you loaded patches beforehand
+    angles_lines = load_list_from_file(path_angles)  # convert file to list
 
     # Generate plot
-    for _ in range(1):  # makes several
+    for _ in range(1):  # makes several plot, subplots aren't legible with too many image (5x5 is a good size)
         fig1, axes1 = create_multiplots(tensor_patches, angles_lines, angles_test_prediction_numpy, number_sample=16)
         # plot_patch_test(tensor_patches, sample_number=36, angles_list=angles_lines, predicted_angle=angles_test_prediction_numpy, name='test_DQD')
-        # plt.tight_layout()
+        plt.tight_layout()
         plt.show()
 
     # Calculate mean square error, standard deviation and average error

@@ -77,15 +77,12 @@ if __name__ == '__main__':
     selected_lines = []
 
     for patch, line_list in zip(patches_list, lines_list):
-        if len(line_list) == 1:
-            Dx = np.gradient(patch)[0]
-            selected_patches.append(torch.from_numpy(Dx))
+        if len(line_list) == 1:  # takes patch into account only if it has one line crossing it
+            Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
+            selected_patches.append(torch.from_numpy(Dx))  # convert numpy array back to torch tensor
             selected_lines.append(line_list)
 
     # print(lines_list)
-    # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=True)
-    # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=True)
-    # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=False)
 
     plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD_Dx_2')
 
@@ -93,6 +90,7 @@ if __name__ == '__main__':
     angles_lines = angles_from_list(selected_lines)
     angles_lines_normalized = normalize_angle(angles_lines)
 
+    # Resampling of the dataset
     # resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
     # get_angle_stat(resampled_angles)
 
@@ -113,4 +111,4 @@ if __name__ == '__main__':
     print(len(angles_lines))
     # Save patches and angles to file for later use
     torch.save(tensor_patches, './saved/double_dot_patches_Dx.pt')
-    # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')
+    # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them

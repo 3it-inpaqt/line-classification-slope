@@ -373,45 +373,41 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
     :param sample_number: The number of patches to sample
     :param show_offset: If True draws the offset rectangle (ignored if both offset x and y are 0)
     """
-    # TODO Add angle value to the subplot to check it
     # Check if sample number is not greater than the amount of available data
     if sample_number > len(lines_list):
         sample_number = len(lines_list)
         logger.warning(f'{len(lines_list)} diagrams available but number of sampled diagram was set to {sample_number}. Only {len(lines_list)} will be sampled')
 
+    # Set number of rows and columns of the subplot
     nrows = ceil(np.sqrt(sample_number))
     ncols = ceil(sample_number / nrows)
+
     # Select a random sample of indices
     indices = sample(range(len(lines_list)), k=sample_number)
+
     # Create subplots
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(4*ncols, 4*nrows))
     fig.suptitle('Examples of patches line(s) (in blue)', fontsize='30', fontweight='bold')
 
     for i, ax in enumerate(axes.flatten()):
         if i < sample_number:
-            index = indices[i]
-            # print(index)
+            index = indices[i]  # select the index of the patch and line
             line = lines_list[index]
-            # print(line)
             patch = patches_list[index]
 
             height, width = np.shape(patch)  # Get the height and width of the image
-            # print('Height: ', height)
-            # print('Width: ', width)
             ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
             ax.set_ylim([0, height])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
-            # print(line)
-            # print('-------------------')
             ax.imshow(patch, extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
 
             for segment in line:
-                # print(segment)
                 x_lim, y_lim = segment[0], segment[1]
                 angle = calculate_angle(x_lim[0], y_lim[0], x_lim[1], y_lim[1])
                 angle_deg = angle * 180 / np.pi
-                angle_norm = angle / (2 * np.pi)
+                # angle_norm = angle / (2 * np.pi)  # comment this out and add it to the caption if you want the normed angle
                 ax.plot(x_lim, y_lim, color='blue', alpha=0.6, linewidth=5)
                 ax.set_title('Angle: {:.3f} rad \n {:.3f}°'.format(angle, angle_deg), fontsize=20)
+
             if show_offset and (settings.label_offset_x != 0 or settings.label_offset_y != 0):
                 # Create a rectangle patch that represent offset
                 rect = patches.Rectangle((settings.label_offset_x - 0.5, settings.label_offset_y - 0.5),
@@ -420,15 +416,6 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
                                          linewidth=2, edgecolor='fuchsia', facecolor='none')
                 # Add the offset rectangle to the axes
                 ax.add_patch(rect)
-
-            # if predicted_angle is not None and angles_list is not None:
-            #     angle = angles_list[index]
-            #     pred_angle = predicted_angle[index]
-            #     angle_degree = angle * 180 / np.pi
-            #     normalized_angle = normalize_angle(angle)
-            #     title = 'Angle: {:.3f} | {:.3f}° \n Normalized value: {:.3f} \n Predicted value: {:.3f}'.format(angle, angle_degree, normalized_angle, pred_angle)
-            #     ax.set_title(title, fontsize=20)
-
             ax.axis('off')
         else:
             fig.delaxes(ax)  # if there is no more patches but some axes are still to be filled, it deletes these axes and leaves a blank space
@@ -459,12 +446,7 @@ def plot_samples(samples: List[torch.Tensor], lines: List[Any], title: str, file
 
     for i, s in enumerate(samples):
         ax = axs[i // plot_length, i % plot_length]
-        # print(s)
         ax.imshow(s.reshape(settings.patch_size_x, settings.patch_size_y), interpolation='nearest', cmap='copper')
-
-        # line = lines[i]
-        # x_lim, y_lim = line[0], line[1]
-        # ax.plot(x_lim, y_lim, color='blue')
 
         if confidences:
             # If it's a tuple we assume it is: mean, std, entropy

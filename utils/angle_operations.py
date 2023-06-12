@@ -1,17 +1,15 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray
-# import random
-import matplotlib.pyplot as plt
-
 import torch
-# import torchvision.transforms.functional as f
-# from PIL import Image
+from typing import Tuple, List, Any
 
 from utils.misc import random_select_elements, generate_random_indices
 
-from typing import Tuple, List, Any
 np.seterr(divide='ignore')
 
+
+# -- Angle calculations method and associated utils functions -- #
 
 def center_line(x1: float, y1: float, x2: float, y2: float) -> Tuple[float]:
     """
@@ -91,7 +89,7 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
     """
     angle_list = []
     for line_list in lines:
-        line = line_list[0]
+        line = line_list[0]  # when generated, the lines for each patch are in a list (of one element if you choose one intersecting line per patch)
         x1, x2 = line[0][0], line[0][1]
         y1, y2 = line[1][0], line[1][1]
         angle = calculate_angle(x1, y1, x2, y2)
@@ -99,6 +97,8 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
 
     return np.array(angle_list)
 
+
+# -- Line rotation methods -- #
 
 def rotate_line(line, theta=np.pi/2):
     """
@@ -143,6 +143,8 @@ def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
     return rotated_images_list, rotated_lines_list
 
 
+# -- Line decomposition method -- #
+
 def decompose_line(line) -> Tuple[Any]:
     """
     Find angle of all the lines composing a single segment
@@ -163,6 +165,8 @@ def decompose_line(line) -> Tuple[Any]:
     return decomposition, angles_decomposition
 
 
+# -- STATISTICS ON ANGLE -- #
+
 def get_angle_stat(angles_list):
     """
     Get angles statistic of the dataset
@@ -178,6 +182,3 @@ def get_angle_stat(angles_list):
     plt.ylabel('Frequency')
     plt.title('Distribution of Angles (average: {:.3f})'.format(avg))
     plt.show()
-
-
-
