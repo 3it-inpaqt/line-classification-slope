@@ -1,26 +1,11 @@
-from plot.lines_visualisation import create_multiplots
-from utils.statistics import mean_square_error, calculate_std_dev, calculate_average_error
-from models.model import AngleNet
-
-import copy
-
 import matplotlib.pyplot as plt
-import numpy as np
-from time import sleep
-
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import tqdm
-from sklearn.model_selection import train_test_split
 
-from linegeneration.generate_lines import create_image_set
-from utils.save_model import save_model
-from utils.angle_operations import normalize_angle
+from models.model import AngleNet
+from plot.lines_visualisation import create_multiplots
 from utils.misc import load_list_from_file
-from plot.data import plot_patch_test
+# from utils.statistics import mean_square_error, calculate_std_dev, calculate_average_error
 
-import torch
 
 if __name__ == '__main__':
 
@@ -28,7 +13,7 @@ if __name__ == '__main__':
 
     N = 18
     model = AngleNet(N)
-    model_name = 'best_model_LeakyReLU_Dx.pt'
+    model_name = 'best_model_synthetic_LeakyReLU_shade.pt'
     path_model = f"saved\model\{model_name}"
     model.load_state_dict(torch.load(path_model), strict=False)
 
@@ -42,7 +27,7 @@ if __name__ == '__main__':
     angles_lines = load_list_from_file(path_angles)
 
     # Generate plot
-    for _ in range(20):  # makes several
+    for _ in range(1):  # makes several
         fig1, axes1 = create_multiplots(tensor_patches, angles_lines, angles_test_prediction_numpy, number_sample=16)
         # plot_patch_test(tensor_patches, sample_number=36, angles_list=angles_lines, predicted_angle=angles_test_prediction_numpy, name='test_DQD')
         # plt.tight_layout()
