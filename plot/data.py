@@ -393,11 +393,9 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
             # print(index)
             line = lines_list[index]
             # print(line)
-            # TODO Take into account line being a list of lines, so with 1 or more elements [([75, 5], [-543, -532]), ([5, -8], [-532, -530])]
-            # TODO THE AX PLOT IS NOT CORRECT ONCE AGAIN
             patch = patches_list[index]
 
-            height, width = patch.shape[:2]  # Get the height and width of the image
+            height, width = np.shape(patch)  # Get the height and width of the image
             # print('Height: ', height)
             # print('Width: ', width)
             ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image

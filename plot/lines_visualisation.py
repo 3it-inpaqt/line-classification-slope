@@ -15,7 +15,7 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
     """
     Generate figures with several plots to see different lines orientation
 
-    :param image_set: size of the image
+    :param image_set:
     :param angles: array containing the angles for each image of the set
     :param prediction_angles: optional, value of predicted angles by a neural network (ndarray)
     :param number_sample: number of images to plot, None by default
@@ -23,7 +23,10 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
     """
 
     # n, p, _ = image_set.shape
-    n, p = image_set.shape
+    # n, p = image_set.shape  # change when using tensor
+    print(len(image_set))
+    n = len(image_set)  # change when using synthetic data
+
     if (number_sample is not None) and (number_sample < n):
         n = number_sample
     # Compute the number of rows and columns required to display n subplots
