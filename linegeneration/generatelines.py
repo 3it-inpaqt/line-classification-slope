@@ -43,19 +43,20 @@ def generate_image(size: tuple, color=None) -> Tuple[ndarray, float]:
     return img, angle
 
 
-def create_image_set(n: int, N: int) -> Tuple[ndarray, ndarray]:
+def create_image_set(n: int, N: int, color: int = None) -> Tuple[ndarray, ndarray]:
     """
     Generate a batch of arrays with various lines orientation
 
     :param n: number of image to generate
     :param N: side of each image
+    :param color:
     :return: 3d numpy array, n x N x N
     """
     image_set = np.zeros((n, N, N))
     angle_list = []
 
     for k in range(n):
-        image, angle = generate_image((N, N))
+        image, angle = generate_image((N, N), color=color)
         image_set[k, :, :] = image
         angle_list.append(angle)
 
