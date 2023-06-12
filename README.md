@@ -46,7 +46,7 @@ logger_console_level: info
 
 * `utils\` : Miscellaneous utility code
   * `angle_operations.py` : different methods to calculate angles, fetch them from a file, etc.
-  * `msic.py` : miscellaneous scripts (random numbers, fetching from file, etc.)
+  * `misc.py` : miscellaneous scripts (random numbers, fetching from file, etc.)
   * `output.py` : prepare the output directory when loading diagrams
   * `save_model.py`: save NN model after training
   * `settings.py` : storing all settings for this program with default values
