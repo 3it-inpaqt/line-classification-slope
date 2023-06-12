@@ -60,6 +60,10 @@ You first need to load the diagrams from the files. `load_dataset.py` will extra
 you supposedly added to a folder called data, along with the json file containing the labels' information. Furthermore, 
 the data are then converted to pytorch tensors and stored in a folder (`.\saved`) that you need to create. 
 
+Below is an example of patches with lines drawn on top to better vizualise them (in this case the derivative of the diagrams is used):
+![image](https://github.com/3it-inpaqt/line-classification-slope/assets/86256324/db24c29f-580a-48b4-8f99-dd66d22bf49a)
+
+
 ## Generate a model
 
 You then need to generate a model using `simple_network.py`. Make sure you have set up the right directory to store 
