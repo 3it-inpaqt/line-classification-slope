@@ -14,8 +14,8 @@ if __name__ == '__main__':
 
     # Load model
     model = AngleNet(N)
-    model_name = 'best_model_1.pt'
-    path = f"saved\{model_name}"
+    model_name = 'best_model_synthetic_LeakyReLU_shade.pt'
+    path = f"saved\model\{model_name}"
     model.load_state_dict(torch.load(path), strict=False)
 
     # Apply model
@@ -26,13 +26,16 @@ if __name__ == '__main__':
     angles_test_prediction = model(tensor_image_test)  # feedforward of the test images
     angles_test_prediction_numpy = angles_test_prediction.detach().numpy()
 
-    # # Generate plot
+    # Generate plot
     fig, axes = create_multiplots(image_set_test, angles_test, angles_test_prediction_numpy)
 
+    # patches, angles = create_image_set(n, N)
+    #
+    # fig, axes = create_multiplots(patches, angles)
     plt.tight_layout()
     plt.show()
 
-    # Calculate standard deviation
-    std_dev = calculate_std_dev(angles_test_normalized, angles_test_prediction_numpy)
-
-    print('Standard deviation: ', std_dev)
+    # # Calculate standard deviation
+    # std_dev = calculate_std_dev(angles_test_normalized, angles_test_prediction_numpy)
+    #
+    # print('Standard deviation: ', std_dev)
