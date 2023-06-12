@@ -24,7 +24,7 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
 
     # n, p, _ = image_set.shape
     # n, p = image_set.shape  # change when using tensor
-    print(len(image_set))
+    # print(len(image_set))
     n = len(image_set)  # change when using synthetic data
 
     if (number_sample is not None) and (number_sample < n):
@@ -37,7 +37,7 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
     indices = sample(range(len(image_set)), k=number_sample)
 
     # Create a figure and axis objects
-    fig, axes = plt.subplots(nrows=number_rows, ncols=number_columns, figsize=(5 * number_columns, 5 * number_rows))
+    fig, axes = plt.subplots(nrows=number_rows, ncols=number_columns, figsize=(6 * number_columns, 6 * number_rows))
 
     for i, ax in enumerate(axes.flatten()):
         if i < n:
@@ -49,10 +49,10 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
             # print(angle_radian)
             angle_degree = angle_radian * 180 / np.pi
             ax.imshow(image, cmap='copper')
-            title = 'Angle: {:.3f} | {:.3f}° \n Normalized value: {:.4f}'.format(angle_radian, angle_degree, normalized_angle)
+            title = 'Angle: {:.3f} | {:.2f}° \n Normalized value: {:.4f}'.format(angle_radian, angle_degree, normalized_angle)
             if prediction_angles is not None:
                 prediction_angle = prediction_angles[index][0]  # the angle is a ndarray type with one element only for index i
-                title += '\n Predicted value: {:.4f}'.format(prediction_angle)
+                title += '\n Predicted: {:.4f} ({:.2f}°)'.format(prediction_angle, prediction_angle*2*np.pi*180/np.pi)
             ax.set_title(title, fontsize=25)
             ax.axis('off')
             plt.tight_layout()

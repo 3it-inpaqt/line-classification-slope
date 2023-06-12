@@ -42,10 +42,11 @@ if __name__ == '__main__':
     angles_lines = load_list_from_file(path_angles)
 
     # Generate plot
-    fig1, axes1 = create_multiplots(tensor_patches, angles_lines, angles_test_prediction_numpy, number_sample=25)
-    # plot_patch_test(tensor_patches, sample_number=36, angles_list=angles_lines, predicted_angle=angles_test_prediction_numpy, name='test_DQD')
-    # plt.tight_layout()
-    plt.show()
+    for _ in range(20):  # makes several
+        fig1, axes1 = create_multiplots(tensor_patches, angles_lines, angles_test_prediction_numpy, number_sample=16)
+        # plot_patch_test(tensor_patches, sample_number=36, angles_list=angles_lines, predicted_angle=angles_test_prediction_numpy, name='test_DQD')
+        # plt.tight_layout()
+        plt.show()
 
     # Calculate mean square error, standard deviation and average error
     # std_dev = calculate_std_dev(angles_lines, angles_test_prediction_numpy)

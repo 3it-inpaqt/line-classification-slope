@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=True)
     # plot_patch_sample(patches_list, lines_list, sample_number=16, show_offset=False)
 
-    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD_Dx')
+    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD_Dx_2')
 
     # Calculate angles by hand for verification
     angles_lines = angles_from_list(selected_lines)
