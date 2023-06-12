@@ -1,24 +1,23 @@
 import copy
-
 import matplotlib.pyplot as plt
 import numpy as np
-
+from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import tqdm
-from sklearn.model_selection import train_test_split
 
 from linegeneration.generatelines import create_image_set
-from utils.savemodel import save_model
 from utils.angleoperations import normalize_angle
+from utils.savemodel import save_model
+from utils.statistics import calculate_std_dev
 
 # Read data
 n = 10000  # number of images to create
 N = 18  # size of the images (NxN)
 
 # Read data
-X, y = create_image_set(n, N)
+X, y = create_image_set(n, N, color=0)
 y_normalized = normalize_angle(y)
 
 # train-test split for model evaluation
@@ -85,19 +84,23 @@ for epoch in range(n_epochs):
 
 # restore model and return best accuracy
 model.load_state_dict(best_weights)
+y_pred = model(X_test)
+
+std = calculate_std_dev(y_pred, y_test)
 
 # Save the state dictionary
-save_model(model, 'best_model_synthetic_LeakyReLU')
+# save_model(model, 'best_model_synthetic_LeakyReLU_shade')
 
 # Plot accuracy
 plt.figure(1)
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.2f" % np.sqrt(best_mse))
+print("Standard deviation: %.4f" % std)
 plt.xlabel('Epoch')
 plt.ylabel('Mean Square Error (MSE)')
 plt.plot(history)
 # Add a text box to the plot
-textstr = f'Best MSE: {best_mse}'
+textstr = f'Best MSE: {best_mse} \n SDT dev: {std}'
 props = dict(boxstyle='round', facecolor='white', alpha=0.5)
 plt.text(0.05, 0.95, textstr, fontsize=14, verticalalignment='top', bbox=props)
 plt.show()
