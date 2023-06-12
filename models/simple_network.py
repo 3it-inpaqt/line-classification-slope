@@ -87,7 +87,7 @@ for epoch in range(n_epochs):
 model.load_state_dict(best_weights)
 
 # Save the state dictionary
-save_model(model, 'best_model')
+save_model(model, 'best_model_synthetic_LeakyReLU')
 
 # Plot accuracy
 plt.figure(1)
