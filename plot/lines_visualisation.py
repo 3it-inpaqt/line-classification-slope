@@ -11,24 +11,26 @@ from utils.angle_operations import normalize_angle
 from utils.settings import Settings
 
 
-def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: ndarray = None, number_sample: float = None) -> Tuple[Figure, Axes]:
+def create_multiplots(image_set_tensor: ndarray, angles: ndarray, prediction_angles: ndarray = None, number_sample: float = None) -> Tuple[Figure, Axes]:
     """
     Generate figures with several plots to see different lines orientation
 
-    :param image_set:
+    :param image_set_tensor:
     :param angles: array containing the angles for each image of the set
     :param prediction_angles: optional, value of predicted angles by a neural network (ndarray)
     :param number_sample: number of images to plot, None by default
     :return: a figure with subplots
     """
 
-    # n, p, _ = image_set.shape
+    image_set = image_set_tensor.squeeze(1)
+    n, p, _ = image_set.shape
     # n, p = image_set.shape  # change when using tensor
     # print(len(image_set))
-    n = len(image_set)  # change when using synthetic data
+    # n = len(image_set)  # change when using synthetic data
 
     if (number_sample is not None) and (number_sample < n):
         n = number_sample
+
     # Compute the number of rows and columns required to display n subplots
     number_rows = int(np.ceil(np.sqrt(n)))
     number_columns = int(np.ceil(n / number_rows))
@@ -42,7 +44,9 @@ def create_multiplots(image_set: ndarray, angles: ndarray, prediction_angles: nd
     for i, ax in enumerate(axes.flatten()):
         if i < n:
             index = indices[i]
-            image = np.reshape(image_set[index, :], (Settings.patch_size_x, Settings.patch_size_y))
+            # image = np.reshape(image_set[index, :, :], (Settings.patch_size_x, Settings.patch_size_y))
+            image = image_set[index, :, :]
+
             normalized_angle = float(angles[index])
             # print(normalized_angle)
             angle_radian = normalized_angle * (2 * np.pi)

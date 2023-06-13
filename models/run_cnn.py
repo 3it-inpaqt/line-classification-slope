@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from models.cnn import CNN
+from plot.lines_visualisation import create_multiplots
 from utils.misc import load_list_from_file
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
@@ -109,4 +110,9 @@ textstr = '\n'.join((
 
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
+plt.show()
+
+# Plot some lines and patches
+fig1, axes1 = create_multiplots(X_test, y_test, y_pred.detach().numpy(), number_sample=16)
+plt.tight_layout()
 plt.show()
