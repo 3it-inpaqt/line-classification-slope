@@ -1,52 +1,103 @@
+import copy
+import matplotlib.pyplot as plt
+from numpy import sqrt, inf
 from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
+import torch.optim as optim
 
 from models.cnn import CNN
-from utils.misc import load_list_from_file
+from utils.misc import isqrt, load_list_from_file
 
 
 # Set hyperparameters
-batch_size = 100
+batch_size = 128
 learning_rate = 0.001
-num_epochs = 20
+num_epochs = 100
 
 # Initialize model
-model = CNN(batch_size, learning_rate, num_epochs)
+network = CNN()
+criterion = nn.MSELoss()  # loss function
+optimizer = optim.Adam(network.parameters(), lr=learning_rate)  # optimizer
 
 # Load data
-X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-n, N = X.shape
+X, y = torch.load('./saved/double_dot_patches_cnn_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
+# print(X.shape)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
 
+# print(n, N)
+
 # Convert to 2D PyTorch tensors
-X_train = torch.tensor(X_train, dtype=torch.float32)
+X_train = torch.tensor(X_train, dtype=torch.float32)  # adds a dimension of size 1 at index 1, reshaped to have a size of [n, 1, N, N]
+# print(X_train.shape)
 y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
-X_test = torch.tensor(X_test, dtype=torch.float32)
+X_test = torch.tensor(X_test, dtype=torch.float32)  # adds a dimension of size 1 at index 1, reshaped to have a size of [n, 1, N, N]
+# print(X_test.shape)
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
+# Move network and data tensors to device
+device = network.device
+network.to(device)
+X_train = X_train.to(device)
+y_train = y_train.to(device)
+X_test = X_test.to(device)
+y_test = y_test.to(device)
 
 # We use the pre-defined number of epochs to determine how many iterations to train the network on
+batch_start = torch.arange(0, len(X_train), batch_size)
+# Hold the best model
+best_mse = inf   # init to infinity
+best_weights = None
+history = []
+
 for epoch in range(num_epochs):
-    model.train()  # prepare model for training
+    network.train()  # prepare model for training
     # Load in the data in batches using the train_loader object
-    for i, (images, labels) in enumerate(train_loader):
-        # Move tensors to the configured device
-        images = images.to(device)
-        labels = labels.to(device)
+    for start in batch_start:
+        # Take a batch
+        X_batch = X_train[start:start + batch_size]
+        y_batch = y_train[start:start + batch_size]
 
         # Forward pass
-        outputs = model(images)
-        loss = criterion(outputs, labels)
+        y_pred = network(X_batch)
+        loss = criterion(y_pred, y_batch)
 
-        # Backward and optimize
+        # Backward pass
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-    print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, loss.item()))
+    # Evaluate accuracy at the end of each epoch
+    network.eval()
+    y_pred = network(X_test)
 
+    mse = criterion(y_pred, y_test)
+    mse = float(mse)
+    history.append(mse)
+    if mse < best_mse:
+        best_mse = mse
+        best_weights = copy.deepcopy(network.state_dict())
 
+# Restore model and return best accuracy
+network.load_state_dict(best_weights)
 
+# Save the state dictionary
+torch.save(network.state_dict(), 'best_model_cnn_Dx.pt')
 
+# Plot accuracy
+plt.figure(1)
+plt.suptitle('Training on the derivative of patches')
+print("MSE: %.4f" % best_mse)
+print("RMSE: %.4f" % sqrt(best_mse))
+plt.xlabel('Epoch')
+plt.ylabel('Mean Square Error (MSE)')
+plt.plot(history)
+
+# Add a text box to the plot
+textstr = f'Best MSE: {best_mse:.4f} \nRMSE: {sqrt(best_mse):.4f}'
+text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
+                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
+                    horizontalalignment='right', verticalalignment='top')
+
+plt.show()

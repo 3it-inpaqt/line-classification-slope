@@ -211,7 +211,9 @@ def convert_coordinate_dic(label_dic):
     return x1, y1, x2, y2
 
 
-def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int = 1) -> int:
+# -- Randomization and resampling -- #
+
+def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int = 1) -> tuple[Any, Any, int]:
     """
     Select two elements from two different list with same index randomly
     :param list1:
@@ -245,6 +247,7 @@ def generate_random_indices(length, count):
     indices = random.sample(range(length), count)
     return indices
 
+
 def resample_data(patch_list, line_list):
     """
     Resample data to have a better distribution of angles
@@ -254,3 +257,13 @@ def resample_data(patch_list, line_list):
     """
 
     return None
+
+
+# -- Integer sqrt -- #
+def isqrt(n):
+    x = n
+    y = (x + 1) // 2
+    while y < x:
+        x = y
+        y = (x + n // x) // 2
+    return x
