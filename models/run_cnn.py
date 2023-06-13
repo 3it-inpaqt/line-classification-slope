@@ -7,7 +7,9 @@ import torch.nn as nn
 import torch.optim as optim
 
 from models.cnn import CNN
+from linegeneration.generate_lines import create_image_set
 from plot.lines_visualisation import create_multiplots
+from utils.angle_operations import normalize_angle
 from utils.misc import load_list_from_file
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
@@ -24,19 +26,23 @@ criterion = nn.MSELoss()  # loss function
 optimizer = optim.Adam(network.parameters(), lr=learning_rate)  # optimizer
 
 # Load data
-X, y = torch.load('./saved/double_dot_patches_cnn_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-# print(X.shape)
+# X, y = torch.load('./saved/double_dot_patches_cnn_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
+X_exp = torch.load('./saved/double_dot_patches_cnn_Dx.pt')
+
+n = X_exp.shape[0]
+N = 18
+
+# Read Synthetic data
+X, y = create_image_set(n, N, True)  # n images of size NxN
+# y_normalized = normalize_angle(y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
 
-# print(n, N)
 
 # Convert to 2D PyTorch tensors
-X_train = torch.tensor(X_train, dtype=torch.float32)  # adds a dimension of size 1 at index 1, reshaped to have a size of [n, 1, N, N]
-# print(X_train.shape)
+X_train = torch.tensor(X_train, dtype=torch.float32).unsqueeze(1)  # adds a dimension of size 1 at index 1, reshaped to have a size of [n, 1, N, N]
 y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
-X_test = torch.tensor(X_test, dtype=torch.float32)  # adds a dimension of size 1 at index 1, reshaped to have a size of [n, 1, N, N]
-# print(X_test.shape)
+X_test = torch.tensor(X_test, dtype=torch.float32).unsqueeze(1)  # adds a dimension of size 1 at index 1, reshaped to have a size of [n, 1, N, N]
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # Move network and data tensors to device
@@ -90,11 +96,11 @@ y_pred = network(X_test)
 std = calculate_std_dev(y_pred, y_test)
 
 # Save the state dictionary
-save_model(network, 'best_model_cnn_Dx.pt')
+save_model(network, 'best_model_cnn_synthetic_gaussian.pt')
 
 # Plot accuracy
 fig, ax = plt.subplots()
-ax.set_title('CNN Training on the derivative of patches')
+ax.set_title('CNN Training on the synthetic patches (gaussian blur)')
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % sqrt(best_mse))
 ax.set_xlabel('Epoch')
