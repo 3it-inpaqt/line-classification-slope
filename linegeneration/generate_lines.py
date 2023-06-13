@@ -7,11 +7,12 @@ from typing import Tuple
 from utils.angle_operations import calculate_angle, normalize_angle
 
 
-def generate_image(size: tuple, sigma: float = 0) -> Tuple[ndarray, float]:
+def generate_image(size: tuple, sigma: float = 0, aa: bool = False) -> Tuple[ndarray, float]:
     """
     Generate a binary image with a random line
     :param size: Shape of the image
     :param sigma: Add a gaussian blur to the image if True
+    :param aa: Anti-alias, creates AA line or not
     :return:
     """
     img = np.random.normal(10, 2, size) * 255
@@ -31,28 +32,33 @@ def generate_image(size: tuple, sigma: float = 0) -> Tuple[ndarray, float]:
     angle = calculate_angle(x1, y1, x2, y2)
 
     # Create line starting from (x1,y1) and ending at (x2,y2)
-    rr, cc = line(x1, y1, x2, y2)
-    img[rr, cc] = 255
+    if aa:
+        rr, cc, val = line_aa(x1, y1, x2, y2)
+        img[rr, cc] = 255 * val
+    else:
+        rr, cc = line(x1, y1, x2, y2)
+        img[rr, cc] = 255
 
     img = gaussian_filter(img, sigma=sigma)
 
     return img/255, normalize_angle(angle)
 
 
-def create_image_set(n: int, N: int, gaussian_blur: bool = False) -> Tuple[ndarray, ndarray]:
+def create_image_set(n: int, N: int, gaussian_blur: bool = False, aa: bool = False) -> Tuple[ndarray, ndarray]:
     """
     Generate a batch of arrays with various lines orientation
 
     :param n: number of image to generate
     :param N: side of each image
     :param gaussian_blur: Add a gaussian blur to the image if True
+    :param aa: Anti-alias, creates AA line or not
     :return: 3d numpy array, n x N x N
     """
     image_set = np.zeros((n, N, N))  # important for NN to have size n x N x N
     angle_list = []
 
     for k in range(n):
-        image, angle = generate_image((N, N), gaussian_blur)
+        image, angle = generate_image((N, N), gaussian_blur, aa)
         image_set[k, :, :] = image
         angle_list.append(angle)
 

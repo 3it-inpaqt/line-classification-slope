@@ -39,7 +39,8 @@ N = 18
 
 # Read Synthetic data
 sigma = 0.5
-X, y = create_image_set(n, N, sigma)  # n images of size NxN
+anti_alias = True
+X, y = create_image_set(n, N, sigma, anti_alias)  # n images of size NxN
 # y_normalized = normalize_angle(y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
@@ -115,7 +116,10 @@ y_pred = network(X_test)
 std = calculate_std_dev(y_pred, y_test)
 
 # Save the state dictionary
-save_model(network, f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}.pt')
+model_name = f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}.pt'
+if anti_alias:
+    model_name = f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}_aa.pt'
+save_model(network, model_name)
 
 # Plot accuracy
 fig, ax = plt.subplots()
@@ -135,12 +139,13 @@ ax.plot(history)
 textstr = '\n'.join((
     r'$MSE = %.4f$' % (best_mse, ),
     r'$RMSE = %.4f$' % (sqrt(best_mse), ),
-    r'$\sigma = %.4f$' % (std, )
+    r'$\sigma = %.2f$' % (std, )
 ))
 
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
 plt.show()
+plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_MSE.png")
 
 # Plot some lines and patches
 if torch.cuda.is_available():
@@ -151,3 +156,4 @@ else:
 fig1, axes1 = create_multiplots(X_test.cpu(), y_test.cpu(), y_pred_numpy, number_sample=16)
 plt.tight_layout()
 plt.show()
+plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_patches.png")
