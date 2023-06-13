@@ -23,7 +23,9 @@ learning_rate = 0.001
 num_epochs = 200
 
 # Initialize model
-network = CNN()
+kernel_size_conv = 4
+kernel_size_maxpool = 2
+network = CNN(kernel_size_conv)
 criterion = nn.MSELoss()  # loss function
 optimizer = optim.Adam(network.parameters(), lr=learning_rate)  # optimizer
 logger.info('Model has been initialized')
@@ -36,7 +38,8 @@ n = X_exp.shape[0]
 N = 18
 
 # Read Synthetic data
-X, y = create_image_set(n, N, True)  # n images of size NxN
+sigma = 0.5
+X, y = create_image_set(n, N, sigma)  # n images of size NxN
 # y_normalized = normalize_angle(y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
@@ -64,7 +67,7 @@ best_weights = None
 history = []
 
 # Initialize the progress bar
-logger.info('Starting training')
+# logger.info('Starting training')
 pbar = tqdm(range(num_epochs), desc="Training Progress", unit="epoch")
 
 for epoch in range(num_epochs):
@@ -102,7 +105,7 @@ for epoch in range(num_epochs):
 
 # Close the progress bar
 pbar.close()
-logger.info('Training is ended')
+# logger.info('Training is ended')
 
 # Restore model and return best accuracy
 network.load_state_dict(best_weights)
@@ -112,11 +115,16 @@ y_pred = network(X_test)
 std = calculate_std_dev(y_pred, y_test)
 
 # Save the state dictionary
-save_model(network, 'best_model_cnn_synthetic_gaussian.pt')
+save_model(network, f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}.pt')
 
 # Plot accuracy
 fig, ax = plt.subplots()
-ax.set_title(r'CNN Training on the synthetic patches (gaussian blur $\sigma = 0.8$)')
+title = '\n'.join((
+    r'CNN Training on the synthetic patches (gaussian blur $\sigma = %.4f $)' % (sigma, ),
+    f'Kernel size: {kernel_size_conv}'
+))
+
+ax.set_title(title)
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % sqrt(best_mse))
 ax.set_xlabel('Epoch')

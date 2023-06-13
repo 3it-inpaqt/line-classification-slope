@@ -7,11 +7,11 @@ from typing import Tuple
 from utils.angle_operations import calculate_angle, normalize_angle
 
 
-def generate_image(size: tuple, gaussian_blur: bool = False) -> Tuple[ndarray, float]:
+def generate_image(size: tuple, sigma: float = 0) -> Tuple[ndarray, float]:
     """
     Generate a binary image with a random line
     :param size: Shape of the image
-    :param gaussian_blur: Add a gaussian blur to the image if True
+    :param sigma: Add a gaussian blur to the image if True
     :return:
     """
     img = np.random.normal(10, 2, size) * 255
@@ -34,8 +34,7 @@ def generate_image(size: tuple, gaussian_blur: bool = False) -> Tuple[ndarray, f
     rr, cc = line(x1, y1, x2, y2)
     img[rr, cc] = 255
 
-    if gaussian_blur:
-        img = gaussian_filter(img, sigma=0.8)
+    img = gaussian_filter(img, sigma=sigma)
 
     return img/255, normalize_angle(angle)
 

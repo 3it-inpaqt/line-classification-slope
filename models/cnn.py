@@ -6,7 +6,7 @@ class CNN(nn.Module):
     """
     Convolutional classifier neural network.
     """
-    def __init__(self):
+    def __init__(self, kernel_size_conv=4):
         super(CNN, self).__init__()  # ensures the initialization of the parent nn.Module class is called before defining any custom layers or parameters.
 
         # Device will determine whether to run the training on GPU or CPU.
@@ -14,16 +14,16 @@ class CNN(nn.Module):
 
         # Layers
         self.layers = nn.Sequential(
-            nn.Conv2d(1, 6, kernel_size=4, stride=1, padding=1),
+            nn.Conv2d(1, 6, kernel_size=kernel_size_conv, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(6, 12, kernel_size=4, stride=1, padding=1),
+            nn.Conv2d(6, 12, kernel_size=kernel_size_conv, stride=1, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
-            nn.Linear(768, 200),
-            nn.ReLU(),
+            # nn.MaxPool2d(kernel_size=kernel_size_maxpool, stride=2),
+            nn.Linear(12 * (kernel_size_conv ** 2) * (kernel_size_conv ** 2), 200),
+            nn.LeakyReLU(),
             nn.Linear(200, 100),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Linear(100, 1)
             )
 
