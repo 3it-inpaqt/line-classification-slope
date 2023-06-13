@@ -13,11 +13,11 @@ if __name__ == '__main__':
 
     N = 18  # image size
     model = AngleNet(N)  # load model template
-    model_name = 'best_model_synthetic_LeakyReLU_shade.pt'  # select model to load, make sure you trained one and save it beforehand
-    path_model = f"saved\model\{model_name}"
+    model_name = 'best_model_cnn_Dx_3.pt'  # select model to load, make sure you trained one and save it beforehand
+    path_model = f"saved\model\convolution\{model_name}"
     model.load_state_dict(torch.load(path_model), strict=False)  # load the file into the preset model
 
-    path_tensor = "saved\double_dot_patches_Dx.pt"  # select tensor file to use, make sure you loaded patches beforehand
+    path_tensor = "saved\double_dot_patches_cnn_Dx.pt"  # select tensor file to use, make sure you loaded patches beforehand
     tensor_patches = torch.load(path_tensor)
 
     angles_test_prediction = model(tensor_patches)  # feedforward of the test images

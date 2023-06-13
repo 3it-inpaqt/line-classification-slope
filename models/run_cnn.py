@@ -7,7 +7,9 @@ import torch.nn as nn
 import torch.optim as optim
 
 from models.cnn import CNN
-from utils.misc import isqrt, load_list_from_file
+from utils.misc import load_list_from_file
+from utils.save_model import save_model
+from utils.statistics import calculate_std_dev
 
 
 # Set hyperparameters
@@ -81,23 +83,30 @@ for epoch in range(num_epochs):
 
 # Restore model and return best accuracy
 network.load_state_dict(best_weights)
+y_pred = network(X_test)
+# print("y test: ", type(y_test), y_test.shape)
+# print("y pred: ", type(y_pred), y_pred.shape)
+std = calculate_std_dev(y_pred, y_test)
 
 # Save the state dictionary
-torch.save(network.state_dict(), 'best_model_cnn_Dx.pt')
+save_model(network, 'best_model_cnn_Dx.pt')
 
 # Plot accuracy
-plt.figure(1)
-plt.suptitle('Training on the derivative of patches')
+fig, ax = plt.subplots()
+ax.set_title('CNN Training on the derivative of patches')
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % sqrt(best_mse))
-plt.xlabel('Epoch')
-plt.ylabel('Mean Square Error (MSE)')
-plt.plot(history)
+ax.set_xlabel('Epoch')
+ax.set_ylabel('Mean Square Error (MSE)')
+ax.plot(history)
 
 # Add a text box to the plot
-textstr = f'Best MSE: {best_mse:.4f} \nRMSE: {sqrt(best_mse):.4f}'
-text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
-                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
-                    horizontalalignment='right', verticalalignment='top')
+textstr = '\n'.join((
+    r'$MSE = %.4f$' % (best_mse, ),
+    r'$RMSE = %.4f$' % (sqrt(best_mse), ),
+    r'$\sigma = %.4f$' % (std, )
+))
 
+props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
 plt.show()
