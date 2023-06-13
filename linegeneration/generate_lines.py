@@ -15,13 +15,14 @@ def generate_image(size: tuple, gaussian_blur: bool = False) -> Tuple[ndarray, f
     :return:
     """
     img = np.random.normal(10, 2, size) * 255
+    min_length = 0.5 * size[0]
 
     # Select two random positions in the array
     index1 = np.random.choice(img.shape[0], 2, replace=False)
     x1, y1 = tuple(index1)
     # Set a minimum length for the line (at least half the size of the picture)
     length = 0
-    while length < size[0] / 1.5:  # while the length is not at least half the size of the picture it selects new endpoints
+    while length <= min_length:  # while the length is not at least half the size of the picture it selects new endpoints
         index2 = np.random.choice(img.shape[0], 2, replace=False)
         x2, y2 = tuple(index2)
         length = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
@@ -30,13 +31,13 @@ def generate_image(size: tuple, gaussian_blur: bool = False) -> Tuple[ndarray, f
     angle = calculate_angle(x1, y1, x2, y2)
 
     # Create line starting from (x1,y1) and ending at (x2,y2)
-    rr, cc, val = line_aa(x1, y1, x2, y2)
-    img[rr, cc] = val * 255
+    rr, cc = line(x1, y1, x2, y2)
+    img[rr, cc] = 255
 
     if gaussian_blur:
-        img = gaussian_filter(img, sigma=2)
+        img = gaussian_filter(img, sigma=0.8)
 
-    return img, normalize_angle(angle)
+    return img/255, normalize_angle(angle)
 
 
 def create_image_set(n: int, N: int, gaussian_blur: bool = False) -> Tuple[ndarray, ndarray]:

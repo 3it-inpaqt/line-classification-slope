@@ -16,10 +16,16 @@ def calculate_std_dev(pred_angles: Any, known_angles: Any) -> float:
     :return: Standard deviation between predicted and known angles
     """
     # Convert input to NumPy arrays if they are PyTorch tensors
-    if isinstance(pred_angles, torch.Tensor):
-        pred_angles = pred_angles.detach().numpy()
-    if isinstance(known_angles, torch.Tensor):
-        known_angles = known_angles.detach().numpy()
+    if torch.cuda.is_available():
+        if isinstance(pred_angles, torch.Tensor):
+            pred_angles = pred_angles.cpu().detach().numpy()
+        if isinstance(known_angles, torch.Tensor):
+            known_angles = known_angles.cpu().detach().numpy()
+    else:
+        if isinstance(pred_angles, torch.Tensor):
+            pred_angles = pred_angles.detach().numpy()
+        if isinstance(known_angles, torch.Tensor):
+            known_angles = known_angles.detach().numpy()
 
     # Calculate standard deviation
     residuals = pred_angles - known_angles

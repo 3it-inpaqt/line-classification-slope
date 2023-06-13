@@ -12,6 +12,9 @@ if __name__ == '__main__':
     N = 18
     n = 16
 
+    if torch.cuda.is_available():
+        print('it works')
+
     # Load model
     # model = AngleNet(N)
     # model_name = 'best_model_LeakyReLU.pt'
@@ -39,7 +42,7 @@ if __name__ == '__main__':
     # import numpy as np
     # img = np.random.normal(0.5, 2, (N, N))
     #
-    image_set_test, angles_test = create_image_set(n, N, False)
-    fig, axes = create_multiplots(image_set_test, angles_test, number_sample=n)
-    plt.show()
+    # image_set_test, angles_test = create_image_set(n, N, True)
+    # fig, axes = create_multiplots(image_set_test, angles_test, number_sample=n)
+    # plt.show()
 

@@ -14,13 +14,17 @@ class CNN(nn.Module):
 
         # Layers
         self.layers = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(1, 6, kernel_size=4, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(6, 12, kernel_size=4, stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Flatten(),
-            nn.Linear(32 * 9 * 9, 1)
+            nn.Linear(768, 200),
+            nn.ReLU(),
+            nn.Linear(200, 100),
+            nn.ReLU(),
+            nn.Linear(100, 1)
             )
 
     def forward(self, x):
