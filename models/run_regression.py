@@ -54,9 +54,13 @@ y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # Define the model
 model = nn.Sequential(
-        nn.Linear(N, 24),  # change N to N*N if you use synthetic data
+        nn.Linear(N, 48),  # change N to N*N if you use synthetic data
         nn.LeakyReLU(),
-        nn.Linear(24, 6),
+        nn.Linear(48, 24),
+        nn.LeakyReLU(),
+        nn.Linear(24, 12),
+        nn.LeakyReLU(),
+        nn.Linear(12, 6),
         nn.LeakyReLU(),
         nn.Linear(6, 1),
     )
@@ -67,7 +71,7 @@ learning_rate = 1e-5
 loss_fn = nn.SmoothL1Loss()  # mean absolute error
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-n_epochs = 1000   # number of epochs to run
+n_epochs = 1200   # number of epochs to run
 batch_size = 16  # size of each batch
 batch_start = torch.arange(0, len(X_train), batch_size)
 
@@ -110,6 +114,7 @@ for epoch in range(n_epochs):
     if mea < best_mea:
         best_mea = mea
         best_weights = copy.deepcopy(model.state_dict())
+        y_pred_best = model(X_test)
         std = calculate_std_dev(y_pred, y_test)
 
 pbar.close()
@@ -120,7 +125,7 @@ model.load_state_dict(best_weights)
 # print("y pred: ", type(y_pred), y_pred.shape)
 # std = calculate_std_dev(y_pred, y_test)
 # Save the state dictionary
-save_model(model, f'best_model_experimental_LeakyReLU_Dx_SmoothL1Loss_batch{batch_size}')
+save_model(model, f'best_model_experimental_LeakyReLU_Dx_SmoothL1Loss_batch{batch_size}_epoch{n_epochs}')
 
 # Plot accuracy
 fig, ax = plt.subplots()
@@ -148,12 +153,11 @@ plt.show()
 
 # Plot some lines and patches
 if torch.cuda.is_available():
-    y_pred_numpy = y_pred.cpu().detach().numpy()
+    y_pred_numpy = y_pred_best.cpu().detach().numpy()
 else:
-    y_pred_numpy = y_pred.cpu().detach().numpy()
+    y_pred_numpy = y_pred_best.cpu().detach().numpy()
 
-fig1, axes1 = create_multiplots(X_test.detach().numpy(), y_test.detach().numpy(), y_pred.detach().numpy(), number_sample=16)
+fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=16)
 plt.tight_layout()
 # plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_patches.png")
 plt.show()
-

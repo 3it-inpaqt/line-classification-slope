@@ -108,8 +108,8 @@ if __name__ == '__main__':
 
     stacked_patches = torch.stack(selected_patches)
     tensor_patches = stacked_patches.unsqueeze(1)
-    print(tensor_patches.shape)
-    print(len(angles_lines))
+    # print(tensor_patches.shape)
+    # print(len(angles_lines))
     # Save patches and angles to file for later use
-    torch.save(tensor_patches, './saved/model/double_dot_patches_cnn_Dx.pt')
-    # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
+    # torch.save(tensor_patches, './saved/model/double_dot_patches_cnn_Dx.pt')
+    save_list_to_file(angles_lines, './saved/double_dot_normalized_angles_pi.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them

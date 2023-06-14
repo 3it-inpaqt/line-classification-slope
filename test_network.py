@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     N = 18  # image size
     model = AngleNet(N*N)  # load model template
-    model_name = 'best_model_synthetic_LeakyReLU_Dx_SmoothL1Loss_batch16.pt'  # select model to load, make sure you trained one and save it beforehand
+    model_name = 'best_model_experimental_LeakyReLU_Dx_SmoothL1Loss_batch16_epoch2000_1.pt'  # select model to load, make sure you trained one and save it beforehand
     path_model = f"saved\\model\\regression\\{model_name}"
     model.load_state_dict(torch.load(path_model), strict=False)  # load the file into the preset model
 
