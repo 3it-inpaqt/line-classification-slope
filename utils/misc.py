@@ -259,35 +259,19 @@ def isqrt(n):
 
 
 # -- Misc -- #
-def get_pow_10(number):
-    return float(str(number)[-5:])
-
-
-def renorm_tensor(X):
-    """
-    Method to re-normalise a tensor
-    :param X:
-    :return:
-    """
-    return X / (get_pow_10(float(X.min()))) - (X / (get_pow_10(float(X.min())))).min()
-
-
 def renorm_all_tensors(big_tensor):
     """
-    Re-normalise all tensors in a [n, 1, N, N] tensor
+    Re-normalise all tensors in a [n, 1, N, N] tensor with value between 0 and 1
     :param big_tensor:
     :return:
     """
     n = big_tensor.shape[0]
 
-    new_big_tensor = torch.empty_like(big_tensor)
+    new_tensor = big_tensor.view(big_tensor.size(0), -1)
+    new_tensor -= new_tensor.min(1, keepdim=True)[0]
+    new_tensor /= new_tensor.max(1, keepdim=True)[0]
+    new_tensor = new_tensor.view(n, settings.patch_size_x, settings.patch_size_y)
 
-    for k in range(n):
-        x = (big_tensor[k].squeeze() / (get_pow_10(float(big_tensor[k].squeeze().min()))) - (
-                    big_tensor[k].squeeze() / (get_pow_10(float(big_tensor[k].squeeze().min())))).min())
-
-        new_big_tensor[k, 0, :, :] = x
-
-    return new_big_tensor
+    return new_tensor
 
 
