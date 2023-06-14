@@ -12,7 +12,7 @@ from linegeneration.generate_lines import create_image_set
 from utils.logger import logger
 from plot.lines_visualisation import create_multiplots
 from utils.angle_operations import normalize_angle
-from utils.misc import load_list_from_file
+from utils.misc import load_list_from_file, renorm_all_tensors
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
 

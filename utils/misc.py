@@ -275,3 +275,21 @@ def renorm_all_tensors(big_tensor):
     return new_tensor
 
 
+def enhance_contrast(tensor, threshold=0.5):
+    """
+    Enhance tensor contrast. If the value of the tensor is greater than 0.5 it gets multiplied by 1.5 and if below 0.5
+    it gets multiplied by 0.2. Light gets lighter and dark gets darker.
+    :param threshold:
+    :param tensor:
+    :return:
+    """
+    # Initialize a new tensor with the same dimensions as the input tensor
+    enhanced_tensor = torch.zeros_like(tensor)
+
+    # Apply contrast enhancement
+    mask = tensor > threshold
+    enhanced_tensor[mask] = tensor[mask] * 1.5
+    enhanced_tensor[~mask] = tensor[~mask] * 0.6
+
+    return enhanced_tensor
+

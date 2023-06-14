@@ -7,12 +7,13 @@ import torch.optim as optim
 import tqdm
 from sklearn.model_selection import train_test_split
 
-from plot.lines_visualisation import create_multiplots
 from linegeneration.generate_lines import create_image_set
+# from plot.lines_visualisation import create_multiplots
+# from utils.angle_operations import normalize_angle
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
-from utils.angle_operations import normalize_angle
-from utils.misc import load_list_from_file
+from utils.settings import settings
+from utils.misc import load_list_from_file, renorm_all_tensors
 
 # Read data
 # n = 10000  # number of images to create
@@ -27,12 +28,13 @@ from utils.misc import load_list_from_file
 X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
 # X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
-X = X * ()
-# print(X.shape)
 n, N = X.shape
+X = (renorm_all_tensors(X.reshape((n, settings.patch_size_x, settings.patch_size_y)))).reshape((n, N))
+# print(X.shape)
+
 
 # Read Synthetic data
-X, y = create_image_set(n, N)  # n images of size NxN
+# X, y = create_image_set(n, N)  # n images of size NxN
 # y_normalized = normalize_angle(y)
 
 # fig, axes = create_multiplots(X, y, number_sample=16)
