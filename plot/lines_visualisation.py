@@ -9,7 +9,7 @@ from random import sample
 import torch
 
 from utils.angle_operations import normalize_angle
-from utils.settings import Settings
+from utils.settings import settings
 
 
 def create_multiplots(image_set_input: ndarray, angles: ndarray, prediction_angles: ndarray = None, number_sample: float = None) -> Tuple[Figure, Axes]:
@@ -26,9 +26,10 @@ def create_multiplots(image_set_input: ndarray, angles: ndarray, prediction_angl
         image_set = image_set_input.squeeze(1)
         n, p, _ = image_set.shape
     else:  # for synthetic diagrams
-        image_set = image_set_input
-        n = len(image_set)
-        p, _ = image_set[0].shape
+        n = image_set_input.shape[0]
+        p, _ = settings.patch_size_x, settings.patch_size_y
+        image_set = image_set_input.reshape(n, p, p)
+
     # n, p = image_set.shape  # change when using tensor
     # print(len(image_set))
     # n = len(image_set)  # change when using synthetic data

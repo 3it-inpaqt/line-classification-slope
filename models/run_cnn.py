@@ -38,7 +38,7 @@ n = X_exp.shape[0]
 N = 18
 
 # Read Synthetic data
-sigma = 0.9
+sigma = 0.1
 anti_alias = False
 X, y = create_image_set(n, N, sigma, anti_alias)  # n images of size NxN
 # y_normalized = normalize_angle(y)
