@@ -1,9 +1,6 @@
 import copy
-
 import matplotlib.pyplot as plt
 import numpy as np
-
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -13,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from plot.lines_visualisation import create_multiplots
 from linegeneration.generate_lines import create_image_set
 from utils.save_model import save_model
+from utils.statistics import calculate_std_dev
 from utils.angle_operations import normalize_angle
 from utils.misc import load_list_from_file
 
@@ -29,12 +27,12 @@ from utils.misc import load_list_from_file
 X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
 # X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
-
+X = X * ()
 # print(X.shape)
 n, N = X.shape
 
 # Read Synthetic data
-# X, y = create_image_set(n, N)  # n images of size NxN
+X, y = create_image_set(n, N)  # n images of size NxN
 # y_normalized = normalize_angle(y)
 
 # fig, axes = create_multiplots(X, y, number_sample=16)
@@ -63,11 +61,12 @@ model = nn.Sequential(
     )
 
 # loss function and optimizer
+learning_rate = 1e-5
 loss_fn = nn.MSELoss()  # mean square error
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-n_epochs = 500   # number of epochs to run
-batch_size = 10  # size of each batch
+n_epochs = 1000   # number of epochs to run
+batch_size = 16  # size of each batch
 batch_start = torch.arange(0, len(X_train), batch_size)
 
 # Hold the best model
@@ -110,14 +109,17 @@ for epoch in range(n_epochs):
 
 # restore model and return best accuracy
 model.load_state_dict(best_weights)
-#
-# # Save the state dictionary
-save_model(model, 'best_model_LeakyReLU_Dx')
+y_pred = model(X_test)
+# print("y test: ", type(y_test), y_test.shape)
+# print("y pred: ", type(y_pred), y_pred.shape)
+std = calculate_std_dev(y_pred, y_test)
+# Save the state dictionary
+save_model(model, 'best_model_synthetic_LeakyReLU_Dx_low_lr')
 
 # Plot accuracy
-plt.figure(1)
+fig, ax = plt.subplots()
 # plt.suptitle('Training on the experimental patches (DQD)')
-plt.suptitle('Training on the derivative of patches')
+ax.set_title(f'Training on the derivative of patches (regression) \n Learning rate: {learning_rate} | Epochs: {n_epochs}')
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % np.sqrt(best_mse))
 plt.xlabel('Epoch')
@@ -125,9 +127,12 @@ plt.ylabel('Mean Square Error (MSE)')
 plt.plot(history)
 
 # Add a text box to the plot
-textstr = f'Best MSE: {best_mse:.4f} \n RMSE: {np.sqrt(best_mse):.4f}'
-text_box = plt.text(0.85, 0.95, textstr, transform=plt.gca().transAxes,
-                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round'),
-                    horizontalalignment='right', verticalalignment='top')
+textstr = '\n'.join((
+    r'$MSE = %.4f$' % (best_mse, ),
+    r'$RMSE = %.4f$' % (np.sqrt(best_mse), ),
+    r'$\sigma = %.2f$' % (std, )
+))
+props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
 
 plt.show()

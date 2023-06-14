@@ -248,17 +248,6 @@ def generate_random_indices(length, count):
     return indices
 
 
-def resample_data(patch_list, line_list):
-    """
-    Resample data to have a better distribution of angles
-    :param patch_list:
-    :param line_list:
-    :return:
-    """
-
-    return None
-
-
 # -- Integer sqrt -- #
 def isqrt(n):
     x = n
@@ -267,3 +256,38 @@ def isqrt(n):
         x = y
         y = (x + n // x) // 2
     return x
+
+
+# -- Misc -- #
+def get_pow_10(number):
+    return float(str(number)[-5:])
+
+
+def renorm_tensor(X):
+    """
+    Method to re-normalise a tensor
+    :param X:
+    :return:
+    """
+    return X / (get_pow_10(float(X.min()))) - (X / (get_pow_10(float(X.min())))).min()
+
+
+def renorm_all_tensors(big_tensor):
+    """
+    Re-normalise all tensors in a [n, 1, N, N] tensor
+    :param big_tensor:
+    :return:
+    """
+    n = big_tensor.shape[0]
+
+    new_big_tensor = torch.empty_like(big_tensor)
+
+    for k in range(n):
+        x = (big_tensor[k].squeeze() / (get_pow_10(float(big_tensor[k].squeeze().min()))) - (
+                    big_tensor[k].squeeze() / (get_pow_10(float(big_tensor[k].squeeze().min())))).min())
+
+        new_big_tensor[k, 0, :, :] = x
+
+    return new_big_tensor
+
+

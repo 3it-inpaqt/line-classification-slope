@@ -18,8 +18,8 @@ from utils.statistics import calculate_std_dev
 
 
 # Set hyperparameters
-batch_size = 64
-learning_rate = 0.001
+batch_size = 32
+learning_rate = 0.0001
 num_epochs = 200
 
 # Initialize model
@@ -39,7 +39,7 @@ N = 18
 
 # Read Synthetic data
 sigma = 0.9
-anti_alias = True
+anti_alias = False
 X, y = create_image_set(n, N, sigma, anti_alias)  # n images of size NxN
 # y_normalized = normalize_angle(y)
 
@@ -119,16 +119,16 @@ std = calculate_std_dev(y_pred, y_test)
 model_name = f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}.pt'
 if anti_alias:
     model_name = f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}_aa.pt'
-save_model(network, model_name)
+# save_model(network, model_name)
 
 # Plot accuracy
 fig, ax = plt.subplots()
 title = '\n'.join((
     r'CNN Training on the synthetic patches (gaussian blur $\sigma = %.4f $)' % (sigma, ),
-    f'Kernel size: {kernel_size_conv}'
+    f'Kernel size: {kernel_size_conv} | Batch size: {batch_size} | Epochs: {num_epochs} | lr: {learning_rate}'
 ))
 
-ax.set_title(title)
+ax.set_title(title, fontsize=12)
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % sqrt(best_mse))
 print("STD: % .4f" % std)
@@ -145,8 +145,9 @@ textstr = '\n'.join((
 
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
-plt.show()
 plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_MSE.png")
+plt.show()
+
 
 # Plot some lines and patches
 if torch.cuda.is_available():
@@ -156,5 +157,5 @@ else:
 
 fig1, axes1 = create_multiplots(X_test.cpu(), y_test.cpu(), y_pred_numpy, number_sample=16)
 plt.tight_layout()
-plt.show()
 plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_patches.png")
+plt.show()
