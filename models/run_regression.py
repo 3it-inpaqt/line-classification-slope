@@ -16,8 +16,8 @@ from utils.settings import settings
 from utils.misc import load_list_from_file, renorm_all_tensors, enhance_contrast
 
 # Read data
-n = 500  # number of images to create
-N = 18  # size of the images (NxN)
+# n = 500  # number of images to create
+# N = 18  # size of the images (NxN)
 
 # Load patches
 # patches = torch.load('./saved/double_dot_patches.pt'),
@@ -25,17 +25,17 @@ N = 18  # size of the images (NxN)
 # N = 18
 
 # X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-# X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
+X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
 # X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
-# n, N = X.shape
+n, N = X.shape
 # X = (renorm_all_tensors(X.reshape((n, settings.patch_size_x, settings.patch_size_y)), True)).reshape((n, N))
 # print(X.shape)
 
 
 # Read Synthetic data
-X, y = create_image_set(n, N, aa=True)  # n images of size NxN
-X = X.reshape(n, N*N)
+# X, y = create_image_set(n, N, aa=True)  # n images of size NxN
+# X = X.reshape(n, N*N)
 # y_normalized = normalize_angle(y)
 
 # fig, axes = create_multiplots(X, y, number_sample=16)
@@ -54,7 +54,7 @@ y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # Define the model
 model = nn.Sequential(
-        nn.Linear(N*N, 24),  # change N to N*N if you use synthetic data
+        nn.Linear(N, 24),  # change N to N*N if you use synthetic data
         nn.LeakyReLU(),
         nn.Linear(24, 6),
         nn.LeakyReLU(),
@@ -120,12 +120,12 @@ model.load_state_dict(best_weights)
 # print("y pred: ", type(y_pred), y_pred.shape)
 # std = calculate_std_dev(y_pred, y_test)
 # Save the state dictionary
-save_model(model, 'best_model_synthetic_LeakyReLU_Dx_SmoothL1Loss')
+save_model(model, f'best_model_experimental_LeakyReLU_Dx_SmoothL1Loss_batch{batch_size}')
 
 # Plot accuracy
 fig, ax = plt.subplots()
 # plt.suptitle('Training on the experimental patches (DQD)')
-ax.set_title(f'Training on the derivative of patches (regression) \n Learning rate: {learning_rate} | Epochs: {n_epochs}')
+ax.set_title(f'Training on the experimental patches (regression + Dx) \n Learning rate: {learning_rate} | Epochs: {n_epochs} | Batch: {batch_size}')
 print("Loss: %.4f" % best_mea)
 # print("RMAE: %.4f" % np.sqrt(best_mea))
 plt.xlabel('Epoch')
@@ -147,10 +147,10 @@ ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='
 plt.show()
 
 # Plot some lines and patches
-# if torch.cuda.is_available():
-#     y_pred_numpy = y_pred.cpu().detach().numpy()
-# else:
-#     y_pred_numpy = y_pred.cpu().detach().numpy()
+if torch.cuda.is_available():
+    y_pred_numpy = y_pred.cpu().detach().numpy()
+else:
+    y_pred_numpy = y_pred.cpu().detach().numpy()
 
 fig1, axes1 = create_multiplots(X_test.detach().numpy(), y_test.detach().numpy(), y_pred.detach().numpy(), number_sample=16)
 plt.tight_layout()

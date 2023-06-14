@@ -6,11 +6,10 @@ import torch.nn as nn
 
 def AngleNet(N):
     model = nn.Sequential(
-        nn.Linear(N * N, 24),  # change N to N*N if you use synthetic data
-        nn.LeakyReLU(),
-        nn.Linear(24, 6),
-        nn.LeakyReLU(),
-        nn.Linear(6, 1),
-        nn.ReLU()
-    )
+                nn.Linear(N, 24),  # change N to N*N if you use synthetic data
+                nn.LeakyReLU(),
+                nn.Linear(24, 6),
+                nn.LeakyReLU(),
+                nn.Linear(6, 1),
+        )
     return model
