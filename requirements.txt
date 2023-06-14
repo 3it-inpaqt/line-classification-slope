@@ -1,19 +1,22 @@
-torch==2.0.0+cu118
-torchvision==0.15.1+cu118
 # pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+codetiming
+configargparse~=1.5
+imageio
 matplotlib
 numpy
-pandas
-tqdm
+pillow~=9.0
+pyyaml~=6.0
+os
 scikit-learn
 scikit-image
 scikit-spatial
-os
-tkinter
-pillow~=9.0
-configargparse~=1.5
-shapely==1.7.1
+scipy
 seaborn
-imageio
-pyyaml~=6.0
-codetiming
+shapely==1.7.1
+tqdm
+torch==2.0.0+cu118
+torchvision==0.15.1+cu118
+
+# If there is a problem with the installation of torch 2.0.0+cu118 and torchvision 0.15.1+cu118 ;
+# install manually with this link https://download.pytorch.org/whl/cu118/torch-2.0.0%2Bcu118-cp39-cp39-win_amd64.whl (torch)
+#https://download.pytorch.org/whl/cu118/torchvision-0.15.1%2Bcu118-cp39-cp39-win_amd64.whl (torchvision)

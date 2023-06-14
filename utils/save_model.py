@@ -10,7 +10,7 @@ def save_model(model, filename='model'):
     :return: save model to a directory called 'saved', feel free to change the name if you want
     """
     # Define path to 'saved' folder
-    path = '.\saved\model'
+    path = ".\\saved\\model\\regression"
 
     # Add extension if not provided
     if not ('.pt' in filename):

@@ -96,19 +96,20 @@ if __name__ == '__main__':
 
     # Reshape patches for neural network
     # Get the number of images and the size of each image
-    n = len(selected_patches)
-    N = selected_patches[0].shape[0]
+    # n = len(selected_patches)
+    # N = selected_patches[0].shape[0]
 
     # Create an empty tensor with the desired shape
-    stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
+    # stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
 
     # Fill the 3D tensor with the image data
-    for i, image_tensor in enumerate(selected_patches):
-        stacked_patches[i] = image_tensor
+    # for i, image_tensor in enumerate(selected_patches):
+    #     stacked_patches[i] = image_tensor
 
-    tensor_patches = stacked_patches.flatten(1)
+    stacked_patches = torch.stack(selected_patches)
+    tensor_patches = stacked_patches.unsqueeze(1)
     print(tensor_patches.shape)
     print(len(angles_lines))
     # Save patches and angles to file for later use
-    torch.save(tensor_patches, './saved/double_dot_patches_Dx.pt')
+    torch.save(tensor_patches, './saved/model/double_dot_patches_cnn_Dx.pt')
     # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them

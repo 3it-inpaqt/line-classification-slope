@@ -211,7 +211,9 @@ def convert_coordinate_dic(label_dic):
     return x1, y1, x2, y2
 
 
-def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int = 1) -> int:
+# -- Randomization and resampling -- #
+
+def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int = 1) -> tuple[Any, Any, int]:
     """
     Select two elements from two different list with same index randomly
     :param list1:
@@ -245,12 +247,49 @@ def generate_random_indices(length, count):
     indices = random.sample(range(length), count)
     return indices
 
-def resample_data(patch_list, line_list):
+
+# -- Integer sqrt -- #
+def isqrt(n):
+    x = n
+    y = (x + 1) // 2
+    while y < x:
+        x = y
+        y = (x + n // x) // 2
+    return x
+
+
+# -- Misc -- #
+def renorm_all_tensors(big_tensor):
     """
-    Resample data to have a better distribution of angles
-    :param patch_list:
-    :param line_list:
+    Re-normalise all tensors in a [n, 1, N, N] tensor with value between 0 and 1
+    :param big_tensor:
     :return:
     """
+    n = big_tensor.shape[0]
 
-    return None
+    new_tensor = big_tensor.view(big_tensor.size(0), -1)
+    new_tensor -= new_tensor.min(1, keepdim=True)[0]
+    new_tensor /= new_tensor.max(1, keepdim=True)[0]
+    new_tensor = new_tensor.view(n, settings.patch_size_x, settings.patch_size_y)
+
+    return new_tensor
+
+
+def enhance_contrast(tensor, threshold=0.5):
+    """
+    Enhance tensor contrast. If the value of the tensor is greater than 0.5 it gets multiplied by 1.5 and if below 0.5
+    it gets multiplied by 0.2. Light gets lighter and dark gets darker.
+    :param threshold:
+    :param tensor:
+    :return:
+    """
+    # Initialize a new tensor with the same dimensions as the input tensor
+    enhanced_tensor = torch.zeros_like(tensor)
+
+    # Apply contrast enhancement
+    mask = tensor > threshold
+    enhanced_tensor[mask] = tensor[mask] * 1.5
+    enhanced_tensor[~mask] = tensor[~mask] * 0.6
+
+    return enhanced_tensor
+
