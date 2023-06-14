@@ -38,7 +38,7 @@ n = X_exp.shape[0]
 N = 18
 
 # Read Synthetic data
-sigma = 0.5
+sigma = 0.9
 anti_alias = True
 X, y = create_image_set(n, N, sigma, anti_alias)  # n images of size NxN
 # y_normalized = normalize_angle(y)
@@ -131,6 +131,7 @@ title = '\n'.join((
 ax.set_title(title)
 print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % sqrt(best_mse))
+print("STD: % .4f" % std)
 ax.set_xlabel('Epoch')
 ax.set_ylabel('Mean Square Error (MSE)')
 ax.plot(history)
