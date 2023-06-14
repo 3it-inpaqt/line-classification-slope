@@ -13,11 +13,11 @@ from linegeneration.generate_lines import create_image_set
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
 from utils.settings import settings
-from utils.misc import load_list_from_file, renorm_all_tensors
+from utils.misc import load_list_from_file, renorm_all_tensors, enhance_contrast
 
 # Read data
-# n = 10000  # number of images to create
-# N = 18  # size of the images (NxN)
+n = 500  # number of images to create
+N = 18  # size of the images (NxN)
 
 # Load patches
 # patches = torch.load('./saved/double_dot_patches.pt'),
@@ -25,16 +25,17 @@ from utils.misc import load_list_from_file, renorm_all_tensors
 # N = 18
 
 # X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
+# X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
 # X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
-n, N = X.shape
-X = (renorm_all_tensors(X.reshape((n, settings.patch_size_x, settings.patch_size_y)))).reshape((n, N))
+# n, N = X.shape
+# X = (renorm_all_tensors(X.reshape((n, settings.patch_size_x, settings.patch_size_y)), True)).reshape((n, N))
 # print(X.shape)
 
 
 # Read Synthetic data
-# X, y = create_image_set(n, N)  # n images of size NxN
+X, y = create_image_set(n, N)  # n images of size NxN
+X = X.reshape(n, N*N)
 # y_normalized = normalize_angle(y)
 
 # fig, axes = create_multiplots(X, y, number_sample=16)

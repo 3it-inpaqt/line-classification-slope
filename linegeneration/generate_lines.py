@@ -15,16 +15,21 @@ def generate_image(size: tuple, sigma: float = 0, aa: bool = False) -> Tuple[nda
     :param aa: Anti-alias, creates AA line or not
     :return:
     """
-    img = np.random.normal(10, 2, size) * 255
-    min_length = 0.5 * size[0]
+    img = np.random.normal(10, 0.3, size) * 255
+    min_length = 0.9 * min(size[0], size[1])
 
-    # Select two random positions in the array
-    index1 = np.random.choice(img.shape[0], 2, replace=False)
+    # Select one random position on an edge
+    index1 = np.random.choice([0, size[0] - 1]), np.random.choice(size[1])
     x1, y1 = tuple(index1)
+
+    # Select another random position on a different edge
+    index2 = np.random.choice([0, size[1] - 1]), np.random.choice(size[1])
+    x2, y2 = tuple(index2)
+
     # Set a minimum length for the line (at least half the size of the picture)
-    length = 0
+    length = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
     while length <= min_length:  # while the length is not at least half the size of the picture it selects new endpoints
-        index2 = np.random.choice(img.shape[0], 2, replace=False)
+        index2 = np.random.choice([0, size[1] - 1]), np.random.choice(size[1])
         x2, y2 = tuple(index2)
         length = np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
@@ -39,12 +44,13 @@ def generate_image(size: tuple, sigma: float = 0, aa: bool = False) -> Tuple[nda
         rr, cc = line(x1, y1, x2, y2)
         img[rr, cc] = 255
 
-    img = gaussian_filter(img, sigma=sigma)
+    if sigma > 0:
+        img = gaussian_filter(img, sigma=sigma)
 
     return img/255, normalize_angle(angle)
 
 
-def create_image_set(n: int, N: int, gaussian_blur: bool = False, aa: bool = False) -> Tuple[ndarray, ndarray]:
+def create_image_set(n: int, N: int, gaussian_blur: float = 0, aa: bool = False) -> Tuple[ndarray, ndarray]:
     """
     Generate a batch of arrays with various lines orientation
 

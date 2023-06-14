@@ -12,8 +12,8 @@ if __name__ == '__main__':
     N = 18
     n = 16
 
-    if torch.cuda.is_available():
-        print('it works')
+    # if torch.cuda.is_available():
+    #     print('it works')
 
     # Load model
     # model = AngleNet(N)
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # model.load_state_dict(torch.load(path), strict=False)
     #
     # # Apply model
-    image_set_test, angles_test = create_image_set(n, N)  # generate new image set to test the network on new images
+    # image_set_test, angles_test = create_image_set(n, N)  # generate new image set to test the network on new images
     # angles_test_normalized = normalize_angle(angles_test)  # normalize angle
     # tensor_image_test = torch.tensor(image_set_test, dtype=torch.float32)  # convert ndarray to tensor and flatten it
     # tensor_image_test = tensor_image_test.flatten(1)
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     # angles_test_prediction_numpy = angles_test_prediction.detach().numpy()  # convert result to numpy array
 
     # Generate plot
-    fig, axes = create_multiplots(image_set_test, angles_test, angles_test_prediction_numpy)
+    # fig, axes = create_multiplots(image_set_test, angles_test, angles_test_prediction_numpy)
     # plt.tight_layout()
     # plt.show()
     #
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # import numpy as np
     # img = np.random.normal(0.5, 2, (N, N))
     #
-    # image_set_test, angles_test = create_image_set(n, N, True)
-    # fig, axes = create_multiplots(image_set_test, angles_test, number_sample=n)
-    # plt.show()
+    image_set_test, angles_test = create_image_set(n, N, 0.9, aa=True)
+    fig, axes = create_multiplots(image_set_test, angles_test, number_sample=n)
+    plt.show()
 

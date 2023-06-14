@@ -259,26 +259,10 @@ def isqrt(n):
 
 
 # -- Misc -- #
-def renorm_all_tensors(big_tensor):
-    """
-    Re-normalise all tensors in a [n, 1, N, N] tensor with value between 0 and 1
-    :param big_tensor:
-    :return:
-    """
-    n = big_tensor.shape[0]
-
-    new_tensor = big_tensor.view(big_tensor.size(0), -1)
-    new_tensor -= new_tensor.min(1, keepdim=True)[0]
-    new_tensor /= new_tensor.max(1, keepdim=True)[0]
-    new_tensor = new_tensor.view(n, settings.patch_size_x, settings.patch_size_y)
-
-    return new_tensor
-
-
-def enhance_contrast(tensor, threshold=0.5):
+def enhance_contrast(tensor, threshold=0.3):
     """
     Enhance tensor contrast. If the value of the tensor is greater than 0.5 it gets multiplied by 1.5 and if below 0.5
-    it gets multiplied by 0.2. Light gets lighter and dark gets darker.
+    it gets multiplied by 0.6. Light gets lighter and dark gets darker.
     :param threshold:
     :param tensor:
     :return:
@@ -293,3 +277,22 @@ def enhance_contrast(tensor, threshold=0.5):
 
     return enhanced_tensor
 
+
+def renorm_all_tensors(big_tensor, enhance=False):
+    """
+    Re-normalise all tensors in a [n, 1, N, N] tensor with value between 0 and 1
+    :param big_tensor:
+    :param enhance: Whether you want to enhance contrast or not, false by default
+    :return:
+    """
+    n = big_tensor.shape[0]
+
+    new_tensor = big_tensor.view(big_tensor.size(0), -1)
+    new_tensor -= new_tensor.min(1, keepdim=True)[0]
+    new_tensor /= new_tensor.max(1, keepdim=True)[0]
+    new_tensor = new_tensor.view(n, settings.patch_size_x, settings.patch_size_y)
+
+    if enhance:
+        new_tensor = enhance_contrast(new_tensor)
+
+    return new_tensor
