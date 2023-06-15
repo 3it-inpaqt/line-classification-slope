@@ -80,6 +80,25 @@ def normalize_angle(angle):
     return angle / (2*np.pi)
 
 
+def sin_cos(angle):
+    """
+    Encode an angle in a tuple sin, cos
+    :param angle:
+    :return:
+    """
+    return np.sin(angle), np.cos(angle)
+
+
+def decoding_angle(a, b):
+    """
+    Decode angle from tuple sin, cos
+    :param a:
+    :param b:
+    :return:
+    """
+    return np.arctan2(a, b)
+
+
 def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
     """
     The list of lines contains tuples of list coordinate of the form ([x1, x2], [y1, y2]). It is a bother to calculate

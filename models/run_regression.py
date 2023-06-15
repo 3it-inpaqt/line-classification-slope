@@ -24,6 +24,8 @@ from utils.misc import load_list_from_file, renorm_all_tensors, enhance_contrast
 # n = patches[0].shape[0]
 # N = 18
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 # X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
 # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
@@ -53,22 +55,30 @@ X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
 # Define the model
+# model = nn.Sequential(
+#         nn.Linear(N, 48),  # change N to N*N if you use synthetic data
+#         nn.LeakyReLU(),
+#         nn.Linear(48, 24),
+#         nn.LeakyReLU(),
+#         nn.Linear(24, 12),
+#         nn.LeakyReLU(),
+#         nn.Linear(12, 6),
+#         nn.LeakyReLU(),
+#         nn.Linear(6, 1),
+#     )
+
 model = nn.Sequential(
-        nn.Linear(N, 48),  # change N to N*N if you use synthetic data
-        nn.LeakyReLU(),
-        nn.Linear(48, 24),
-        nn.LeakyReLU(),
-        nn.Linear(24, 12),
-        nn.LeakyReLU(),
-        nn.Linear(12, 6),
-        nn.LeakyReLU(),
-        nn.Linear(6, 1),
+        nn.Linear(N, 128),  # change N to N*N if you use synthetic data
+        nn.Sigmoid(),
+        nn.Linear(128, 64),
+        nn.ReLU(),
+        nn.Linear(64, 1),
     )
 
 # loss function and optimizer
-learning_rate = 1e-5
-# loss_fn = nn.MSELoss()  # mean square error
-loss_fn = nn.SmoothL1Loss()  # mean absolute error
+learning_rate = 1e-3
+loss_fn = nn.MSELoss()  # mean square error
+# loss_fn = nn.SmoothL1Loss()  # mean absolute error
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 n_epochs = 1200   # number of epochs to run
@@ -125,7 +135,7 @@ model.load_state_dict(best_weights)
 # print("y pred: ", type(y_pred), y_pred.shape)
 # std = calculate_std_dev(y_pred, y_test)
 # Save the state dictionary
-save_model(model, f'best_model_experimental_LeakyReLU_Dx_SmoothL1Loss_batch{batch_size}_epoch{n_epochs}')
+save_model(model, f'best_model_experimental_SigmoidReLU_Dx_MSE_batch{batch_size}_epoch{n_epochs}')
 
 # Plot accuracy
 fig, ax = plt.subplots()
@@ -136,13 +146,13 @@ print("Loss: %.4f" % best_mea)
 plt.xlabel('Epoch')
 # plt.ylabel('Mean Absolute Error (MAE)')
 # plt.ylabel('Mean Square Error (MSE)')
-plt.ylabel('Loss (SmoothL1Loss)')
+plt.ylabel('Loss (MSE)')
 
 plt.plot(history)
 
 # Add a text box to the plot
 textstr = '\n'.join((
-    r'$Loss = %.4f$' % (best_mea, ),
+    r'MSE = %.4f$' % (best_mea, ),
     r'$RMSE = %.4f$' % (np.sqrt(best_mea), ),
     r'$\sigma = %.2f$' % (std, )
 ))
