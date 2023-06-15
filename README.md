@@ -38,7 +38,9 @@ logger_console_level: info
 
 * `models\` : Neural network models
   * `model.py` : simple class to generate a NN model
-  * `simple_network.py` : perform regression task and save the model generated
+  * `cnn.py` : simple class to generate a CNN model
+  * `run_cnn.py` : perferm convolution task and save the model generated
+  * `run_regression.py` : perform regression task and save the model generated
 
 * `plot\` : Generate figures of diagrams
   * `data.py` : plot the interpolated image
@@ -66,18 +68,29 @@ Below is an example of patches with lines drawn on top to better vizualise them 
 
 ## Generate a model
 
-You then need to generate a model using `simple_network.py`. Make sure you have set up the right directory to store 
-the output file. This script generates a dataset itself to train the network on. The model is stored in `.\saved\model`.
+You then need to generate a model using `run_regression.py` or `run_cnn.py`. The data structure changes whether you perferm the regression
+or the convolution task. When loading the diagrams you have to make sure to set up the tensor accordingly. Make sure you have set up the 
+right directory to store the output file. This script generates a dataset itself to train the network on. The model is stored in `.\saved\model`.
 
 ## Feedforward
 
 After training your network, you can use `test_network.py` to test the network on the data. Make sure whenever you change 
-the network structure in `simple_network.py` to also change it in `model.py` for compatibility. Otherwise, you will get 
+the network structure in `run_regression.py` to also change it in `model.py` for compatibility. Otherwise, you will get 
 layer size related errors. The file also generates a plot to see if the predicted angle is correct, but I suggest you
 compute the standard deviation to know if the network works as intended. 
+
+The plot created can look like this (regression example):
+
+### Training period
+![image](https://github.com/3it-inpaqt/line-classification-slope/assets/86256324/05540df2-7cb9-481c-b414-95b09a96c1eb)
+
+### Prediction on some patches
+![image](https://github.com/3it-inpaqt/line-classification-slope/assets/86256324/75c01784-4ab3-4d92-8d41-4ad01df5cc76)
+
 
 ## Switching between branches
 
 It can be interesting to switch between the `double-dot` branch and the `main` branch. The point is to train the network
 on synthetic data and then test it on experimental one. You could also fit tune the network this way. Switching between
-branches is easy since they can generate independent files (tensors and NN models).
+branches is easy since they can generate independent files (tensors and NN models). I decided to not merge them for this
+very reason.
