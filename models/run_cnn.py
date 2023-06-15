@@ -26,7 +26,8 @@ num_epochs = 200
 kernel_size_conv = 4
 kernel_size_maxpool = 2
 network = CNN(kernel_size_conv)
-criterion = nn.MSELoss()  # loss function
+# criterion = nn.MSELoss()  # loss function
+criterion = nn.SmoothL1Loss
 optimizer = optim.Adam(network.parameters(), lr=learning_rate)  # optimizer
 logger.info('Model has been initialized')
 

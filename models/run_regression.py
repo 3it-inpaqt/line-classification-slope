@@ -15,149 +15,163 @@ from utils.statistics import calculate_std_dev
 from utils.settings import settings
 from utils.misc import load_list_from_file, renorm_all_tensors, enhance_contrast
 
-# Read data
-# n = 500  # number of images to create
-# N = 18  # size of the images (NxN)
+if __name__ == '__main__':
 
-# Load patches
-# patches = torch.load('./saved/double_dot_patches.pt'),
-# n = patches[0].shape[0]
-# N = 18
+    # Read data
+    # n = 500  # number of images to create
+    # N = 18  # size of the images (NxN)
 
-# X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-X, y = torch.load('./saved/double_dot_patches_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-# X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
-# X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
-n, N = X.shape
-# X = (renorm_all_tensors(X.reshape((n, settings.patch_size_x, settings.patch_size_y)), True)).reshape((n, N))
-# print(X.shape)
+    # Load patches
+    # patches = torch.load('./saved/double_dot_patches.pt'),
+    # n = patches[0].shape[0]
+    # N = 18
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    # X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
+    X_path = './saved/double_dot_patches_Dx.pt'
+    y_path = './saved/double_dot_normalized_angles.txt'
+    X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
+    # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
+    # X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
+    n, N = X.shape
+    # X = (renorm_all_tensors(X.reshape((n, settings.patch_size_x, settings.patch_size_y)), True)).reshape((n, N))
+    # print(X.shape)
 
 
-# Read Synthetic data
-# X, y = create_image_set(n, N, aa=True)  # n images of size NxN
-# X = X.reshape(n, N*N)
-# y_normalized = normalize_angle(y)
+    # Read Synthetic data
+    # X, y = create_image_set(n, N, aa=True)  # n images of size NxN
+    # X = X.reshape(n, N*N)
+    # y_normalized = normalize_angle(y)
 
-# fig, axes = create_multiplots(X, y, number_sample=16)
-# plt.tight_layout()
-# plt.show()
+    # fig, axes = create_multiplots(X, y, number_sample=16)
+    # plt.tight_layout()
+    # plt.show()
 
-# train-test split for model evaluation
-# X_train, X_test, y_train, y_test = train_test_split(X, y_normalized, train_size=0.7, shuffle=True)
-X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
+    # train-test split for model evaluation
+    # X_train, X_test, y_train, y_test = train_test_split(X, y_normalized, train_size=0.7, shuffle=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
 
-# Convert to 2D PyTorch tensors
-X_train = torch.tensor(X_train, dtype=torch.float32)
-y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
-X_test = torch.tensor(X_test, dtype=torch.float32)
-y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
+    # Convert to 2D PyTorch tensors
+    X_train = torch.tensor(X_train, dtype=torch.float32)
+    y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
+    X_test = torch.tensor(X_test, dtype=torch.float32)
+    y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
-# Define the model
-model = nn.Sequential(
-        nn.Linear(N, 48),  # change N to N*N if you use synthetic data
-        nn.LeakyReLU(),
-        nn.Linear(48, 24),
-        nn.LeakyReLU(),
-        nn.Linear(24, 12),
-        nn.LeakyReLU(),
-        nn.Linear(12, 6),
-        nn.LeakyReLU(),
-        nn.Linear(6, 1),
-    )
+    # Define the model
+    # model = nn.Sequential(
+    #         nn.Linear(N, 48),  # change N to N*N if you use synthetic data
+    #         nn.LeakyReLU(),
+    #         nn.Linear(48, 24),
+    #         nn.LeakyReLU(),
+    #         nn.Linear(24, 12),
+    #         nn.LeakyReLU(),
+    #         nn.Linear(12, 6),
+    #         nn.LeakyReLU(),
+    #         nn.Linear(6, 1),
+    #     )
 
-# loss function and optimizer
-learning_rate = 1e-5
-# loss_fn = nn.MSELoss()  # mean square error
-loss_fn = nn.SmoothL1Loss()  # mean absolute error
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    model = nn.Sequential(
+            nn.Linear(N, 128),  # change N to N*N if you use synthetic data
+            nn.Sigmoid(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 1),
+        )
 
-n_epochs = 1200   # number of epochs to run
-batch_size = 16  # size of each batch
-batch_start = torch.arange(0, len(X_train), batch_size)
+    # loss function and optimizer
+    learning_rate = 1e-3
+    loss_fn = nn.MSELoss()  # mean square error
+    # loss_fn = nn.SmoothL1Loss()  # mean absolute error
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-# Hold the best model
-best_mea = np.inf   # init to infinity
-best_weights = None
-history = []
+    n_epochs = 1200   # number of epochs to run
+    batch_size = 16  # size of each batch
+    batch_start = torch.arange(0, len(X_train), batch_size)
 
-pbar = tqdm(range(n_epochs), desc="Training Progress", unit="epoch")
+    # Hold the best model
+    best_mea = np.inf   # init to infinity
+    best_weights = None
+    history = []
 
-for epoch in range(n_epochs):
-    model.train()
-    for start in batch_start:
-        # take a batch
-        X_batch = X_train[start:start+batch_size]
-        y_batch = y_train[start:start+batch_size]
-        # X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
-        # forward pass
-        y_pred = model(X_batch)
-        # print('Y pred: ', y_pred)
-        loss = loss_fn(y_pred, y_batch)
-        # backward pass
-        optimizer.zero_grad()
-        loss.backward()
-        # update weights
-        optimizer.step()
-        # update progress bar
-        # tqdm.write("Epoch {}, Batch {}: Loss = {:.4f}".format(epoch, start, loss), end="\r")
-    pbar.update(1)
-    # evaluate accuracy at end of each epoch
-    model.eval()
-    X_test = X_test.flatten(1)
-    y_pred = model(X_test)
+    pbar = tqdm(range(n_epochs), desc="Training Progress", unit="epoch")
 
-    mea = loss_fn(y_pred, y_test)
-    mea = float(mea)
-    history.append(mea)
-    pbar.set_postfix({"MSE": mea})
+    for epoch in range(n_epochs):
+        model.train()
+        for start in batch_start:
+            # take a batch
+            X_batch = X_train[start:start+batch_size]
+            y_batch = y_train[start:start+batch_size]
+            # X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
+            # forward pass
+            y_pred = model(X_batch)
+            # print('Y pred: ', y_pred)
+            loss = loss_fn(y_pred, y_batch)
+            # backward pass
+            optimizer.zero_grad()
+            loss.backward()
+            # update weights
+            optimizer.step()
+            # update progress bar
+            # tqdm.write("Epoch {}, Batch {}: Loss = {:.4f}".format(epoch, start, loss), end="\r")
+        pbar.update(1)
+        # evaluate accuracy at end of each epoch
+        model.eval()
+        X_test = X_test.flatten(1)
+        y_pred = model(X_test)
 
-    if mea < best_mea:
-        best_mea = mea
-        best_weights = copy.deepcopy(model.state_dict())
-        y_pred_best = model(X_test)
-        std = calculate_std_dev(y_pred, y_test)
+        mea = loss_fn(y_pred, y_test)
+        mea = float(mea)
+        history.append(mea)
+        pbar.set_postfix({"MSE": mea})
 
-pbar.close()
-# restore model and return best accuracy
-model.load_state_dict(best_weights)
-# y_pred = model(X_test)
-# print("y test: ", type(y_test), y_test.shape)
-# print("y pred: ", type(y_pred), y_pred.shape)
-# std = calculate_std_dev(y_pred, y_test)
-# Save the state dictionary
-save_model(model, f'best_model_experimental_LeakyReLU_Dx_SmoothL1Loss_batch{batch_size}_epoch{n_epochs}')
+        if mea < best_mea:
+            best_mea = mea
+            best_weights = copy.deepcopy(model.state_dict())
+            y_pred_best = model(X_test)
+            std = calculate_std_dev(y_pred, y_test)
 
-# Plot accuracy
-fig, ax = plt.subplots()
-# plt.suptitle('Training on the experimental patches (DQD)')
-ax.set_title(f'Training on the experimental patches (regression + Dx) \n Learning rate: {learning_rate} | Epochs: {n_epochs} | Batch: {batch_size}')
-print("Loss: %.4f" % best_mea)
-# print("RMAE: %.4f" % np.sqrt(best_mea))
-plt.xlabel('Epoch')
-# plt.ylabel('Mean Absolute Error (MAE)')
-# plt.ylabel('Mean Square Error (MSE)')
-plt.ylabel('Loss (SmoothL1Loss)')
+    pbar.close()
+    # restore model and return best accuracy
+    model.load_state_dict(best_weights)
+    # y_pred = model(X_test)
+    # print("y test: ", type(y_test), y_test.shape)
+    # print("y pred: ", type(y_pred), y_pred.shape)
+    # std = calculate_std_dev(y_pred, y_test)
+    # Save the state dictionary
+    save_model(model, f'best_model_experimental_SigmoidReLU_Dx_MSE_batch{batch_size}_epoch{n_epochs}')
 
-plt.plot(history)
+    # Plot accuracy
+    fig, ax = plt.subplots()
+    # plt.suptitle('Training on the experimental patches (DQD)')
+    ax.set_title(f'Training on the experimental patches (regression + Dx) \n Learning rate: {learning_rate} | Epochs: {n_epochs} | Batch: {batch_size}')
+    print("Loss: %.4f" % best_mea)
+    # print("RMAE: %.4f" % np.sqrt(best_mea))
+    plt.xlabel('Epoch')
+    # plt.ylabel('Mean Absolute Error (MAE)')
+    # plt.ylabel('Mean Square Error (MSE)')
+    plt.ylabel('Loss (MSE)')
 
-# Add a text box to the plot
-textstr = '\n'.join((
-    r'$Loss = %.4f$' % (best_mea, ),
-    r'$RMSE = %.4f$' % (np.sqrt(best_mea), ),
-    r'$\sigma = %.2f$' % (std, )
-))
-props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
+    plt.plot(history)
 
-plt.show()
+    # Add a text box to the plot
+    textstr = '\n'.join((
+        r'MSE = %.4f$' % (best_mea, ),
+        r'$RMSE = %.4f$' % (np.sqrt(best_mea), ),
+        r'$\sigma = %.2f$' % (std, )
+    ))
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
 
-# Plot some lines and patches
-if torch.cuda.is_available():
-    y_pred_numpy = y_pred_best.cpu().detach().numpy()
-else:
-    y_pred_numpy = y_pred_best.cpu().detach().numpy()
+    plt.show()
 
-fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=16)
-plt.tight_layout()
-# plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_patches.png")
-plt.show()
+    # Plot some lines and patches
+    if torch.cuda.is_available():
+        y_pred_numpy = y_pred_best.cpu().detach().numpy()
+    else:
+        y_pred_numpy = y_pred_best.cpu().detach().numpy()
+
+    fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=16)
+    plt.tight_layout()
+    # plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_patches.png")
+    plt.show()
