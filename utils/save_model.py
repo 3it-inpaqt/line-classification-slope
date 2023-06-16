@@ -1,16 +1,26 @@
 import os
 import torch
 
+from utils.logger import logger
 
-def save_model(model, filename='model'):
+
+def save_model(model, filename='model', run_type='ff'):
     """
 
     :param model: Pytorch model to save
     :param filename: String, by default the model is saved as 'model', if the file already exist, an index is added
+    :param run_type: Type of the run: ff = feedforward, cnn = convolution
     :return: save model to a directory called 'saved', feel free to change the name if you want
     """
     # Define path to 'saved' folder
-    path = ".\\saved\\model\\regression"
+    if run_type == "ff":
+        path = ".\\saved\\model\\regression"
+    elif run_type == "cnn":
+        path = ".\\saved\\model\\convolution"
+    else:
+        while run_type != "ff" and run_type != "cnn":
+            logger.warning(f'Run type invalid.')
+            run_type = input('Please select a proper run type (cnn or ff): ')
 
     # Add extension if not provided
     if not ('.pt' in filename):

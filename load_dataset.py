@@ -1,24 +1,19 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
 from typing import List
 import torch
 
-import matplotlib.pyplot as plt
-from numpy import pi
-import numpy as np
-from random import sample
-
 from classes.diagram_offline import DiagramOffline
 from classes.diagram_ndot_offline import DiagramOfflineNDot
-
-from utils.angle_operations import angles_from_list, normalize_angle, get_angle_stat
-from utils.settings import settings
-from utils.output import init_out_directory, ExistingRunName
-from utils.logger import logger
-from utils.statistics import resample_dataset
-
-from utils.misc import save_list_to_file
-from pathlib import Path
 from classes.qdsd import DATA_DIR
 from plot.data import plot_patch_sample
+from plot.lines_visualisation import create_multiplots
+from utils.angle_operations import angles_from_list, normalize_angle, get_angle_stat
+from utils.logger import logger
+from utils.misc import save_list_to_file, renorm_all_tensors
+from utils.settings import settings
+from utils.output import init_out_directory, ExistingRunName
 
 run_name = settings.run_name
 
@@ -84,11 +79,11 @@ if __name__ == '__main__':
 
     # print(lines_list)
 
-    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD_Dx_2')
+    # plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD_Dx_2')
 
     # Calculate angles by hand for verification
     angles_lines = angles_from_list(selected_lines)
-    angles_lines_normalized = normalize_angle(angles_lines)
+    # angles_lines_normalized = normalize_angle(angles_lines)
 
     # Resampling of the dataset
     # resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
@@ -108,8 +103,18 @@ if __name__ == '__main__':
 
     stacked_patches = torch.stack(selected_patches)
     tensor_patches = stacked_patches.unsqueeze(1)
+
+    # prepro_tensor = renorm_all_tensors(tensor_patches, True)
     # print(tensor_patches.shape)
     # print(len(angles_lines))
     # Save patches and angles to file for later use
-    # torch.save(tensor_patches, './saved/model/double_dot_patches_cnn_Dx.pt')
-    save_list_to_file(angles_lines, './saved/double_dot_normalized_angles_pi.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
+    # torch.save(prepro_tensor, './saved/model/double_dot_patches_cnn_Dx_preprocessing.pt')
+    # fig1, axes1 = create_multiplots(prepro_tensor, angles_lines, number_sample=16)
+    # plt.tight_layout()
+    # plt.show()
+
+    # fig2, axes2 = create_multiplots(tensor_patches, angles_lines, number_sample=16)
+    # plt.tight_layout()
+    # plt.show()
+
+    # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them

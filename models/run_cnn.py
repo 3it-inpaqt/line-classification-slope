@@ -27,29 +27,30 @@ kernel_size_conv = 4
 kernel_size_maxpool = 2
 network = CNN(kernel_size_conv)
 # criterion = nn.MSELoss()  # loss function
-criterion = nn.SmoothL1Loss
+criterion = nn.SmoothL1Loss()
+name_criterion = str(criterion)[:-2]
 optimizer = optim.Adam(network.parameters(), lr=learning_rate)  # optimizer
 logger.info('Model has been initialized')
 
 # Load data
-# X, y = torch.load('./saved/double_dot_patches_cnn_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-X_exp = torch.load('./saved/double_dot_patches_cnn_Dx.pt')
+X, y = torch.load('./saved/double_dot_patches_cnn_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
+# X_exp = torch.load('./saved/double_dot_patches_cnn_Dx.pt')
 
-n = X_exp.shape[0]
-N = 18
+# n = X_exp.shape[0]
+# N = 18
 
 # Read Synthetic data
-sigma = 0.1
-anti_alias = False
-X, y = create_image_set(n, N, sigma, anti_alias)  # n images of size NxN
+# sigma = 0.1
+# anti_alias = False
+# X, y = create_image_set(n, N, sigma, anti_alias)  # n images of size NxN
 # y_normalized = normalize_angle(y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
 
 # Convert to 2D PyTorch tensors
-X_train = torch.tensor(X_train, dtype=torch.float32).unsqueeze(1)  # adds a dimension of size 1 at index 1, reshaped to have a size of [n, 1, N, N]
+X_train = torch.tensor(X_train, dtype=torch.float32)
 y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
-X_test = torch.tensor(X_test, dtype=torch.float32).unsqueeze(1)  # adds a dimension of size 1 at index 1, reshaped to have a size of [n, 1, N, N]
+X_test = torch.tensor(X_test, dtype=torch.float32)
 y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 logger.info('Dataset has been set up successfully')
 
@@ -69,7 +70,6 @@ best_weights = None
 history = []
 
 # Initialize the progress bar
-# logger.info('Starting training')
 pbar = tqdm(range(num_epochs), desc="Training Progress", unit="epoch")
 
 for epoch in range(num_epochs):
@@ -88,7 +88,7 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+    pbar.update(1)
     # Evaluate accuracy at the end of each epoch
     network.eval()
     y_pred = network(X_test)
@@ -99,7 +99,7 @@ for epoch in range(num_epochs):
 
     # Update the progress bar description
     # pbar.update(1)
-    pbar.set_postfix({"MSE": mse})
+    pbar.set_postfix({"Loss": mse})
 
     if mse < best_mse:
         best_mse = mse
@@ -117,15 +117,18 @@ y_pred = network(X_test)
 std = calculate_std_dev(y_pred, y_test)
 
 # Save the state dictionary
-model_name = f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}.pt'
-if anti_alias:
-    model_name = f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}_aa.pt'
-# save_model(network, model_name)
+run_name = f'cnn_experimental_Dx_{name_criterion}_kernel{kernel_size_conv}_batch{batch_size}_epochs{num_epochs}'
+model_name = f'best_model_{run_name}.pt'
+#
+# if anti_alias:
+#     model_name = f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}_aa.pt'
+save_model(network, model_name, 'cnn')
 
 # Plot accuracy
 fig, ax = plt.subplots()
 title = '\n'.join((
-    r'CNN Training on the synthetic patches (gaussian blur $\sigma = %.4f $)' % (sigma, ),
+    # r'CNN Training on the synthetic patches (gaussian blur $\sigma = %.4f $)' % (sigma, ),
+    r'CNN Training on experimental patches (Dx)',
     f'Kernel size: {kernel_size_conv} | Batch size: {batch_size} | Epochs: {num_epochs} | lr: {learning_rate}'
 ))
 
@@ -134,19 +137,19 @@ print("MSE: %.4f" % best_mse)
 print("RMSE: %.4f" % sqrt(best_mse))
 print("STD: % .4f" % std)
 ax.set_xlabel('Epoch')
-ax.set_ylabel('Mean Square Error (MSE)')
+ax.set_ylabel(f'Loss ({name_criterion})')
 ax.plot(history)
 
 # Add a text box to the plot
 textstr = '\n'.join((
-    r'$MSE = %.4f$' % (best_mse, ),
+    r'$Loss = %.4f$' % (best_mse, ),
     r'$RMSE = %.4f$' % (sqrt(best_mse), ),
     r'$\sigma = %.2f$' % (std, )
 ))
 
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
-plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_MSE.png")
+plt.savefig(f".\saved\plot\{run_name}.png")
 plt.show()
 
 
@@ -158,5 +161,5 @@ else:
 
 fig1, axes1 = create_multiplots(X_test.cpu(), y_test.cpu(), y_pred_numpy, number_sample=16)
 plt.tight_layout()
-plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_patches.png")
+plt.savefig(f".\saved\plot\{run_name}_patches.png")
 plt.show()

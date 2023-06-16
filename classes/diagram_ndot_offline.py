@@ -197,4 +197,5 @@ class DiagramOfflineNDot(DiagramOffline):
         if len(diagrams) == 0:
             logger.error(f'No diagram loaded in "{zip_dir}"')
 
+        print(type(diagrams[0].values))
         return diagrams
