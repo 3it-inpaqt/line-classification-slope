@@ -11,7 +11,7 @@ from plot.data import plot_patch_sample
 from plot.lines_visualisation import create_multiplots
 from utils.angle_operations import angles_from_list, normalize_angle, get_angle_stat
 from utils.logger import logger
-from utils.misc import save_list_to_file, renorm_all_tensors
+from utils.misc import save_list_to_file, renorm_array
 from utils.settings import settings
 from utils.output import init_out_directory, ExistingRunName
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     for patch, line_list in zip(patches_list, lines_list):
         if len(line_list) == 1:  # takes patch into account only if it has one line crossing it
             Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
-            selected_patches.append(torch.from_numpy(Dx))  # convert numpy array back to torch tensor
+            selected_patches.append(renorm_array(Dx))  # convert numpy array back to torch tensor and normalize it
             selected_lines.append(line_list)
 
     # print(lines_list)
@@ -102,19 +102,16 @@ if __name__ == '__main__':
     #     stacked_patches[i] = image_tensor
 
     stacked_patches = torch.stack(selected_patches)
-    tensor_patches = stacked_patches.unsqueeze(1)
+    # tensor_patches = stacked_patches.unsqueeze(1)
 
     # prepro_tensor = renorm_all_tensors(tensor_patches, True)
-    # print(tensor_patches.shape)
+    print(stacked_patches[0, 0, :, :])
     # print(len(angles_lines))
     # Save patches and angles to file for later use
-    # torch.save(prepro_tensor, './saved/model/double_dot_patches_cnn_Dx_preprocessing.pt')
-    # fig1, axes1 = create_multiplots(prepro_tensor, angles_lines, number_sample=16)
-    # plt.tight_layout()
-    # plt.show()
+    torch.save(stacked_patches, './saved/double_dot_patches_Dx_normalized.pt')
 
-    # fig2, axes2 = create_multiplots(tensor_patches, angles_lines, number_sample=16)
-    # plt.tight_layout()
-    # plt.show()
+    fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
+    plt.tight_layout()
+    plt.show()
 
     # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them

@@ -13,7 +13,9 @@ from plot.lines_visualisation import create_multiplots
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
 from utils.settings import settings
-from utils.misc import load_list_from_file, renorm_all_tensors, enhance_contrast
+from utils.misc import load_list_from_file
+
+# TODO Use the settings file to set parameters instead of changing them manually
 
 if __name__ == '__main__':
 
@@ -29,15 +31,15 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-    X_path = './saved/double_dot_patches_Dx.pt'
+    X_path = './saved/double_dot_patches_Dx_normalized.pt'
     y_path = './saved/double_dot_normalized_angles.txt'
     X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
+    N = settings.patch_size_x * settings.patch_size_y
     # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
     # X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
-    n, N = X.shape
+    # n, N = X.shape
     # X = (renorm_all_tensors(X.reshape((n, settings.patch_size_x, settings.patch_size_y)), True)).reshape((n, N))
     # print(X.shape)
-
 
     # Read Synthetic data
     # X, y = create_image_set(n, N, aa=True)  # n images of size NxN
@@ -58,34 +60,23 @@ if __name__ == '__main__':
     X_test = torch.tensor(X_test, dtype=torch.float32)
     y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
-    # Define the model
-    # model = nn.Sequential(
-    #         nn.Linear(N, 48),  # change N to N*N if you use synthetic data
-    #         nn.LeakyReLU(),
-    #         nn.Linear(48, 24),
-    #         nn.LeakyReLU(),
-    #         nn.Linear(24, 12),
-    #         nn.LeakyReLU(),
-    #         nn.Linear(12, 6),
-    #         nn.LeakyReLU(),
-    #         nn.Linear(6, 1),
-    #     )
-
     model = nn.Sequential(
-            nn.Linear(N, 128),  # change N to N*N if you use synthetic data
-            nn.Sigmoid(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Linear(64, 1),
+            nn.Linear(N, 24),  # change N to N*N if you use synthetic data
+            nn.LeakyReLU(),
+            nn.Linear(24, 12),
+            nn.LeakyReLU(),
+            nn.Linear(12, 6),
+            nn.LeakyReLU(),
+            nn.Linear(6, 1)
         )
 
     # loss function and optimizer
-    learning_rate = 1e-3
-    loss_fn = nn.MSELoss()  # mean square error
+    learning_rate = 1e-5
+    loss_fn = nn.SmoothL1Loss()  # mean square error
     # loss_fn = nn.SmoothL1Loss()  # mean absolute error
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-    n_epochs = 1200   # number of epochs to run
+    n_epochs = 500   # number of epochs to run
     batch_size = 16  # size of each batch
     batch_start = torch.arange(0, len(X_train), batch_size)
 
@@ -102,7 +93,7 @@ if __name__ == '__main__':
             # take a batch
             X_batch = X_train[start:start+batch_size]
             y_batch = y_train[start:start+batch_size]
-            # X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
+            X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # forward pass
             y_pred = model(X_batch)
             # print('Y pred: ', y_pred)
@@ -139,7 +130,7 @@ if __name__ == '__main__':
     # print("y pred: ", type(y_pred), y_pred.shape)
     # std = calculate_std_dev(y_pred, y_test)
     # Save the state dictionary
-    save_model(model, f'best_model_experimental_SigmoidReLU_Dx_MSE_batch{batch_size}_epoch{n_epochs}')
+    save_model(model, f'best_model_experimental_Dx_{str(loss_fn)[:-2]}_batch{batch_size}_epoch{n_epochs}')
 
     # Plot accuracy
     fig, ax = plt.subplots()
@@ -156,7 +147,7 @@ if __name__ == '__main__':
 
     # Add a text box to the plot
     textstr = '\n'.join((
-        r'MSE = %.4f$' % (best_mea, ),
+        r'$Loss = %.4f$' % (best_mea, ),
         r'$RMSE = %.4f$' % (np.sqrt(best_mea), ),
         r'$\sigma = %.2f$' % (std, )
     ))

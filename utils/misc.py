@@ -278,21 +278,17 @@ def enhance_contrast(tensor, threshold=0.3):
     return enhanced_tensor
 
 
-def renorm_all_tensors(big_tensor, enhance=False):
+def renorm_array(array: np.ndarray) -> torch.Tensor:
     """
-    Re-normalise all tensors in a [n, 1, N, N] tensor with value between 0 and 1
-    :param big_tensor:
-    :param enhance: Whether you want to enhance contrast or not, false by default
-    :return:
+    Re-normalise a tensor with value between 0 and 1
+    :param array: Tensor of size [N, N]
+    :return: Normalized tensor of size [1, N, N]
     """
-    n = big_tensor.shape[0]
-
-    new_tensor = big_tensor.view(big_tensor.size(0), -1)
+    tensor = torch.from_numpy(array)
+    new_tensor = tensor.view(1, -1)
     new_tensor -= new_tensor.min(1, keepdim=True)[0]
     new_tensor /= new_tensor.max(1, keepdim=True)[0]
-    new_tensor = new_tensor.view(n, settings.patch_size_x, settings.patch_size_y)
-
-    if enhance:
-        new_tensor = enhance_contrast(new_tensor)
+    new_tensor = new_tensor.view(1, tensor.size(0), tensor.size(1))
 
     return new_tensor
+
