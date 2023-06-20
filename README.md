@@ -59,7 +59,7 @@ From there, you can decide what model to use (feed-forward, CNN, etc.), and set 
 * `models\` : Neural network models
   * `model.py` : simple class to generate a NN model
   * `cnn.py` : simple class to generate a CNN model
-  * `run_cnn.py` : perferm convolution task and save the model generated
+  * `run_cnn.py` : perform convolution task and save the model generated
   * `run_regression.py` : perform regression task and save the model generated
 
 * `plot\` : Generate figures of diagrams
@@ -85,13 +85,13 @@ You first need to load the diagrams from the files. `load_dataset.py` will extra
 you supposedly added to a folder called data, along with the json file containing the labels' information. Furthermore, 
 the data are then converted to pytorch tensors and stored in a folder (`.\saved`) that you need to create. 
 
-Below is an example of patches with lines drawn on top to better vizualise them (in this case the derivative of the diagrams is used):
+Below is an example of patches with lines drawn on top to better visualise them (in this case the derivative of the diagrams is used):
 ![image](https://github.com/3it-inpaqt/line-classification-slope/assets/86256324/db24c29f-580a-48b4-8f99-dd66d22bf49a)
 
 
 ## Generate a model
 
-You then need to generate a model using `run_regression.py` or `run_cnn.py`. The data structure changes whether you perferm the regression
+You then need to generate a model using `run_regression.py` or `run_cnn.py`. The data structure changes whether you perform the regression
 or the convolution task. When loading the diagrams you have to make sure to set up the tensor accordingly. Make sure you have set up the 
 right directory to store the output file. This script generates a dataset itself to train the network on. The model is stored in `.\saved\model`.
 
