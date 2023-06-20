@@ -28,6 +28,9 @@ def main():
         X = X.reshape(n, N*N)
         # Set title for loss evolution with respect to epoch and model name
         model_name = f'best_model_experimental_Dx_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        # custom_suffix = '_new_loss'
+        # if len(custom_suffix) > 0:
+        #     model_name += custom_suffix
         ax_title = f'Training on the synthetic patches (regression) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
 
     else:
@@ -90,6 +93,11 @@ def main():
             # Forward pass
             y_pred = model(X_batch)
             loss = criterion(y_pred, y_batch)
+
+            # loss_init = criterion(y_pred, y_batch)
+            # loss_prime = criterion(y_pred, y_batch - 0.5)
+            # loss = min(loss_prime, loss_init)
+
             # Backward pass
             optimizer.zero_grad()
             loss.backward()
