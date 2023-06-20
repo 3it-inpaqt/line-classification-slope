@@ -16,12 +16,32 @@ Create a file `settings.yaml` to override settings documented in `utils\settings
 ### For example:
 
 ```yaml
+# Related to the diagrams
 run_name: 'tmp'
 research_group: 'eva_dupont_ferrier'
 pixel_size: 0.002
 dot_number: 2
 logger_console_level: info
+
+# Related to the simulation
+x_path: './saved/double_dot_patches_Dx_normalized.pt'
+y_path: './saved/double_dot_normalized_angles.txt'
+
+model_type: 'FF'
+loss_fn: 'SmoothL1Loss'
+learning_rate: 0.001
+n_epochs: 1200   # number of epochs to run
+batch_size: 10  # size of each batch
+kernel_size_conv:  4  # for convolution
+
+# Related to synthetic data
+synthetic: False
+n_synthetic: 500  # number of synthetic data to create
+anti_alias: False
+sigma: 0.1
 ```
+
+From there, you can decide what model to use (feed-forward, CNN, etc.), and set the different hyperparameters. 
 
 # Files structure
 
@@ -55,6 +75,9 @@ logger_console_level: info
   * `statistics.py` : miscellaneous code to compute statistic
 
 # Workflow
+
+If you wish to simply run the program, then use `run.py` after setting proper parameters in the `settings.yaml` file. 
+This allows you to be more flexible. However, you can also proceed like explained below.
 
 ## Loading diagrams
 

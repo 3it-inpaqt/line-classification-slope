@@ -173,7 +173,7 @@ def main():
 
     fig1, axes1 = create_multiplots(X_test.cpu(), y_test.cpu(), y_pred_numpy, number_sample=16)
     plt.tight_layout()
-    plt.savefig(f".\saved\plot\{run_name}_patches.png")
+    plt.savefig(f".\saved\plot\{model_name}_patches.png")
     plt.show()
 
 
