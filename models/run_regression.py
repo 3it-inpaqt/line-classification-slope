@@ -15,25 +15,15 @@ from utils.statistics import calculate_std_dev
 from utils.settings import settings
 from utils.misc import load_list_from_file
 
+
 # TODO Use the settings file to set parameters instead of changing them manually
 
-if __name__ == '__main__':
+def main():
 
-    # Read data
-    # n = 500  # number of images to create
-    # N = 18  # size of the images (NxN)
-
-    # Load patches
-    # patches = torch.load('./saved/double_dot_patches.pt'),
-    # n = patches[0].shape[0]
-    # N = 18
-
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    # X, y = torch.load('./saved/double_dot_patches.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-    X_path = './saved/double_dot_patches_Dx_normalized.pt'
-    y_path = './saved/double_dot_normalized_angles.txt'
+    X_path = settings.x_path
+    y_path = settings.y_path
     X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
+
     N = settings.patch_size_x * settings.patch_size_y
     # X, y = torch.load('./saved/single_dot_patches_rot.pt'), [float(x) for x in load_list_from_file('./saved/single_dot_normalized_angles_rot.txt')]
     # X, y = torch.load('./saved/double_dot_patches_resample_20.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles_resample_20.txt')]
@@ -166,3 +156,9 @@ if __name__ == '__main__':
     plt.tight_layout()
     # plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_patches.png")
     plt.show()
+
+
+if __name__ == '__main__':
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    main()
+

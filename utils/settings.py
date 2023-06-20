@@ -101,6 +101,9 @@ class Settings:
     # If true the data will be loaded from cache if possible.
     use_data_cache: bool = False
 
+    x_path: str = './saved/double_dot_patches_Dx_normalized.pt'
+    y_path: str = './saved/double_dot_normalized_angles.txt'
+
     # The size of a diagram patch send to the network input (number of pixel)
     patch_size_x: int = 18
     patch_size_y: int = 18
@@ -164,10 +167,14 @@ class Settings:
 
     # The type of model to use (could be a neural network).
     # Have to be in the implemented list: FF, BFF, CNN, BCNN.
-    model_type: str = 'CNN'
+    model_type: str = 'FF'
 
-    # The number of fully connected hidden layer and their respective number of neurons.
-    hidden_layers_size: Sequence = (200, 100)
+    # Hyperparameters
+    loss_fn: str = 'SmoothL1Loss'
+    learning_rate: float = 0.00001
+    n_epochs: int = 500  # number of epochs to run
+    batch_size: int = 16  # size of each batch
+    kernel_size_conv: int = 4  # for convolution
 
     # The number of convolution layers and their respective properties (for CNN models only).
     conv_layers_kernel: Sequence = (4, 4)
