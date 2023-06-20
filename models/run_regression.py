@@ -8,7 +8,7 @@ from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
 from linegeneration.generate_lines import create_image_set
-from models.model import loss_fn_dic
+from models.model import loss_fn_dic, find_loss
 from plot.lines_visualisation import create_multiplots
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
@@ -92,11 +92,10 @@ def main():
             X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # Forward pass
             y_pred = model(X_batch)
-            loss = criterion(y_pred, y_batch)
+            # loss_1 = criterion(y_pred, y_batch)
+            # loss_2 = criterion(y_pred - 0.5, y_batch)
 
-            # loss_init = criterion(y_pred, y_batch)
-            # loss_prime = criterion(y_pred, y_batch - 0.5)
-            # loss = min(loss_prime, loss_init)
+            loss = find_loss(y_pred, y_batch, criterion, threshold=0.49)
 
             # Backward pass
             optimizer.zero_grad()
