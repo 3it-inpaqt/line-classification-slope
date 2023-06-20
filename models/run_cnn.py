@@ -13,29 +13,17 @@ from utils.logger import logger
 from plot.lines_visualisation import create_multiplots
 from utils.angle_operations import normalize_angle
 from utils.misc import load_list_from_file
+from models.model import loss_fn_dic
 from utils.save_model import save_model
+from utils.settings import settings
 from utils.statistics import calculate_std_dev
 
 
 def main():
-    # Set hyperparameters
-    batch_size = 32
-    learning_rate = 0.0001
-    num_epochs = 200
-
-    # Initialize model
-    kernel_size_conv = 4
-    kernel_size_maxpool = 2
-    network = CNN(kernel_size_conv)
-    # criterion = nn.MSELoss()  # loss function
-    criterion = nn.SmoothL1Loss()
-    name_criterion = str(criterion)[:-2]
-    optimizer = optim.Adam(network.parameters(), lr=learning_rate)  # optimizer
-    logger.info('Model has been initialized')
-
     # Load data
-    X, y = torch.load('./saved/double_dot_patches_cnn_Dx.pt'), [float(x) for x in load_list_from_file('./saved/double_dot_normalized_angles.txt')]
-    # X_exp = torch.load('./saved/double_dot_patches_cnn_Dx.pt')
+    X_path = settings.x_path
+    y_path = settings.y_path
+    X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
 
     # n = X_exp.shape[0]
     # N = 18
@@ -54,6 +42,22 @@ def main():
     X_test = torch.tensor(X_test, dtype=torch.float32)
     y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
     logger.info('Dataset has been set up successfully')
+
+    # Set hyperparameters
+    batch_size = settings.batch_size
+    learning_rate = settings.learning_rate
+    num_epochs = settings.n_epochs
+
+    # Initialize model
+    kernel_size_conv = settings.kernel_size_conv
+    network = CNN(kernel_size_conv)
+
+    name_criterion = settings.loss_fn
+    criterion = loss_fn_dic[name_criterion]
+
+    optimizer = optim.Adam(network.parameters(), lr=learning_rate)  # optimizer
+    logger.info('Model has been initialized')
+
 
     # Move network and data tensors to device
     device = network.device
