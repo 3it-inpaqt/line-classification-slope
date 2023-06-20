@@ -164,6 +164,8 @@ class Settings:
     # Running on synthetic data or not
     synthetic: bool = False
     n_synthetic: int = 500
+    anti_alias: bool = False
+    sigma: float = 0.1
 
     # ==================================================================================================================
     # ===================================================== Model ======================================================
@@ -395,16 +397,6 @@ class Settings:
         # Networks
         assert isinstance(self.model_type, str) and self.model_type.upper() in ['FF', 'BFF', 'CNN', 'BCNN'], \
             f'Invalid network type {self.model_type}'
-        assert all((a > 0 for a in self.hidden_layers_size)), 'Hidden layer size should be more than 0'
-        assert len(self.conv_layers_channel) == len(self.conv_layers_kernel) == len(self.max_pooling_layers), \
-            'All convolution meta parameters should have the same size (channel, kernels and max pooling)'
-        if self.model_type.upper() in ['CNN', 'BCNN']:
-            assert len(self.conv_layers_channel) + len(self.hidden_layers_size) == len(self.batch_norm_layers), \
-                'The batch normalisation meta parameters should be define for each layer (convolution and linear)'
-        if self.model_type.upper() in ['FF', 'BFF']:
-            assert len(self.hidden_layers_size) == len(self.batch_norm_layers), \
-                'The batch normalisation meta parameters should be define for each linear layer'
-        assert all((a > 0 for a in self.conv_layers_channel)), 'Conv layer nb channel should be more than 0'
         assert all((a > 1 for a in self.conv_layers_kernel)), 'Conv layer kernel size should be more than 1'
 
         # Training
@@ -415,11 +407,6 @@ class Settings:
                                                               'should be at least 1'
         assert not (self.nb_epoch > 0 and self.nb_train_update > 0), 'Exactly one should be set between' \
                                                                      ' number of epoch and number of train step'
-        assert self.bayesian_nb_sample_train > 0, 'The number of bayesian sample should be at least 1'
-        assert self.bayesian_nb_sample_valid > 0, 'The number of bayesian sample should be at least 1'
-        assert self.bayesian_nb_sample_test > 0, 'The number of bayesian sample should be at least 1'
-        assert self.bayesian_confidence_metric in ['std', 'norm_std', 'entropy', 'norm_entropy'], \
-            f'Invalid bayesian confidence metric value "{self.bayesian_confidence_metric}"'
 
         # Checkpoints
         assert self.checkpoints_per_epoch >= 0, 'The number of checkpoints per epoch should be >= 0'

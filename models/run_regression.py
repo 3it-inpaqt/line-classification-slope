@@ -74,7 +74,7 @@ def main():
     batch_start = torch.arange(0, len(X_train), batch_size)
 
     # Hold the best model
-    best_mea = np.inf   # init to infinity
+    best_loss = np.inf   # init to infinity
     best_weights = None
     history = []
 
@@ -95,6 +95,7 @@ def main():
             loss.backward()
             # Update weights
             optimizer.step()
+
         # Update progress bar
         pbar.update(1)
         # Evaluate accuracy at end of each epoch
@@ -107,8 +108,8 @@ def main():
         history.append(loss_value)
         pbar.set_postfix({name_criterion: loss_value})
 
-        if loss_value < best_mea:
-            best_mea = loss_value
+        if loss_value < best_loss:
+            best_loss = loss_value
             best_weights = copy.deepcopy(model.state_dict())
             y_pred_best = model(X_test)
             std = calculate_std_dev(y_pred, y_test)
@@ -124,7 +125,7 @@ def main():
     fig, ax = plt.subplots()
 
     ax.set_title(ax_title)
-    print("Loss: %.4f" % best_mea)
+    print("Loss: %.4f" % best_loss)
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
@@ -132,9 +133,8 @@ def main():
 
     # Add a text box to the plot
     textstr = '\n'.join((
-        r'$Loss = %.4f$' % (best_mea, ),
-        r'$RMSE = %.4f$' % (np.sqrt(best_mea), ),
-        r'$\sigma = %.2f$' % (std, )
+        r'$Loss = %.4f$' % (best_loss, ),
+        r'$\sigma = %.3f$' % (std, )
     ))
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
