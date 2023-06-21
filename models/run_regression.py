@@ -8,7 +8,7 @@ from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
 from linegeneration.generate_lines import create_image_set
-from models.model import loss_fn_dic, find_loss
+from models.model import loss_fn_dic, AngleNet
 from plot.lines_visualisation import create_multiplots
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
@@ -60,13 +60,7 @@ def main():
     # y_test_gpu = y_test.to(device)
 
     input_size = settings.patch_size_x * settings.patch_size_y
-    model = nn.Sequential(
-            nn.Linear(input_size, 24),
-            nn.LeakyReLU(),
-            nn.Linear(24, 6),
-            nn.LeakyReLU(),
-            nn.Linear(6, 1)
-        )
+    model = AngleNet(input_size)  # CHANGE THE STRUCTURE OF THE NETWORK IN THE 'ANGLENET' CLASS
 
     # Loss function and optimizer
     learning_rate = settings.learning_rate
