@@ -51,7 +51,7 @@ def create_multiplots(image_set_input: ndarray, angles: ndarray, prediction_angl
     for i, ax in enumerate(axes.flatten()):
         if i < n:
             index = indices[i]
-            # image = np.reshape(image_set[index, :, :], (Settings.patch_size_x, Settings.patch_size_y))
+            # image = np.reshape(image_set[index, :, :], (settings.patch_size_x, settings.patch_size_y))
             image = np.reshape(image_set[index, :], (settings.patch_size_x, settings.patch_size_y))
             # image = image_set[index, :, :]
 

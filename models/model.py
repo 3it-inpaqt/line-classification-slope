@@ -6,18 +6,16 @@ from torch import Tensor, gt, min
 loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(), 'MSE': nn.MSELoss(), 'MAE': nn.L1Loss()}
 
 
-def AngleNet(N):
+def AngleNet(input_size):
     model = nn.Sequential(
-        nn.Linear(N, 48),  # change N to N*N if you use synthetic data
-        nn.LeakyReLU(),
-        nn.Linear(48, 24),
-        nn.LeakyReLU(),
-        nn.Linear(24, 12),
-        nn.LeakyReLU(),
-        nn.Linear(12, 6),
-        nn.LeakyReLU(),
-        nn.Linear(6, 1),
-    )
+            nn.Linear(input_size, 24),
+            nn.ReLU(),
+            nn.Linear(24, 12),
+            nn.ReLU(),
+            nn.Linear(12, 6),
+            nn.ReLU(),
+            nn.Linear(6, 1)
+        )
     return model
 
 

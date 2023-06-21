@@ -15,9 +15,9 @@ class CNN(nn.Module):
         # Layers
         self.layers = nn.Sequential(
             nn.Conv2d(1, 6, kernel_size=kernel_size_conv, stride=1, padding=1),
-            nn.ReLU(),
+            nn.Sigmoid(),
             nn.Conv2d(6, 12, kernel_size=kernel_size_conv, stride=1, padding=1),
-            nn.ReLU(),
+            nn.Sigmoid(),
             nn.Flatten(),
             # nn.MaxPool2d(kernel_size=kernel_size_maxpool, stride=2),
             nn.Linear(12 * (kernel_size_conv ** 2) * (kernel_size_conv ** 2), 200),

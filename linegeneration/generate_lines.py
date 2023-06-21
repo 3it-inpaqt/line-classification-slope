@@ -7,15 +7,19 @@ from typing import Tuple
 from utils.angle_operations import calculate_angle, normalize_angle
 
 
-def generate_image(size: tuple, sigma: float = 0, aa: bool = False) -> Tuple[ndarray, float]:
+def generate_image(size: tuple, background: bool = False, sigma: float = 0, aa: bool = False) -> Tuple[ndarray, float]:
     """
     Generate a binary image with a random line
     :param size: Shape of the image
+    :param background: Whether to make a noisy background or not
     :param sigma: Add a gaussian blur to the image if True
     :param aa: Anti-alias, creates AA line or not
     :return:
     """
-    img = np.random.normal(10, 0.3, size) * 255
+    if background:
+        img = np.random.normal(0, 0.3, size) * 255
+    else:
+        img = np.zeros(size)
     min_length = 0.9 * min(size[0], size[1])
 
     # Select one random position on an edge

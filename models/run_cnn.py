@@ -18,6 +18,11 @@ from utils.save_model import save_model
 from utils.settings import settings
 from utils.statistics import calculate_std_dev
 
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica"
+})
+
 
 def main():
 
@@ -30,9 +35,9 @@ def main():
         # Set title for loss evolution with respect to epoch and model name
         model_name = f'best_model_experimental_Dx_convolution_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}_kernel{settings.kernel_size_conv}'
 
-        custom_suffix = '_new_loss'
-        if len(custom_suffix) > 0:
-            model_name += custom_suffix
+        # custom_suffix = '_new_loss'
+        # if len(custom_suffix) > 0:
+        #     model_name += custom_suffix
         ax_title = f'Training on the synthetic patches (convolution) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Kernel: {settings.kernel_size_conv}'
 
     else:
