@@ -41,7 +41,7 @@ If you are using Pycharm follow these simple steps:
 _<span style="color:gold;">Note:</span> The settings do not change the structure of the neural network. This has to be
 done manually in either `models/model.py` (feed-forward) or `models/cnn.py` (convolution)_
 
-Create a file `settings.yaml` to override settings documented in `utils\settings.py`.
+Create a file `settings.yaml` to override settings documented in `utils\settings.py`. From there, you can decide what model to use (feed-forward, CNN, etc.), and set the different hyperparameters. 
 
 ### For example:
 
@@ -73,8 +73,6 @@ n_synthetic: 500  # number of synthetic data to create
 anti_alias: False
 sigma: 0.1
 ```
-
-From there, you can decide what model to use (feed-forward, CNN, etc.), and set the different hyperparameters. 
 
 # Files structure
 
