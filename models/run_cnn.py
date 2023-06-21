@@ -35,9 +35,6 @@ def main():
         # Set title for loss evolution with respect to epoch and model name
         model_name = f'best_model_experimental_Dx_convolution_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}_kernel{settings.kernel_size_conv}'
 
-        # custom_suffix = '_new_loss'
-        # if len(custom_suffix) > 0:
-        #     model_name += custom_suffix
         ax_title = f'Training on the synthetic patches (convolution) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Kernel: {settings.kernel_size_conv}'
 
     else:
@@ -52,15 +49,6 @@ def main():
     X_path = settings.x_path
     y_path = settings.y_path
     X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
-
-    # n = X_exp.shape[0]
-    # N = 18
-
-    # Read Synthetic data
-    # sigma = 0.1
-    # anti_alias = False
-    # X, y = create_image_set(n, N, sigma, anti_alias)  # n images of size NxN
-    # y_normalized = normalize_angle(y)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
 
@@ -120,7 +108,7 @@ def main():
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        pbar.update(1)
+
         # Evaluate accuracy at the end of each epoch
         network.eval()
         y_pred = network(X_test)
@@ -130,7 +118,7 @@ def main():
         history.append(mse)
 
         # Update the progress bar description
-        # pbar.update(1)
+        pbar.update(1)
         pbar.set_postfix({"Loss": mse})
 
         if mse < best_loss:

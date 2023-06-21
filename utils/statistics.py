@@ -8,6 +8,8 @@ from typing import Any
 # from utils.angle_operations import get_angle_stat
 
 
+# -- Statistics variables -- #
+
 def calculate_std_dev(pred_angles: Any, known_angles: Any) -> float:
     """
     Calculates the standard deviation between predicted and known angles.
@@ -34,7 +36,8 @@ def calculate_std_dev(pred_angles: Any, known_angles: Any) -> float:
     std_dev_residuals = np.sqrt(variance_residuals)
     return std_dev_residuals
 
-def mean_square_error(observed_value: ndarray, predicted_value:ndarray) -> float:
+
+def mean_square_error(observed_value: ndarray, predicted_value:ndarray) -> ndarray:
     """
     Calculate the mean square error, input are expected to be 1D arrays of same length
     :param observed_value:
@@ -60,6 +63,8 @@ def calculate_average_error(actual_values: ndarray, predicted_values: ndarray) -
 
     return average_error
 
+
+# -- Resampling operations -- #
 
 def remove_elements_exceeding_count(list1, list2, n):
     """

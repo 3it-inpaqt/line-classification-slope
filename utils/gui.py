@@ -1,3 +1,9 @@
+"""
+This is an attempt to create a GUI in order to change parameters more easily. However, this method is slightly obsolete,
+since the 'settings.yaml' file handles this issue much better. The user is free to use either method. Note this file is
+not working because of subprocess error. Feel free to fix it or not.
+"""
+
 import os
 import tkinter as tk
 from tkinter import ttk

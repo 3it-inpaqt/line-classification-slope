@@ -1,15 +1,18 @@
-import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
+"""
+This script is a recreation, from scratch of the software LabelBox. This was made before I could access the labeled
+diagrams. You do not have to take it into account, but it's still useful.
+Make sure to input the right directory name
+"""
+
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-
-import os
+import tkinter as tk
 
 from utils.angle_operations import calculate_angle
-from utils.misc import list_files, create_txt_file, create_directory
+from utils.misc import list_files
+from utils.settings import settings
 
 
 # Initialize variables
@@ -18,12 +21,11 @@ positions_list, angles_list = [], []
 lines = []
 
 # Load diagram to use
-directory = "C:\\Users\\wilan\\OneDrive\\Documents\\M1 GP\\Stage Sherbrooke\\Data\\interpolated_img\\interpolated_img\\2.0mV\\single\\eva_dupont_ferrier"
+run_name = settings.run_name
+directory = f""  # CHANGE DIRECTORY PATH HERE
 files_list = list_files(directory)
 current_image_index = 0
 file = files_list[current_image_index]
-
-# Set file to write coordinates of line in
 
 
 def reset():

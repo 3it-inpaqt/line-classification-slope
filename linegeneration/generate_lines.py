@@ -16,8 +16,10 @@ def generate_image(size: tuple, background: bool = False, sigma: float = 0, aa: 
     :param aa: Anti-alias, creates AA line or not
     :return:
     """
+    # Generate gaussian distribution for background if specified
     if background:
         img = np.random.normal(0, 0.3, size) * 255
+    # Otherwise blank background (black)
     else:
         img = np.zeros(size)
     min_length = 0.9 * min(size[0], size[1])
@@ -42,33 +44,37 @@ def generate_image(size: tuple, background: bool = False, sigma: float = 0, aa: 
 
     # Create line starting from (x1,y1) and ending at (x2,y2)
     if aa:
-        rr, cc, val = line_aa(x1, y1, x2, y2)
+        rr, cc, val = line_aa(x1, y1, x2, y2)  # thicc line if anti-alias is on
         img[rr, cc] = 255 * val
     else:
-        rr, cc = line(x1, y1, x2, y2)
+        rr, cc = line(x1, y1, x2, y2)  # one pixel thicc line otherwise
         img[rr, cc] = 255
 
+    # Add a gaussian blur if specified
     if sigma > 0:
         img = gaussian_filter(img, sigma=sigma)
 
     return img/255, normalize_angle(angle)
 
 
-def create_image_set(n: int, N: int, gaussian_blur: float = 0, aa: bool = False) -> Tuple[ndarray, ndarray]:
+def create_image_set(n: int, N: int, background: bool = False, gaussian_blur: float = 0, aa: bool = False) -> Tuple[ndarray, ndarray]:
     """
     Generate a batch of arrays with various lines orientation
 
     :param n: number of image to generate
     :param N: side of each image
+    :param background: Whether to make a noisy background or not
     :param gaussian_blur: Add a gaussian blur to the image if True
     :param aa: Anti-alias, creates AA line or not
     :return: 3d numpy array, n x N x N
     """
+    # Initialise outputs
     image_set = np.zeros((n, N, N))  # important for NN to have size n x N x N
     angle_list = []
 
+    # Iterates to generate n images and put them in the output array
     for k in range(n):
-        image, angle = generate_image((N, N), gaussian_blur, aa)
+        image, angle = generate_image((N, N), background=background, sigma=gaussian_blur, aa=aa)
         image_set[k, :, :] = image
         angle_list.append(angle)
 

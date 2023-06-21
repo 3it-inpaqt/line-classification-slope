@@ -13,7 +13,7 @@ np.seterr(divide='ignore')
 
 def center_line(x1: float, y1: float, x2: float, y2: float) -> Tuple[float]:
     """
-    Calculate the center of a line
+    Find the center of a line
     :param x1:
     :param y1:
     :param x2:
@@ -46,7 +46,7 @@ def get_point_above_horizontal(x1: float, y1: float, x2: float, y2: float) -> Tu
 
 def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
     """
-    Calculate the angle of a lign with respect to the
+    Calculate the angle of a line
     :param x1: x position of first point
     :param y1: y position of first point
     :param x2: x position of second point
@@ -60,7 +60,7 @@ def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
     dy = b - d
 
     if dx == 0:
-        return np.pi/2
+        return np.pi/2  # way to handle geometrically division by 0 in the formula of the slope
     else:
         slope = dy/dx
         angle = np.arctan(slope)
@@ -70,10 +70,10 @@ def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
             return angle
 
 
-def normalize_angle(angle):
+def normalize_angle(angle: Any):
     """
-    Normalize angle in radian to a value between 0 and 1
-    angle can be a float or a ndarray, it doesn't matter
+    Normalize angle in radian to a value between 0 and 1.
+    Angle can be a float or a ndarray, it doesn't matter
     :param angle: angle of a line
     :return: normalized angle value
     """
@@ -87,7 +87,9 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
     :param lines: List containing lines coordinates
     :return: List of angles associated with each line
     """
+    # Initialise output list
     angle_list = []
+    # Iterate through each line and find its angle
     for line_list in lines:
         line = line_list[0]  # when generated, the lines for each patch are in a list (of one element if you choose one intersecting line per patch)
         x1, x2 = line[0][0], line[0][1]
@@ -98,7 +100,14 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
     return np.array(angle_list)
 
 
-# -- Line rotation methods -- #
+""" 
+Line rotation methods:
+
+This is useful on single dot diagrams as only one orientation of line is possible. The goal is to expend the database 
+with more angle values. However, it raises the issue of pixel modification, as not all rotation angles are allowed,
+only multiples of 90°. It is recommended to work directly on double dots.
+"""
+
 
 def rotate_line(line, theta=np.pi/2):
     """
@@ -145,9 +154,10 @@ def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
 
 # -- Line decomposition method -- #
 
-def decompose_line(line) -> Tuple[Any]:
+def decompose_line(line) -> tuple[list[list[tuple[Any, Any]]], list[float]]:
     """
-    Find angle of all the lines composing a single segment
+    Find angle of all the lines composing a single segment. Sometimes, a single line passes through a patch, but is not
+    perfectly straight due to the labeling and/or setup variability.
     :param line:
     :return:
     """
@@ -167,9 +177,9 @@ def decompose_line(line) -> Tuple[Any]:
 
 # -- STATISTICS ON ANGLE -- #
 
-def get_angle_stat(angles_list):
+def get_angle_stat(angles_list: List[float]) -> None:
     """
-    Get angles statistic of the dataset
+    Get angles distribution of the dataset.
     :param angles_list:
     :return:
     """

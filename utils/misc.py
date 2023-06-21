@@ -11,17 +11,21 @@ from typing import Any, Dict, Iterable, List, Tuple, Union
 from utils.settings import settings
 
 
-def list_files(directory: str) -> List[str]:
+# -- os process (files, directory, etc.) -- #
+
+def list_files(directory: str, extension: str = None) -> List[str]:
     """
     List all files in a directory and returns a list with all files names
-    :param directory: path to the directory
+    :param directory: Path to the directory
+    :param extension: Optional, extension of files to list
     :return: files list
     """
     os.chdir(directory)
     files = []
     for filename in os.listdir():
         if os.path.isfile(os.path.join(os.getcwd(), filename)):
-            files.append(filename)
+            if extension is None or filename.endswith(extension):
+                files.append(filename)
     return files
 
 
@@ -80,21 +84,6 @@ def save_list_to_file(list1: list, path: str, list2=None) -> Any:
         print('Done')
 
 
-# def load_list_from_file(file_path):
-#     loaded_list = []
-#     with open(file_path, 'r') as file:
-#         for line in file:
-#             line = line.strip()
-#             if line:
-#                 items = line.split(',')
-#                 if len(items) > 1:
-#                     loaded_list.append((items[0], items[1]))
-#                 else:
-#                     loaded_list.append(items[0])
-#
-#     return loaded_list
-
-
 def load_list_from_file(filepath):
     list_from_file = []
     with open(filepath) as f:
@@ -103,38 +92,7 @@ def load_list_from_file(filepath):
     return list_from_file
 
 
-def clip(n, smallest, largest):
-    """ Shortcut to clip a value between 2 others """
-    return max(smallest, min(n, largest))
-
-
-def get_nb_loader_workers(device: torch.device = None) -> int:
-    """
-    Estimate the number based on: the device > the user settings > hardware setup
-
-    :param device: The torch device.
-    :return: The number of data loader workers.
-    """
-
-    # Use the pyTorch data loader
-    if device and device.type == 'cuda':
-        # CUDA doesn't support multithreading for data loading
-        nb_workers = 0
-    elif settings.nb_loader_workers:
-        # Use user setting if set (0 mean auto)
-        nb_workers = settings.nb_loader_workers
-    else:
-        # Try to detect the number of available CPU
-        # noinspection PyBroadException
-        try:
-            nb_workers = len(os.sched_getaffinity(0))
-        except Exception:
-            nb_workers = os.cpu_count()
-
-        nb_workers = ceil(nb_workers / 2)  # The optimal number seems to be half of the cores
-
-    return nb_workers
-
+# -- YAML and JSON --#
 
 def yaml_preprocess(item: Any) -> Union[str, int, float, List, Dict]:
     """
@@ -200,7 +158,8 @@ def format_string(input_string):
 
 def convert_coordinate_dic(label_dic):
     """
-    Dictionary containing a list of dictionary for the initial and final coordinates of a line points
+    Dictionary containing a list of dictionary for the initial and final coordinates of a line points. Initial goal was
+    to collect from the json file the information on the line but this is already handled by the load_diagram function.
     :param label_dic:
     :return: tuple of coordinate x1, y1, x2, y2
     """
@@ -248,7 +207,7 @@ def generate_random_indices(length, count):
     return indices
 
 
-# -- Integer sqrt -- #
+# -- Related to float and integer -- #
 def isqrt(n):
     x = n
     y = (x + 1) // 2
@@ -258,7 +217,6 @@ def isqrt(n):
     return x
 
 
-# -- Misc -- #
 def dec_to_sci(number):
     """
     Convert float into scientific notation. Remove all trailing zeros automatically.
@@ -268,6 +226,41 @@ def dec_to_sci(number):
     """
     a = '%E' % number
     return a.split('E')[0].rstrip('0').rstrip('.') + 'E' + a.split('E')[1]
+
+
+def clip(n, smallest, largest):
+    """ Shortcut to clip a value between 2 others """
+    return max(smallest, min(n, largest))
+
+
+# -- Tensor processing -- #
+
+def get_nb_loader_workers(device: torch.device = None) -> int:
+    """
+    Estimate the number based on: the device > the user settings > hardware setup
+
+    :param device: The torch device.
+    :return: The number of data loader workers.
+    """
+
+    # Use the pyTorch data loader
+    if device and device.type == 'cuda':
+        # CUDA doesn't support multithreading for data loading
+        nb_workers = 0
+    elif settings.nb_loader_workers:
+        # Use user setting if set (0 mean auto)
+        nb_workers = settings.nb_loader_workers
+    else:
+        # Try to detect the number of available CPU
+        # noinspection PyBroadException
+        try:
+            nb_workers = len(os.sched_getaffinity(0))
+        except Exception:
+            nb_workers = os.cpu_count()
+
+        nb_workers = ceil(nb_workers / 2)  # The optimal number seems to be half of the cores
+
+    return nb_workers
 
 
 def enhance_contrast(tensor, threshold=0.3):

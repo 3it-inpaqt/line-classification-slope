@@ -4,10 +4,10 @@ import torch
 from utils.logger import logger
 
 
-def save_model(model, filename='model', run_type='ff'):
+def save_model(model, filename: str = 'model', run_type: str = 'ff') -> None:
     """
-
-    :param model: Pytorch model to save
+    Save a machine learning model in a .pt file.
+    :param model: Pytorch model to save, by default simply 'model'
     :param filename: String, by default the model is saved as 'model', if the file already exist, an index is added
     :param run_type: Type of the run: ff = feedforward, cnn = convolution
     :return: save model to a directory called 'saved', feel free to change the name if you want
