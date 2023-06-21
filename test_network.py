@@ -4,6 +4,7 @@ import torch
 from models.model import AngleNet
 from plot.lines_visualisation import create_multiplots
 from utils.misc import load_list_from_file
+from utils.settings import settings
 # from utils.statistics import mean_square_error, calculate_std_dev, calculate_average_error
 
 
@@ -11,14 +12,16 @@ if __name__ == '__main__':
 
     # Load data
 
-    N = 18  # image size
-    model = AngleNet(N*N)  # load model template
-    model_name = 'best_model_experimental_LeakyReLU_Dx_SmoothL1Loss_batch16_epoch2000_1.pt'  # select model to load, make sure you trained one and save it beforehand
-    path_model = f"saved\\model\\regression\\{model_name}"
+    input_size = settings.patch_size_x * settings.patch_size_y  # image size
+    model = AngleNet(input_size)  # load model template
+    model_type = 'regression'
+
+    model_name = f'best_model_synthetic_{model_type}_MSE_batch16_epoch1000_2.pt'  # select model to load, make sure you trained one and save it beforehand
+    path_model = f"saved/model/{model_type}/{model_name}"
     model.load_state_dict(torch.load(path_model), strict=False)  # load the file into the preset model
 
-    path_tensor = "saved\double_dot_patches_Dx.pt"  # select tensor file to use, make sure you loaded patches beforehand
-    tensor_patches = torch.load(path_tensor)
+    path_tensor = "saved\double_dot_patches_Dx_normalized.pt"  # select tensor file to use, make sure you loaded patches beforehand
+    tensor_patches = torch.reshape(torch.load(path_tensor).squeeze(1), (371, input_size))
 
     angles_test_prediction = model(tensor_patches)  # feedforward of the test images
     angles_test_prediction_numpy = angles_test_prediction.detach().numpy()  # convert to numpy array (remove gradient)

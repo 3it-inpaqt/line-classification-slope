@@ -8,15 +8,13 @@ from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
 from linegeneration.generate_lines import create_image_set
-from models.model import loss_fn_dic
+from models.model import loss_fn_dic, find_loss
 from plot.lines_visualisation import create_multiplots
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev
 from utils.settings import settings
-from utils.misc import load_list_from_file
+from utils.misc import load_list_from_file, dec_to_sci
 
-
-# TODO Use the settings file to set parameters instead of changing them manually
 
 def main():
 
@@ -24,10 +22,10 @@ def main():
         # Read Synthetic data
         N = settings.patch_size_x
         n = settings.n_synthetic
-        X, y = create_image_set(n, N, aa=True)  # n images of size NxN
+        X, y = create_image_set(n, N, gaussian_blur=settings.sigma, aa=settings.anti_alias)  # n images of size NxN
         X = X.reshape(n, N*N)
         # Set title for loss evolution with respect to epoch and model name
-        model_name = f'best_model_experimental_Dx_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        model_name = f'best_model_synthetic_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
         # custom_suffix = '_new_loss'
         # if len(custom_suffix) > 0:
         #     model_name += custom_suffix
@@ -54,14 +52,18 @@ def main():
     X_test = torch.tensor(X_test, dtype=torch.float32)
     y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
 
-    # TODO change to import model depending on input synthetic or experimental
+    # Move network and data tensors to device
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # X_train_gpu = X_train.to(device)
+    # y_train_gpu = y_train.to(device)
+    # X_test_gpu = X_test.to(device)
+    # y_test_gpu = y_test.to(device)
+
     input_size = settings.patch_size_x * settings.patch_size_y
     model = nn.Sequential(
             nn.Linear(input_size, 24),
             nn.LeakyReLU(),
-            nn.Linear(24, 12),
-            nn.LeakyReLU(),
-            nn.Linear(12, 6),
+            nn.Linear(24, 6),
             nn.LeakyReLU(),
             nn.Linear(6, 1)
         )
@@ -92,12 +94,11 @@ def main():
             X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # Forward pass
             y_pred = model(X_batch)
+            # loss_1 = criterion(y_pred, y_batch)
+            # loss_2 = criterion(y_pred - 0.5, y_batch)
+
+            # loss = find_loss(y_pred, y_batch, criterion, threshold=0.49)
             loss = criterion(y_pred, y_batch)
-
-            # loss_init = criterion(y_pred, y_batch)
-            # loss_prime = criterion(y_pred, y_batch - 0.5)
-            # loss = min(loss_prime, loss_init)
-
             # Backward pass
             optimizer.zero_grad()
             loss.backward()
@@ -141,12 +142,13 @@ def main():
 
     # Add a text box to the plot
     textstr = '\n'.join((
-        r'$Loss = %.4f$' % (best_loss, ),
-        r'$\sigma = %.3f$' % (std, )
+        r'$Best Loss = {{{loss}}}$'.format(loss=dec_to_sci(best_loss), ),
+        r'$\sigma = {{{deviation}}} $'.format(deviation=dec_to_sci(std), )
     ))
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
 
+    plt.savefig(f".\saved\plot\{model_name}_loss.png")
     plt.show()
 
     # Plot some lines and patches
@@ -155,13 +157,12 @@ def main():
     else:
         y_pred_numpy = y_pred_best.cpu().detach().numpy()
 
-    fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=16)
+    fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=25)
     plt.tight_layout()
-    # plt.savefig(f".\saved\plot\{model_name.removesuffix('.pt')}_patches.png")
+    plt.savefig(f".\saved\plot\{model_name}_patches.png")
     plt.show()
 
 
 if __name__ == '__main__':
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     main()
 

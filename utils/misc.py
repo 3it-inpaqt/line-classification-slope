@@ -1,12 +1,12 @@
-import os
-from typing import Any, Dict, Iterable, List, Tuple, Union
 from dataclasses import asdict, is_dataclass
+from decimal import Decimal
 from copy import copy
-
 from math import ceil
-import random
 import numpy as np
+import os
+import random
 import torch
+from typing import Any, Dict, Iterable, List, Tuple, Union
 
 from utils.settings import settings
 
@@ -259,6 +259,17 @@ def isqrt(n):
 
 
 # -- Misc -- #
+def dec_to_sci(number):
+    """
+    Convert float into scientific notation. Remove all trailing zeros automatically.
+    Based on https://stackoverflow.com/a/6913576/19392385
+    :param number:
+    :return:
+    """
+    a = '%E' % number
+    return a.split('E')[0].rstrip('0').rstrip('.') + 'E' + a.split('E')[1]
+
+
 def enhance_contrast(tensor, threshold=0.3):
     """
     Enhance tensor contrast. If the value of the tensor is greater than 0.5 it gets multiplied by 1.5 and if below 0.5
