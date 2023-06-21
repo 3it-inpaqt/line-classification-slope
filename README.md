@@ -3,7 +3,7 @@
 Regression task to identify angles on charge stability diagrams of double quantum dots. However, you can also apply this
 model to single dot, make sure you change the setting accordingly.
 
-_**<span style="color:lime;">DISCLAIMER:</span> most of the experimental data used to run the trainings are under NDA and therefore cannot be shared. The plots you might have not correspond to the one I obtained during my internship.**_
+_**<span style="color:lime;">DISCLAIMER:</span> most of the experimental data used to run the trainings are under NDA and therefore cannot be shared. The plots you might have could not correspond to the one I obtained during my internship.**_
 
 # Install
 
