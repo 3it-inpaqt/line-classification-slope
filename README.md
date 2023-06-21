@@ -3,6 +3,8 @@
 Regression task to identify angles on charge stability diagrams of double quantum dots. However, you can also apply this
 model to single dot, make sure you change the setting accordingly.
 
+_**<span style="color:lime;"><>DISCLAIMER:</span> most of the experimental data used to run the trainings are under NDA and therefore cannot be shared. The plots you might have not correspond to the one I obtained during my internship.**_
+
 # Install
 
 ### General information
@@ -151,7 +153,7 @@ compute the standard deviation to know if the network works as intended.
 During the training period you should see a bar indicating the number of batch already used, and the value of the loss.
 Once the training is over, a graph should appear with the evolution of the loss during the training, like the one below:
 
-![x94qscjf.bmp](..%2F..%2FAppData%2FLocal%2FTemp%2Fx94qscjf.bmp)
+![best_model_experimental_Dx_regression_SmoothL1Loss_batch32_epoch2500_loss](https://github.com/3it-inpaqt/line-classification-slope/assets/86256324/1412d443-f847-42d9-b173-717fed307ca1)
 
 Sigma indicates the standard deviation, a much more accurate representation of the accuracy of the network in this case.
 Be aware that a value of `0.1` is actually not good since the values of the angles are normalised over `2*pi`. You have
@@ -159,7 +161,9 @@ to first multiply by `2*pi` to get the standard deviation in radian and then by 
 
 ### Prediction on some patches
 
-![best_model_synthetic_regression_MSE_batch16_epoch1000_patches.png](saved%2Fplot%2Fbest_model_synthetic_regression_MSE_batch16_epoch1000_patches.png)
+Below is an example of angle predictions on few patches from a synthetic dataset.
+
+![best_model_synthetic_regression_SmoothL1Loss_batch18_epoch500_patches](https://github.com/3it-inpaqt/line-classification-slope/assets/86256324/59b7792c-53c9-489b-a742-6319de439049)
 
 ## Switching between branches
 
