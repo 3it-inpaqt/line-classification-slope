@@ -1,18 +1,14 @@
-from typing import Tuple
-
-import matplotlib.pyplot as plt
-from numpy import ndarray
-import numpy as np
-from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import numpy as np
 from random import sample
-import torch
+from typing import Tuple, Any
 
-from utils.angle_operations import normalize_angle
 from utils.settings import settings
 
 
-def create_multiplots(image_set_input: ndarray, angles: ndarray, prediction_angles: ndarray = None, number_sample: float = None) -> Tuple[Figure, Axes]:
+def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any = None, number_sample: float = None) -> Tuple[Figure, Axes]:
     """
     Generate figures with several plots to see different lines orientation
 
@@ -22,53 +18,53 @@ def create_multiplots(image_set_input: ndarray, angles: ndarray, prediction_angl
     :param number_sample: number of images to plot, None by default
     :return: a figure with subplots
     """
-    if isinstance(image_set_input, torch.Tensor):  # if images are from load_diagrams.py
-        image_set = image_set_input.squeeze(1)
-        print(image_set.shape)
-        n, p = image_set.shape
-    else:  # for synthetic diagrams
+    if settings.synthetic:  # for synthetic diagrams
         n = image_set_input.shape[0]
-        p, _ = settings.patch_size_x, settings.patch_size_y
-        image_set = image_set_input.reshape(n, p, p)
+        p, q = settings.patch_size_x, settings.patch_size_y
+        image_set = image_set_input.reshape(n, p, q)
 
-    # n, p = image_set.shape  # change when using tensor
-    # print(len(image_set))
-    # n = len(image_set)  # change when using synthetic data
+    else:  # for experimental diagrams
+        image_set = image_set_input.squeeze(1)  # tensor of shape [n, N*N] required
+        n, _ = image_set.shape
+        image_set.reshape(n, settings.patch_size_x, settings.patch_size_y)
 
-    if (number_sample is not None) and (number_sample < n):
-        n = number_sample
+    # Make sure the program doesn't sample more data than available
+    if (number_sample is not None) and (number_sample > n):
+        number_sample = n // 2  # choose arbitrary half the dataset
 
     # Compute the number of rows and columns required to display n subplots
     number_rows = int(np.ceil(np.sqrt(n)))
     number_columns = int(np.ceil(n / number_rows))
 
     # Select a random sample of indices
-    indices = sample(range(len(image_set)), k=number_sample)
+    indices = sample(range(number_sample), k=number_sample)
 
     # Create a figure and axis objects
     fig, axes = plt.subplots(nrows=number_rows, ncols=number_columns, figsize=(6 * number_columns, 6 * number_rows))
 
     for i, ax in enumerate(axes.flatten()):
         if i < n:
+            # Get the patch
             index = indices[i]
-            # image = np.reshape(image_set[index, :, :], (settings.patch_size_x, settings.patch_size_y))
-            image = np.reshape(image_set[index, :], (settings.patch_size_x, settings.patch_size_y))
-            # image = image_set[index, :, :]
-
+            image = image_set[index, :, :]  # no need to reshape, image is now [N, N] shape
+            # Get the angle
             normalized_angle = float(angles[index])
-            # print(normalized_angle)
             angle_radian = normalized_angle * (2 * np.pi)
-            # print(angle_radian)
             angle_degree = angle_radian * 180 / np.pi
-            ax.imshow(image * 255, cmap='copper')
+            # Set the figure
+            ax.imshow(image * 255, cmap='copper')  # first show the image otherwise line would be hidden
             title = 'Angle: {:.3f} | {:.2f}° \n Normalized value: {:.4f}'.format(angle_radian, angle_degree, normalized_angle)
+            # Modify figure title to take into account predicted angle value if it was given in input
             if prediction_angles is not None:
                 prediction_angle = prediction_angles[index][0]  # the angle is a ndarray type with one element only for index i
                 title += '\n Predicted: {:.4f} ({:.2f}°)'.format(prediction_angle, prediction_angle*2*np.pi*180/np.pi)
+            # Set ax properties
             ax.set_title(title, fontsize=25)
             ax.axis('off')
             plt.tight_layout()
+
         else:
+            # Removes empty axis if number of patches is not a perfect square (not 9, 16, 25, ...)
             fig.delaxes(ax)  # if not there, problem with range in the array and out of bound error
 
     return fig, axes
