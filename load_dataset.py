@@ -33,7 +33,7 @@ def load_diagram() -> List["DiagramOffline"]:
                                             single_dot=True if settings.dot_number == 1 else False,
                                             load_lines=True,
                                             load_areas=True,
-                                            white_list=[settings.test_diagram] if settings.test_diagram else None)
+                                            white_list=None)
 
     # Normalize the diagram with the same min/max value used during the training.
     # The values are fetch via the "normalization_values_path" setting or in the current run directory.
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     # plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD_Dx_2')
 
     # Calculate angles by hand for verification
-    angles_lines = angles_from_list(selected_lines)
+    # angles_lines = angles_from_list(selected_lines)
     # angles_lines_normalized = normalize_angle(angles_lines)
 
     # Resampling of the dataset
@@ -101,17 +101,17 @@ if __name__ == '__main__':
     # for i, image_tensor in enumerate(selected_patches):
     #     stacked_patches[i] = image_tensor
 
-    stacked_patches = torch.stack(selected_patches)
-    # tensor_patches = stacked_patches.unsqueeze(1)
-
-    # prepro_tensor = renorm_all_tensors(tensor_patches, True)
-    print(stacked_patches[0, 0, :, :])
-    # print(len(angles_lines))
-    # Save patches and angles to file for later use
-    torch.save(stacked_patches, './saved/double_dot_patches_Dx_normalized.pt')
-
-    fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
-    plt.tight_layout()
-    plt.show()
+    # stacked_patches = torch.stack(selected_patches)
+    # # tensor_patches = stacked_patches.unsqueeze(1)
+    #
+    # # prepro_tensor = renorm_all_tensors(tensor_patches, True)
+    # print(stacked_patches[0, 0, :, :])
+    # # print(len(angles_lines))
+    # # Save patches and angles to file for later use
+    # torch.save(stacked_patches, './saved/double_dot_patches_Dx_normalized.pt')
+    #
+    # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
+    # plt.tight_layout()
+    # plt.show()
 
     # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them

@@ -96,6 +96,7 @@ class DiagramOfflineNDot(DiagramOffline):
         """
 
         # Open the json file that contains annotations for every diagrams
+
         with open(labels_path, 'r') as annotations_file:
             labels_json = json.load(annotations_file)
 
@@ -136,7 +137,6 @@ class DiagramOfflineNDot(DiagramOffline):
             if f'{file_basename}.png' not in labels:
                 logger.warning(f'No label found for {file_basename}')
                 nb_no_label += 1
-                continue
 
             # Windows needs the 'b' option
             open_options = 'rb' if platform.system() == 'Windows' else 'r'
@@ -197,5 +197,5 @@ class DiagramOfflineNDot(DiagramOffline):
         if len(diagrams) == 0:
             logger.error(f'No diagram loaded in "{zip_dir}"')
 
-        print(type(diagrams[0].values))
+        # print(type(diagrams[0].values))
         return diagrams

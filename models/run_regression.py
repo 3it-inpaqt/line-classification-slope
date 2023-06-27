@@ -11,9 +11,14 @@ from linegeneration.generate_lines import create_image_set
 from models.model import loss_fn_dic, AngleNet
 from plot.lines_visualisation import create_multiplots
 from utils.save_model import save_model
-from utils.statistics import calculate_std_dev
+from utils.statistics import calculate_std_dev, accuracy
 from utils.settings import settings
 from utils.misc import load_list_from_file, dec_to_sci
+
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif"
+})
 
 
 def main():
@@ -22,14 +27,14 @@ def main():
         # Read Synthetic data
         N = settings.patch_size_x
         n = settings.n_synthetic
-        X, y = create_image_set(n, N, gaussian_blur=settings.sigma, aa=settings.anti_alias)  # n images of size NxN
+        X, y = create_image_set(n, N, gaussian_blur=settings.sigma, background=settings.background, aa=settings.anti_alias)  # n images of size NxN
         X = X.reshape(n, N*N)
         # Set title for loss evolution with respect to epoch and model name
         model_name = f'best_model_synthetic_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
         # custom_suffix = '_new_loss'
         # if len(custom_suffix) > 0:
         #     model_name += custom_suffix
-        ax_title = f'Training on the synthetic patches (regression) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
+        ax_title = f'Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
 
     else:
         X_path = settings.x_path
@@ -60,7 +65,7 @@ def main():
     # y_test_gpu = y_test.to(device)
 
     input_size = settings.patch_size_x * settings.patch_size_y
-    model = AngleNet(input_size)  # CHANGE THE STRUCTURE OF THE NETWORK IN THE 'ANGLENET' CLASS
+    model = AngleNet(input_size, settings.n_hidden_layers)  # CHANGE THE STRUCTURE OF THE NETWORK IN THE 'ANGLENET' CLASS
 
     # Loss function and optimizer
     learning_rate = settings.learning_rate
@@ -116,13 +121,14 @@ def main():
             best_weights = copy.deepcopy(model.state_dict())
             y_pred_best = model(X_test)
             std = calculate_std_dev(y_pred, y_test)
+            acc = accuracy(y_test, y_pred)
 
     pbar.close()
 
     # Restore model and return best accuracy
     model.load_state_dict(best_weights)
     # Save the state dictionary
-    save_model(model, model_name)
+    # save_model(model, model_name)
 
     # Plot accuracy
     fig, ax = plt.subplots()
@@ -137,12 +143,16 @@ def main():
     # Add a text box to the plot
     textstr = '\n'.join((
         r'$Best Loss = {{{loss}}}$'.format(loss=dec_to_sci(best_loss), ),
-        r'$\sigma = {{{deviation}}} $'.format(deviation=dec_to_sci(std), )
+        r'$\sigma = {{{deviation}}} $'.format(deviation=dec_to_sci(std), ),
+        r'$Accuracy = {{{acc}}}$'.format(acc=acc, ),
+        f'{settings.n_hidden_layers} hidden layers',
+        f'{settings.loss_fn}'
     ))
+
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
 
-    plt.savefig(f".\saved\plot\{model_name}_loss.png")
+    # plt.savefig(f".\saved\plot\{model_name}_loss.png")
     plt.show()
 
     # Plot some lines and patches
@@ -151,9 +161,9 @@ def main():
     else:
         y_pred_numpy = y_pred_best.cpu().detach().numpy()
 
-    fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=25)
+    fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='gray')
     plt.tight_layout()
-    plt.savefig(f".\saved\plot\{model_name}_patches.png")
+    # plt.savefig(f".\saved\plot\{model_name}_patches.png")
     plt.show()
 
 

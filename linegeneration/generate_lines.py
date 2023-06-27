@@ -18,10 +18,11 @@ def generate_image(size: tuple, background: bool = False, sigma: float = 0, aa: 
     """
     # Generate gaussian distribution for background if specified
     if background:
-        img = np.random.normal(0, 0.3, size) * 255
+        img = np.random.normal(0.1, 0.01, size) * 255
     # Otherwise blank background (black)
     else:
         img = np.zeros(size)
+
     min_length = 0.9 * min(size[0], size[1])
 
     # Select one random position on an edge
@@ -46,6 +47,7 @@ def generate_image(size: tuple, background: bool = False, sigma: float = 0, aa: 
     if aa:
         rr, cc, val = line_aa(x1, y1, x2, y2)  # thicc line if anti-alias is on
         img[rr, cc] = 255 * val
+        # print(val)
     else:
         rr, cc = line(x1, y1, x2, y2)  # one pixel thicc line otherwise
         img[rr, cc] = 255

@@ -1,6 +1,7 @@
 from collections import Counter
 import numpy as np
 from numpy import ndarray
+from sklearn.metrics import mean_absolute_error
 import torch
 from typing import Any
 
@@ -35,6 +36,22 @@ def calculate_std_dev(pred_angles: Any, known_angles: Any) -> float:
     variance_residuals = np.sum((residuals - mean_residuals) ** 2) / (len(residuals) - 1)
     std_dev_residuals = np.sqrt(variance_residuals)
     return std_dev_residuals
+
+
+def accuracy(known_angles, pred_angles, tol=0.1):
+    # Convert input to NumPy arrays if they are PyTorch tensors
+    if torch.cuda.is_available():
+        if isinstance(pred_angles, torch.Tensor):
+            pred_angles = pred_angles.cpu().detach().numpy()
+        if isinstance(known_angles, torch.Tensor):
+            known_angles = known_angles.cpu().detach().numpy()
+    else:
+        if isinstance(pred_angles, torch.Tensor):
+            pred_angles = pred_angles.detach().numpy()
+        if isinstance(known_angles, torch.Tensor):
+            known_angles = known_angles.detach().numpy()
+
+    return 1 - mean_absolute_error(known_angles, pred_angles)
 
 
 def mean_square_error(observed_value: ndarray, predicted_value:ndarray) -> ndarray:

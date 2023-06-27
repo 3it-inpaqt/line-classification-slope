@@ -16,11 +16,11 @@ from utils.misc import load_list_from_file
 from models.model import loss_fn_dic
 from utils.save_model import save_model
 from utils.settings import settings
-from utils.statistics import calculate_std_dev
+from utils.statistics import calculate_std_dev, accuracy
 
 plt.rcParams.update({
     "text.usetex": True,
-    "font.family": "Helvetica"
+    "font.family": "serif"
 })
 
 
@@ -30,12 +30,17 @@ def main():
         # Read Synthetic data
         N = settings.patch_size_x
         n = settings.n_synthetic
-        X, y = create_image_set(n, N, aa=True)  # n images of size NxN
-        X = X.reshape(n, N*N)
-        # Set title for loss evolution with respect to epoch and model name
-        model_name = f'best_model_experimental_Dx_convolution_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}_kernel{settings.kernel_size_conv}'
+        X, y = create_image_set(n, N, background=True, aa=True)  # n images of size NxN
 
-        ax_title = f'Training on the synthetic patches (convolution) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Kernel: {settings.kernel_size_conv}'
+        image_set_test, angles_test = create_image_set(n, N, background=True, aa=True)
+        fig, axes = create_multiplots(image_set_test, angles_test, number_sample=n, cmap='copper')
+        plt.show()
+
+        # X = X.reshape(n, N*N)
+        # # Set title for loss evolution with respect to epoch and model name
+        # model_name = f'best_model_experimental_Dx_convolution_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}_kernel{settings.kernel_size_conv}'
+        #
+        # ax_title = f'Training on the synthetic patches (convolution) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Kernel: {settings.kernel_size_conv}'
 
     else:
         X_path = settings.x_path
@@ -46,10 +51,6 @@ def main():
         ax_title = f'Training on the experimental patches (convolution + Dx) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Kernel: {settings.kernel_size_conv}'
 
     # Load data
-    X_path = settings.x_path
-    y_path = settings.y_path
-    X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
-
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
 
     # Convert to 2D PyTorch tensors
@@ -124,6 +125,7 @@ def main():
         if mse < best_loss:
             best_loss = mse
             best_weights = copy.deepcopy(network.state_dict())
+            acc = accuracy(y_test, y_pred)
 
     # Close the progress bar
     pbar.close()
@@ -136,38 +138,40 @@ def main():
 
     # if anti_alias:
     #     model_name = f'best_model_cnn_synthetic_gaussian{sigma}_kernel{kernel_size_conv}_aa.pt'
-    save_model(network, model_name, 'cnn')
+    # save_model(network, model_name, 'cnn')
 
     # Plot accuracy
     fig, ax = plt.subplots()
     ax.set_title(ax_title, fontsize=12)
     print("MSE: %.4f" % best_loss)
     print("STD: % .4f" % std)
+    print(f"Accuracy: {acc}")
     ax.set_xlabel('Epoch')
     ax.set_ylabel(f'Loss ({name_criterion})')
     ax.plot(history)
 
     # Add a text box to the plot
     textstr = '\n'.join((
-        r'$Loss = %.4f$' % (best_loss, ),
-        r'$\sigma = %.2f$' % (std, )
+        r'$Loss = %.4f$' % (best_loss, ) + f' ({settings.loss_fn})',
+        r'$\sigma = %.4f$' % (std, ),
+        r'$Accuracy = %.4f$' % (acc, )
     ))
 
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
-    plt.savefig(f".\saved\plot\{model_name}.png")
+    # plt.savefig(f".\saved\plot\{model_name}.png")
     plt.show()
 
     # Plot some lines and patches
-    if torch.cuda.is_available():
-        y_pred_numpy = y_pred.cpu().cpu().detach().numpy()
-    else:
-        y_pred_numpy = y_pred.cpu().detach().numpy()
+    # if torch.cuda.is_available():
+    #     y_pred_numpy = y_pred.cpu().cpu().detach().numpy()
+    # else:
+    #     y_pred_numpy = y_pred.cpu().detach().numpy()
 
-    fig1, axes1 = create_multiplots(X_test.cpu(), y_test.cpu(), y_pred_numpy, number_sample=16)
-    plt.tight_layout()
-    plt.savefig(f".\saved\plot\{model_name}_patches.png")
-    plt.show()
+    # fig1, axes1 = create_multiplots(X_test.cpu(), y_test.cpu(), y_pred_numpy, number_sample=16)
+    # plt.tight_layout()
+    # plt.savefig(f".\saved\plot\{model_name}_patches.png")
+    # plt.show()
 
 
 if __name__ == '__main__':

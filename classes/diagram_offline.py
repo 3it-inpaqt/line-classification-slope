@@ -270,7 +270,7 @@ class DiagramOffline(Diagram):
                       diagrams_path: Path,
                       labels_path: Path = None,
                       single_dot: bool = True,
-                      load_lines: bool = True,
+                      load_lines: bool = True,  #
                       load_areas: bool = True,
                       white_list: List[str] = None) -> List["DiagramOffline"]:
         """

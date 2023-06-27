@@ -166,6 +166,7 @@ class Settings:
     n_synthetic: int = 500
     anti_alias: bool = False
     sigma: float = 0.1
+    background: bool = False
 
     # ==================================================================================================================
     # ===================================================== Model ======================================================
@@ -174,6 +175,7 @@ class Settings:
     # The type of model to use (could be a neural network).
     # Have to be in the implemented list: FF, BFF, CNN, BCNN.
     model_type: str = 'FF'
+    n_hidden_layers: int = 1
 
     # Hyperparameters
     loss_fn: str = 'SmoothL1Loss'
