@@ -57,21 +57,25 @@ dot_number: 2
 logger_console_level: info
 
 # Related to the simulation
+dx: False
 x_path: './saved/double_dot_patches_Dx_normalized.pt'
 y_path: './saved/double_dot_normalized_angles.txt'
 
 model_type: 'FF'
+n_hidden_layers: 1
 loss_fn: 'SmoothL1Loss'
+threshold_loss: 0.48
 learning_rate: 0.0001
-n_epochs: 2500   # number of epochs to run
+n_epochs: 350   # number of epochs to run
 batch_size: 18  # size of each batch
-kernel_size_conv:  4  # for convolution
+kernel_size_conv:  8  # for convolution
 
 # Related to synthetic data
-synthetic: True
-n_synthetic: 500  # number of synthetic data to create
-anti_alias: False
-sigma: 0.1
+synthetic: False
+n_synthetic: 1000  # number of synthetic data to create
+anti_alias: True
+background: True
+sigma: 0.
 ```
 
 # Files structure
