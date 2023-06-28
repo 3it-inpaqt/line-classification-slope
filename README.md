@@ -3,7 +3,7 @@
 Regression task to identify angles on charge stability diagrams of double quantum dots. However, you can also apply this
 model to single dot, make sure you change the setting accordingly.
 
-_**<span style="color:lime;">DISCLAIMER:</span> most of the experimental data used to run the trainings are under NDA and therefore cannot be shared. The plots you might have not correspond to the one I obtained during my internship.**_
+_**<span style="color:lime;">DISCLAIMER:</span> most of the experimental data used to run the trainings are under NDA and therefore cannot be shared. The plots you might have could not correspond to the one I obtained during my internship.**_
 
 # Install
 
@@ -41,7 +41,7 @@ If you are using Pycharm follow these simple steps:
 _<span style="color:gold;">Note:</span> The settings do not change the structure of the neural network. This has to be
 done manually in either `models/model.py` (feed-forward) or `models/cnn.py` (convolution)_
 
-Create a file `settings.yaml` to override settings documented in `utils\settings.py`.
+Create a file `settings.yaml` to override settings documented in `utils\settings.py`. From there, you can decide what model to use (feed-forward, CNN, etc.), and set the different hyperparameters. 
 
 ### For example:
 
@@ -73,8 +73,6 @@ n_synthetic: 500  # number of synthetic data to create
 anti_alias: False
 sigma: 0.1
 ```
-
-From there, you can decide what model to use (feed-forward, CNN, etc.), and set the different hyperparameters. 
 
 # Files structure
 
