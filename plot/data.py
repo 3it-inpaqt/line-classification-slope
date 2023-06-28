@@ -394,11 +394,11 @@ def plot_patch_sample(patches_list: List[torch.Tensor], lines_list: List[Any], s
             index = indices[i]  # select the index of the patch and line
             line = lines_list[index]
             patch = patches_list[index]
-
-            height, width = np.shape(patch)  # Get the height and width of the image
+            print(patch.shape)
+            _, height, width = np.shape(patch)  # Get the height and width of the image
             ax.set_xlim([0, width])  # Set the x-axis limits to match the width of the image
             ax.set_ylim([0, height])  # Set the y-axis limits to match the height of the image (note the inverted y-axis)
-            ax.imshow(patch, extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
+            ax.imshow(patch[0, :, :], extent=[0, height, 0, width], interpolation='nearest', cmap='copper')
 
             for segment in line:
                 x_lim, y_lim = segment[0], segment[1]

@@ -282,13 +282,16 @@ def enhance_contrast(tensor, threshold=0.3):
     return enhanced_tensor
 
 
-def renorm_array(array: np.ndarray) -> torch.Tensor:
+def renorm_array(input_table: Any) -> torch.Tensor:
     """
     Re-normalise a tensor with value between 0 and 1
-    :param array: Tensor of size [N, N]
+    :param input_table: Tensor of size [N, N] or Array
     :return: Normalized tensor of size [1, N, N]
     """
-    tensor = torch.from_numpy(array)
+    if torch.is_tensor(input_table):
+        tensor = input_table.clone()
+    else:
+        tensor = torch.from_numpy(input_table)
     new_tensor = tensor.view(1, -1)
     new_tensor -= new_tensor.min(1, keepdim=True)[0]
     new_tensor /= new_tensor.max(1, keepdim=True)[0]

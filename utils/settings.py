@@ -161,6 +161,8 @@ class Settings:
     # Used to test uncertainty.
     test_noise: float = 0.0
 
+    dx: float = True  # calculate the derivative or not
+
     # Running on synthetic data or not
     synthetic: bool = False
     n_synthetic: int = 500
@@ -179,6 +181,7 @@ class Settings:
 
     # Hyperparameters
     loss_fn: str = 'SmoothL1Loss'
+    threshold_loss: float = 0.  # to calculate a minimum loss to avoid stupid weights modification
     learning_rate: float = 0.00001
     n_epochs: int = 500  # number of epochs to run
     batch_size: int = 16  # size of each batch

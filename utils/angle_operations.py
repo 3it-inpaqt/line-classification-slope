@@ -4,7 +4,7 @@ from numpy import ndarray
 import torch
 from typing import Tuple, List, Any
 
-from utils.misc import random_select_elements, generate_random_indices
+from utils.misc import random_select_elements, generate_random_indices, dec_to_sci
 
 np.seterr(divide='ignore')
 
@@ -183,12 +183,26 @@ def get_angle_stat(angles_list: List[float]) -> None:
     :param angles_list:
     :return:
     """
+    fig, ax = plt.subplots()
+
+    plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": "serif"
+    })
+    plt.tick_params(axis='both', which='major', labelsize=14)
+    plt.subplots_adjust(bottom=0.15)
     # Adjust the bin size
     bin_size = 0.01
-    avg = sum(angles_list)/len(angles_list)
+    len_list = len(angles_list)
+    avg = round(sum(angles_list)/len_list, 3)
+    # Add a text box to the plot
+    textstr = r'$Average: {{{avg}}}$'.format(avg=avg, )
+
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    ax.text(0.1, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='left', va='top', bbox=props)
+
     # Plot histogram
-    plt.hist(angles_list, bins=int((max(angles_list) - min(angles_list)) / bin_size))
-    plt.xlabel('Angles')
-    plt.ylabel('Frequency')
-    plt.title('Distribution of Angles (average: {:.3f})'.format(avg))
+    plt.hist(angles_list, bins=int((max(angles_list) - min(angles_list)) / bin_size), density=True)
+    plt.xlabel(r'Angles', fontsize=18)
+    plt.ylabel(r'Frequency (\%)', fontsize=18)
     plt.show()

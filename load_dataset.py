@@ -73,17 +73,25 @@ if __name__ == '__main__':
 
     for patch, line_list in zip(patches_list, lines_list):
         if len(line_list) == 1:  # takes patch into account only if it has one line crossing it
-            Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
-            selected_patches.append(renorm_array(Dx))  # convert numpy array back to torch tensor and normalize it
+            if settings.dx:
+                Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
+                selected_patches.append(renorm_array(Dx))  # convert numpy array back to torch tensor and normalize it
+            else:
+                # print(patch.shape)
+                selected_patches.append((renorm_array(patch)))
             selected_lines.append(line_list)
 
     # print(lines_list)
 
-    # plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD_Dx_2')
+    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
 
     # Calculate angles by hand for verification
-    # angles_lines = angles_from_list(selected_lines)
-    # angles_lines_normalized = normalize_angle(angles_lines)
+    plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": "serif"
+    })
+    angles_lines = angles_from_list(selected_lines)
+    get_angle_stat(angles_lines)
 
     # Resampling of the dataset
     # resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
@@ -93,22 +101,24 @@ if __name__ == '__main__':
     # Get the number of images and the size of each image
     # n = len(selected_patches)
     # N = selected_patches[0].shape[0]
-
-    # Create an empty tensor with the desired shape
-    # stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
-
-    # Fill the 3D tensor with the image data
-    # for i, image_tensor in enumerate(selected_patches):
-    #     stacked_patches[i] = image_tensor
-
-    # stacked_patches = torch.stack(selected_patches)
-    # # tensor_patches = stacked_patches.unsqueeze(1)
     #
+    # # Create an empty tensor with the desired shape
+    # stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
+    #
+    # # Fill the 3D tensor with the image data
+    # for i, image_tensor in enumerate(selected_patches):
+    #     print(image_tensor.shape)
+    #     stacked_patches[i, :, :] = image_tensor[0, :, :]
+    #
+    # stacked_patches = torch.stack(selected_patches)
+    # tensor_patches = stacked_patches.unsqueeze(1)
+
     # # prepro_tensor = renorm_all_tensors(tensor_patches, True)
     # print(stacked_patches[0, 0, :, :])
     # # print(len(angles_lines))
+
     # # Save patches and angles to file for later use
-    # torch.save(stacked_patches, './saved/double_dot_patches_Dx_normalized.pt')
+    # torch.save(stacked_patches, './saved/double_dot_patches_normalized.pt')
     #
     # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
     # plt.tight_layout()

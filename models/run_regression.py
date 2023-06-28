@@ -93,14 +93,16 @@ def main():
             X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # Forward pass
             y_pred = model(X_batch)
-            # loss_1 = criterion(y_pred, y_batch)
-            # loss_2 = criterion(y_pred - 0.5, y_batch)
+            y_pred_prime = y_pred.clone()
+            y_pred_prime = torch.where(y_pred_prime > settings.threshold_loss, y_pred_prime - 0.5, y_pred_prime)
 
-            # loss = find_loss(y_pred, y_batch, criterion, threshold=0.49)
             loss = criterion(y_pred, y_batch)
+            loss_prime = criterion(y_pred_prime, y_batch)
+
+            final_loss = min(loss, loss_prime)
             # Backward pass
             optimizer.zero_grad()
-            loss.backward()
+            final_loss.backward()
             # Update weights
             optimizer.step()
 
@@ -109,26 +111,33 @@ def main():
         # Evaluate accuracy at end of each epoch
         model.eval()
         X_test = X_test.flatten(1)
-        y_pred = model(X_test)
+        y_pred_test = model(X_test)
         # TODO find another way to calculate the loss
-        loss_value = criterion(y_pred, y_test)
-        loss_value = float(loss_value)
-        history.append(loss_value)
+        loss_value = criterion(y_pred_test, y_test)
+        y_pred_prime = y_pred_test.clone()
+        y_pred_prime = torch.where(y_pred_prime > settings.threshold_loss, y_pred_prime - 0.5, y_pred_prime)
+
+        loss_value_prime = criterion(y_pred_prime, y_test)
+        loss_value, loss_value_prime = float(loss_value), float(loss_value_prime)
+
+        final_loss_value = min(loss_value, loss_value_prime)
+
+        history.append(final_loss_value)
         pbar.set_postfix({name_criterion: loss_value})
 
         if loss_value < best_loss:
             best_loss = loss_value
             best_weights = copy.deepcopy(model.state_dict())
             y_pred_best = model(X_test)
-            std = calculate_std_dev(y_pred, y_test)
-            acc = accuracy(y_test, y_pred)
+            std = min(calculate_std_dev(y_pred_test, y_test), calculate_std_dev(y_pred_prime, y_test))
+            acc = max(accuracy(y_test, y_pred_test), accuracy(y_test, y_pred_prime))
 
     pbar.close()
 
     # Restore model and return best accuracy
     model.load_state_dict(best_weights)
     # Save the state dictionary
-    # save_model(model, model_name)
+    save_model(model, model_name)
 
     # Plot accuracy
     fig, ax = plt.subplots()

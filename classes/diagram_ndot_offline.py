@@ -137,6 +137,7 @@ class DiagramOfflineNDot(DiagramOffline):
             if f'{file_basename}.png' not in labels:
                 logger.warning(f'No label found for {file_basename}')
                 nb_no_label += 1
+                continue
 
             # Windows needs the 'b' option
             open_options = 'rb' if platform.system() == 'Windows' else 'r'
