@@ -181,6 +181,7 @@ class Settings:
 
     # Hyperparameters
     loss_fn: str = 'SmoothL1Loss'
+    beta: float = 1.0  # beta threshold of SmoothL1Loss
     threshold_loss: float = 0.  # to calculate a minimum loss to avoid stupid weights modification
     learning_rate: float = 0.00001
     n_epochs: int = 500  # number of epochs to run

@@ -1,9 +1,10 @@
 import torch.nn as nn
 from torch import Tensor, gt, min
+from utils.settings import settings
 # I don't know if it is useful for the feed-forward on a pretrained network, but it works just fine
 # so if you have any suggestions feel free to share them
 
-loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(), 'MSE': nn.MSELoss(), 'MAE': nn.L1Loss()}
+loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(beta=settings.beta), 'MSE': nn.MSELoss(), 'MAE': nn.L1Loss()}
 
 
 def AngleNet(input_size, n_hidden_layers):

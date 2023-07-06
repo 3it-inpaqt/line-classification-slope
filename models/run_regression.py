@@ -13,7 +13,7 @@ from plot.lines_visualisation import create_multiplots
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev, accuracy
 from utils.settings import settings
-from utils.misc import load_list_from_file, dec_to_sci
+from utils.misc import load_list_from_file, dec_to_sci, resymmetrise_tensor
 
 plt.rcParams.update({
     "text.usetex": True,
@@ -30,7 +30,7 @@ def main():
         X, y = create_image_set(n, N, gaussian_blur=settings.sigma, background=settings.background, aa=settings.anti_alias)  # n images of size NxN
         X = X.reshape(n, N*N)
         # Set title for loss evolution with respect to epoch and model name
-        model_name = f'best_model_synthetic_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        model_name = f'best_model_synthetic_regression_{settings.loss_fn}_beta{int(settings.beta)}_batch{settings.batch_size}_epoch{settings.n_epochs}'
         # custom_suffix = '_new_loss'
         # if len(custom_suffix) > 0:
         #     model_name += custom_suffix
@@ -41,7 +41,7 @@ def main():
         y_path = settings.y_path
         X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
         # Set title for loss evolution with respect to epoch and model name
-        model_name = f'best_model_experimental_Dx_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        model_name = f'best_model_experimental_Dx_regression_{settings.loss_fn}_beta{settings.beta}_batch{settings.batch_size}_epoch{settings.n_epochs}'
         ax_title = f'Training on the experimental patches (regression + Dx) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
 
     # fig, axes = create_multiplots(X, y, number_sample=16)
@@ -71,6 +71,7 @@ def main():
     learning_rate = settings.learning_rate
     name_criterion = settings.loss_fn
     criterion = loss_fn_dic[name_criterion]
+
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     n_epochs = settings.n_epochs   # number of epochs to run
@@ -93,16 +94,19 @@ def main():
             X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # Forward pass
             y_pred = model(X_batch)
-            y_pred_prime = y_pred.clone()
-            y_pred_prime = torch.where(y_pred_prime > settings.threshold_loss, y_pred_prime - 0.5, y_pred_prime)
+            # y_pred_prime = y_pred.clone()
+            # y_pred_prime = torch.where(y_pred_prime > settings.threshold_loss, y_pred_prime - 0.5, y_pred_prime)
 
-            loss = criterion(y_pred, y_batch)
-            loss_prime = criterion(y_pred_prime, y_batch)
+            loss1 = criterion(y_pred, y_batch)
+            loss2 = criterion(resymmetrise_tensor(y_pred), y_batch)
 
-            final_loss = min(loss, loss_prime)
+            loss = torch.min(loss1, loss2)
+            # loss_prime = criterion(y_pred_prime, y_batch)
+
+            # final_loss = min(loss, loss_prime)
             # Backward pass
             optimizer.zero_grad()
-            final_loss.backward()
+            loss.backward()
             # Update weights
             optimizer.step()
 
@@ -113,31 +117,30 @@ def main():
         X_test = X_test.flatten(1)
         y_pred_test = model(X_test)
         # TODO find another way to calculate the loss
-        loss_value = criterion(y_pred_test, y_test)
-        y_pred_prime = y_pred_test.clone()
-        y_pred_prime = torch.where(y_pred_prime > settings.threshold_loss, y_pred_prime - 0.5, y_pred_prime)
+        loss1 = criterion(y_pred, y_batch)
+        loss2 = criterion(resymmetrise_tensor(y_pred), y_batch)
 
-        loss_value_prime = criterion(y_pred_prime, y_test)
-        loss_value, loss_value_prime = float(loss_value), float(loss_value_prime)
+        loss = torch.min(loss1, loss2)
 
-        final_loss_value = min(loss_value, loss_value_prime)
+        loss = float(loss)
+        history.append(loss)
+        pbar.set_postfix({name_criterion: loss})
 
-        history.append(final_loss_value)
-        pbar.set_postfix({name_criterion: loss_value})
-
-        if loss_value < best_loss:
-            best_loss = loss_value
+        if loss < best_loss:
+            best_loss = loss
             best_weights = copy.deepcopy(model.state_dict())
             y_pred_best = model(X_test)
-            std = min(calculate_std_dev(y_pred_test, y_test), calculate_std_dev(y_pred_prime, y_test))
-            acc = max(accuracy(y_test, y_pred_test), accuracy(y_test, y_pred_prime))
+            # std = min(calculate_std_dev(y_pred_test, y_test), calculate_std_dev(y_pred_prime, y_test))
+            # acc = max(accuracy(y_test, y_pred_test), accuracy(y_test, y_pred_prime))
+            std = calculate_std_dev(y_pred_test, y_test)
+            acc = accuracy(y_test, y_pred_test)
 
     pbar.close()
 
     # Restore model and return best accuracy
     model.load_state_dict(best_weights)
     # Save the state dictionary
-    save_model(model, model_name)
+    # save_model(model, model_name)
 
     # Plot accuracy
     fig, ax = plt.subplots()
@@ -155,7 +158,8 @@ def main():
         r'$\sigma = {{{deviation}}} $'.format(deviation=dec_to_sci(std), ),
         r'$Accuracy = {{{acc}}}$'.format(acc=acc, ),
         f'{settings.n_hidden_layers} hidden layers',
-        f'{settings.loss_fn}'
+        f'{settings.loss_fn}',
+        r'$\beta = {{{beta}}}$'.format(beta=settings.beta, )
     ))
 
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -165,15 +169,15 @@ def main():
     plt.show()
 
     # Plot some lines and patches
-    if torch.cuda.is_available():
-        y_pred_numpy = y_pred_best.cpu().detach().numpy()
-    else:
-        y_pred_numpy = y_pred_best.cpu().detach().numpy()
+    # if torch.cuda.is_available():
+    #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
+    # else:
+    #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
 
-    fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='gray')
-    plt.tight_layout()
+    # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='gray')
+    # plt.tight_layout()
     # plt.savefig(f".\saved\plot\{model_name}_patches.png")
-    plt.show()
+    # plt.show()
 
 
 if __name__ == '__main__':
