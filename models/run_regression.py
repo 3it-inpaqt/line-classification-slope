@@ -10,10 +10,11 @@ from sklearn.model_selection import train_test_split
 from linegeneration.generate_lines import create_image_set
 from models.model import loss_fn_dic, AngleNet
 from plot.lines_visualisation import create_multiplots
+from utils.angle_operations import normalize_angle
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev, accuracy
 from utils.settings import settings
-from utils.misc import load_list_from_file, dec_to_sci
+from utils.misc import load_list_from_file, dec_to_sci, resymmetrise_tensor
 
 plt.rcParams.update({
     "text.usetex": True,
@@ -93,16 +94,16 @@ def main():
             X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
             # Forward pass
             y_pred = model(X_batch)
-            y_pred_prime = y_pred.clone()
-            y_pred_prime = torch.where(y_pred_prime > settings.threshold_loss, y_pred_prime - 0.5, y_pred_prime)
 
-            loss = criterion(y_pred, y_batch)
-            loss_prime = criterion(y_pred_prime, y_batch)
+            # Loss
+            loss1 = criterion(y_pred, y_batch)
+            loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss * 2 * np.pi / 180)),
+                              y_batch)
 
-            final_loss = min(loss, loss_prime)
+            loss = torch.min(loss1, loss2)
             # Backward pass
             optimizer.zero_grad()
-            final_loss.backward()
+            loss.backward()
             # Update weights
             optimizer.step()
 
@@ -113,24 +114,21 @@ def main():
         X_test = X_test.flatten(1)
         y_pred_test = model(X_test)
         # TODO find another way to calculate the loss
-        loss_value = criterion(y_pred_test, y_test)
-        y_pred_prime = y_pred_test.clone()
-        y_pred_prime = torch.where(y_pred_prime > settings.threshold_loss, y_pred_prime - 0.5, y_pred_prime)
+        loss1 = criterion(y_pred, y_batch)
+        loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss * 2 * np.pi / 180)),
+                          y_batch)
 
-        loss_value_prime = criterion(y_pred_prime, y_test)
-        loss_value, loss_value_prime = float(loss_value), float(loss_value_prime)
+        loss = torch.min(loss1, loss2)
+        loss = float(loss)
+        history.append(loss)
+        pbar.set_postfix({name_criterion: loss})
 
-        final_loss_value = min(loss_value, loss_value_prime)
-
-        history.append(final_loss_value)
-        pbar.set_postfix({name_criterion: loss_value})
-
-        if loss_value < best_loss:
-            best_loss = loss_value
+        if loss < best_loss:
+            best_loss = loss
             best_weights = copy.deepcopy(model.state_dict())
             y_pred_best = model(X_test)
-            std = min(calculate_std_dev(y_pred_test, y_test), calculate_std_dev(y_pred_prime, y_test))
-            acc = max(accuracy(y_test, y_pred_test), accuracy(y_test, y_pred_prime))
+            std = calculate_std_dev(y_pred_best, y_test)
+            acc = accuracy(y_test, y_pred_best)
 
     pbar.close()
 
@@ -143,7 +141,7 @@ def main():
     fig, ax = plt.subplots()
 
     ax.set_title(ax_title)
-    print("Loss: %.4f" % best_loss)
+    # print("Loss: %.4f" % best_loss)
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
@@ -155,7 +153,8 @@ def main():
         r'$\sigma = {{{deviation}}} $'.format(deviation=dec_to_sci(std), ),
         r'$Accuracy = {{{acc}}}$'.format(acc=acc, ),
         f'{settings.n_hidden_layers} hidden layers',
-        f'{settings.loss_fn}'
+        f'{settings.loss_fn}',
+        r'$\beta = {{{beta}}}$'.format(beta=settings.beta,)
     ))
 
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -170,10 +169,10 @@ def main():
     else:
         y_pred_numpy = y_pred_best.cpu().detach().numpy()
 
-    fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='gray')
-    plt.tight_layout()
+    # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='copper')
+    # plt.tight_layout()
     # plt.savefig(f".\saved\plot\{model_name}_patches.png")
-    plt.show()
+    # plt.show()
 
 
 if __name__ == '__main__':

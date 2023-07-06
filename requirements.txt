@@ -1,6 +1,7 @@
 # pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 codetiming
 configargparse~=1.5
+opencv-python
 imageio
 matplotlib
 numpy
