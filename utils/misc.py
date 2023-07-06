@@ -311,7 +311,7 @@ def resymmetrise_tensor(y_pred: torch.Tensor, threshold=0.):
 
     # Apply the operation to elements greater than the threshold
     mask = torch.gt(y_pred, threshold)
-    new_y_pred[mask] = y_pred[mask] - 0.5
+    new_y_pred[mask] = y_pred[mask] - 1
 
     # Return the smaller loss
     return new_y_pred

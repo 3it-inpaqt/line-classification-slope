@@ -11,6 +11,7 @@ from linegeneration.generate_lines import create_image_set
 from models.model import loss_fn_dic, AngleNet
 from plot.lines_visualisation import create_multiplots
 from utils.save_model import save_model
+from utils.angle_operations import normalize_angle
 from utils.statistics import calculate_std_dev, accuracy
 from utils.settings import settings
 from utils.misc import load_list_from_file, dec_to_sci, resymmetrise_tensor
@@ -30,7 +31,8 @@ def main():
         X, y = create_image_set(n, N, gaussian_blur=settings.sigma, background=settings.background, aa=settings.anti_alias)  # n images of size NxN
         X = X.reshape(n, N*N)
         # Set title for loss evolution with respect to epoch and model name
-        model_name = f'best_model_synthetic_regression_{settings.loss_fn}_beta{int(settings.beta)}_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        # _beta{int(settings.beta)}
+        model_name = f'best_model_synthetic_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
         # custom_suffix = '_new_loss'
         # if len(custom_suffix) > 0:
         #     model_name += custom_suffix
@@ -40,6 +42,7 @@ def main():
         X_path = settings.x_path
         y_path = settings.y_path
         X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
+        print(max(y))
         # Set title for loss evolution with respect to epoch and model name
         model_name = f'best_model_experimental_Dx_regression_{settings.loss_fn}_beta{settings.beta}_batch{settings.batch_size}_epoch{settings.n_epochs}'
         ax_title = f'Training on the experimental patches (regression + Dx) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
@@ -98,7 +101,7 @@ def main():
             # y_pred_prime = torch.where(y_pred_prime > settings.threshold_loss, y_pred_prime - 0.5, y_pred_prime)
 
             loss1 = criterion(y_pred, y_batch)
-            loss2 = criterion(resymmetrise_tensor(y_pred), y_batch)
+            loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss*2*np.pi/180)), y_batch)
 
             loss = torch.min(loss1, loss2)
             # loss_prime = criterion(y_pred_prime, y_batch)
@@ -118,7 +121,7 @@ def main():
         y_pred_test = model(X_test)
         # TODO find another way to calculate the loss
         loss1 = criterion(y_pred, y_batch)
-        loss2 = criterion(resymmetrise_tensor(y_pred), y_batch)
+        loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss*2*np.pi/180)), y_batch)
 
         loss = torch.min(loss1, loss2)
 
@@ -140,13 +143,13 @@ def main():
     # Restore model and return best accuracy
     model.load_state_dict(best_weights)
     # Save the state dictionary
-    # save_model(model, model_name)
+    save_model(model, model_name)
 
     # Plot accuracy
     fig, ax = plt.subplots()
 
     ax.set_title(ax_title)
-    print("Loss: %.4f" % best_loss)
+    # print("Loss: %.4f" % best_loss)
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
@@ -159,7 +162,7 @@ def main():
         r'$Accuracy = {{{acc}}}$'.format(acc=acc, ),
         f'{settings.n_hidden_layers} hidden layers',
         f'{settings.loss_fn}',
-        r'$\beta = {{{beta}}}$'.format(beta=settings.beta, )
+        # r'$\beta = {{{beta}}}$'.format(beta=settings.beta, )
     ))
 
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -174,7 +177,7 @@ def main():
     # else:
     #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
 
-    # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='gray')
+    # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=16, cmap='copper')
     # plt.tight_layout()
     # plt.savefig(f".\saved\plot\{model_name}_patches.png")
     # plt.show()
