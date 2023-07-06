@@ -26,7 +26,7 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
 
     else:  # for experimental diagrams
         image_set = image_set_input.squeeze(1)  # tensor of shape [n, N*N] required
-        print(image_set.shape)
+        # print(image_set.shape)
         if settings.model_type == 'FF':
             n, _ = image_set.shape
             image_set = image_set.reshape(n, settings.patch_size_x, settings.patch_size_y)
@@ -48,7 +48,7 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
     # Create a figure and axis objects
     fig, axes = plt.subplots(nrows=number_rows, ncols=number_columns, figsize=(4 * number_columns, 4 * number_rows))
 
-    print(image_set.shape)
+    # print(image_set.shape)
 
     for i, ax in enumerate(axes.flatten()):
         if i < number_sample:

@@ -299,3 +299,19 @@ def renorm_array(input_table: Any) -> torch.Tensor:
 
     return new_tensor
 
+
+def resymmetrise_tensor(y_pred: torch.Tensor, threshold=0.):
+    """
+
+    :param y_pred:
+    :param threshold:
+    :return:
+    """
+    new_y_pred = y_pred.clone()
+
+    # Apply the operation to elements greater than the threshold
+    mask = torch.gt(y_pred, threshold)
+    new_y_pred[mask] = y_pred[mask] - 1
+
+    # Return the smaller loss
+    return new_y_pred

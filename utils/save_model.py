@@ -37,7 +37,7 @@ def save_model(model, filename: str = 'model', run_type: str = 'ff') -> None:
     index = 0
     indexed_name = filename  # avoid repetition in the name, as filename is being written over and over
     while os.path.exists(os.path.join(path, indexed_name)):
-        print(os.path.join(path, indexed_name))
+        # print(os.path.join(path, indexed_name))
         index += 1
         indexed_name = f"{filename[:-3]}_{index}.pt"  # makes sure extension is not in the middle of the name
 

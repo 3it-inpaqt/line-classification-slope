@@ -181,6 +181,7 @@ class Settings:
 
     # Hyperparameters
     loss_fn: str = 'SmoothL1Loss'
+    beta: float = 1.0
     threshold_loss: float = 0.  # to calculate a minimum loss to avoid stupid weights modification
     learning_rate: float = 0.00001
     n_epochs: int = 500  # number of epochs to run
@@ -400,7 +401,7 @@ class Settings:
                                                             ' have training data'
 
         # Networks
-        assert isinstance(self.model_type, str) and self.model_type.upper() in ['FF', 'BFF', 'CNN', 'BCNN'], \
+        assert isinstance(self.model_type, str) and self.model_type.upper() in ['FF', 'BFF', 'CNN', 'BCNN', 'EDGE-DETECT'], \
             f'Invalid network type {self.model_type}'
         assert all((a > 1 for a in self.conv_layers_kernel)), 'Conv layer kernel size should be more than 1'
 

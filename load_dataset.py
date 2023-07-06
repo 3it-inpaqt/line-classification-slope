@@ -91,24 +91,23 @@ if __name__ == '__main__':
         "font.family": "serif"
     })
     angles_lines = angles_from_list(selected_lines)
-    get_angle_stat(angles_lines)
+    # get_angle_stat(angles_lines)
 
     # Resampling of the dataset
     # resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
     # get_angle_stat(resampled_angles)
 
     # Reshape patches for neural network
-    # Get the number of images and the size of each image
-    # n = len(selected_patches)
-    # N = selected_patches[0].shape[0]
-    #
-    # # Create an empty tensor with the desired shape
-    # stacked_patches = torch.empty(n, N, N, dtype=torch.float32)
-    #
-    # # Fill the 3D tensor with the image data
-    # for i, image_tensor in enumerate(selected_patches):
-    #     print(image_tensor.shape)
-    #     stacked_patches[i, :, :] = image_tensor[0, :, :]
+    # Get the number of images
+    n = len(selected_patches)
+
+    # Create an empty tensor with the desired shape
+    stacked_patches = torch.empty(n, settings.patch_size_x, settings.patch_size_y, dtype=torch.float32)
+
+    # Fill the 3D tensor with the image data
+    for i, image_tensor in enumerate(selected_patches):
+        # print(image_tensor.shape)
+        stacked_patches[i, :, :] = image_tensor[0, :, :]
     #
     # stacked_patches = torch.stack(selected_patches)
     # tensor_patches = stacked_patches.unsqueeze(1)
@@ -117,11 +116,11 @@ if __name__ == '__main__':
     # print(stacked_patches[0, 0, :, :])
     # # print(len(angles_lines))
 
-    # # Save patches and angles to file for later use
-    # torch.save(stacked_patches, './saved/double_dot_patches_normalized.pt')
+    # Save patches and angles to file for later use
+    torch.save(stacked_patches, f'./saved/double_dot_patches_normalized_Dx_{settings.patch_size_x}_{settings.patch_size_y}.pt')
     #
     # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
     # plt.tight_layout()
     # plt.show()
 
-    # save_list_to_file(angles_lines, './saved/double_dot_normalized_angles.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
+    save_list_to_file(angles_lines, f'./saved/double_dot_normalized_angles_{settings.patch_size_x}_{settings.patch_size_y}.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
