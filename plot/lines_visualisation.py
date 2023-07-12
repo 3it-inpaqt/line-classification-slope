@@ -8,7 +8,7 @@ from typing import Tuple, Any
 from utils.settings import settings
 
 
-def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any = None, number_sample: float = None, cmap: str = 'copper') -> Tuple[Figure, Axes]:
+def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any = None, number_sample: float = None, cmap: str = 'copper', normalize=True) -> Tuple[Figure, Axes]:
     """
     Generate figures with several plots to see different lines orientation
 
@@ -17,6 +17,7 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
     :param prediction_angles: optional, value of predicted angles by a neural network (ndarray)
     :param number_sample: number of images to plot, None by default
     :param cmap: Color map, copper by default
+    :param normalize: Whether the angles are normalized or not, True by default
     :return: a figure with subplots
     """
     if settings.synthetic:  # for synthetic diagrams
@@ -28,6 +29,7 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
         image_set = image_set_input.squeeze(1)  # tensor of shape [n, N*N] required
         # print(image_set.shape)
         if settings.model_type == 'FF':
+            print(image_set.shape)
             n, _ = image_set.shape
             image_set = image_set.reshape(n, settings.patch_size_x, settings.patch_size_y)
 
@@ -56,16 +58,22 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
             index = indices[i]
             image = image_set[index, :, :]  # no need to reshape, image is now [N, N] shape
             # Get the angle
-            normalized_angle = float(angles[index])
-            angle_radian = normalized_angle * (2 * np.pi)
+            angle_radian = float(angles[index])
+            if normalize:
+                angle_radian = angle_radian * (2 * np.pi)
             angle_degree = angle_radian * 180 / np.pi
             # Set the figure
             ax.imshow(image * 255, cmap=cmap)  # first show the image otherwise line would be hidden
-            title = 'Angle: {:.2f} ({:.2f}°) \n Normalized value: {:.2f}'.format(angle_radian, angle_degree, normalized_angle)
+            title = 'Angle: {:.2f} ({:.2f}°)'.format(angle_radian, angle_degree)
             # Modify figure title to take into account predicted angle value if it was given in input
             if prediction_angles is not None:
+                # print(prediction_angles)
                 prediction_angle = prediction_angles[index][0]  # the angle is a ndarray type with one element only for index i
-                title += '\n Predicted: {:.2f} ({:.2f}°)'.format(prediction_angle, prediction_angle*2*np.pi*180/np.pi)
+                if normalize:
+                    prediction_angle_degree = prediction_angle * 2 * np.pi * 180 / np.pi
+                else:
+                    prediction_angle_degree = prediction_angle * 180 / np.pi
+                title += '\n Predicted: {:.2f} ({:.2f}°)'.format(prediction_angle, prediction_angle_degree)
             # Set ax properties
             ax.set_title(title, fontsize=22)
             ax.axis('off')

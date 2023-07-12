@@ -8,7 +8,7 @@ from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
 from linegeneration.generate_lines import create_image_set
-from models.model import loss_fn_dic, AngleNet
+from models.model import loss_fn_dic, AngleNet, harmonic_loss
 from plot.lines_visualisation import create_multiplots
 from utils.angle_operations import normalize_angle
 from utils.save_model import save_model
@@ -35,15 +35,17 @@ def main():
         # custom_suffix = '_new_loss'
         # if len(custom_suffix) > 0:
         #     model_name += custom_suffix
-        ax_title = f'Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
+        ax_title = f'Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Threshold: {settings.threshold_loss}°'
 
     else:
         X_path = settings.x_path
         y_path = settings.y_path
         X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
         # Set title for loss evolution with respect to epoch and model name
-        model_name = f'best_model_experimental_Dx_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
-        ax_title = f'Training on the experimental patches (regression + Dx) \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
+        model_name = f'best_model_experimental_{settings.research_group}_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        if settings.dx:
+            model_name += '_Dx'
+        ax_title = f'Training on the experimental patches \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Threshold: {settings.threshold_loss}°'
 
     # fig, axes = create_multiplots(X, y, number_sample=16)
     # plt.tight_layout()
@@ -101,6 +103,9 @@ def main():
                               y_batch)
 
             loss = torch.min(loss1, loss2)
+
+            # loss = harmonic_loss(y_pred, y_batch)
+
             # Backward pass
             optimizer.zero_grad()
             loss.backward()
@@ -113,12 +118,12 @@ def main():
         model.eval()
         X_test = X_test.flatten(1)
         y_pred_test = model(X_test)
-        # TODO find another way to calculate the loss
         loss1 = criterion(y_pred, y_batch)
         loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss * 2 * np.pi / 180)),
                           y_batch)
 
         loss = torch.min(loss1, loss2)
+        # loss = harmonic_loss(y_pred_test, y_test)
         loss = float(loss)
         history.append(loss)
         pbar.set_postfix({name_criterion: loss})
@@ -151,10 +156,10 @@ def main():
     textstr = '\n'.join((
         r'$Best Loss = {{{loss}}}$'.format(loss=dec_to_sci(best_loss), ),
         r'$\sigma = {{{deviation}}} $'.format(deviation=dec_to_sci(std), ),
-        r'$Accuracy = {{{acc}}}$'.format(acc=acc, ),
+        # r'$Accuracy = {{{acc}}}$'.format(acc=acc, ),
         f'{settings.n_hidden_layers} hidden layers',
         f'{settings.loss_fn}',
-        r'$\beta = {{{beta}}}$'.format(beta=settings.beta,)
+        # r'$\beta = {{{beta}}}$'.format(beta=settings.beta,)
     ))
 
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -169,10 +174,10 @@ def main():
     else:
         y_pred_numpy = y_pred_best.cpu().detach().numpy()
 
-    # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='copper')
-    # plt.tight_layout()
+    fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='copper', normalize=True)
+    plt.tight_layout()
     # plt.savefig(f".\saved\plot\{model_name}_patches.png")
-    # plt.show()
+    plt.show()
 
 
 if __name__ == '__main__':

@@ -80,11 +80,12 @@ def normalize_angle(angle: Any):
     return angle / (2 * np.pi)
 
 
-def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
+def angles_from_list(lines: List[Tuple[List]], normalize: bool = False) -> ndarray:
     """
     The list of lines contains tuples of list coordinate of the form ([x1, x2], [y1, y2]). It is a bother to calculate
     directly the angle using calculate_angle, so first we extract coordinates, and then apply the functions
     :param lines: List containing lines coordinates
+    :param normalize: Whether to normalize the angles or not
     :return: List of angles associated with each line
     """
     # Initialise output list
@@ -94,7 +95,10 @@ def angles_from_list(lines: List[Tuple[List]]) -> ndarray:
         line = line_list[0]  # when generated, the lines for each patch are in a list (of one element if you choose one intersecting line per patch)
         x1, x2 = line[0][0], line[0][1]
         y1, y2 = line[1][0], line[1][1]
-        angle = normalize_angle(calculate_angle(x1, y1, x2, y2))
+        if normalize:
+            angle = normalize_angle(calculate_angle(x1, y1, x2, y2))
+        else:
+            angle = calculate_angle(x1, y1, x2, y2)
         angle_list.append(angle)
 
     return np.array(angle_list)
