@@ -1,3 +1,4 @@
+from torch import sin, cos, mean, std_mean, abs, pi
 import torch.nn as nn
 from torch import Tensor, gt, min
 # I don't know if it is useful for the feed-forward on a pretrained network, but it works just fine
@@ -11,19 +12,20 @@ def AngleNet(input_size, n_hidden_layers):
         model = nn.Sequential(
             nn.Linear(input_size, 24),
             nn.LeakyReLU(),
-            nn.Linear(24, 6),
+            nn.Linear(24, 3),
             nn.ReLU(),
-            nn.Linear(6, 1)
+            nn.Linear(3, 1)
         )
+
     elif n_hidden_layers == 2:
         model = nn.Sequential(
-                nn.Linear(input_size, 24),
-                nn.LeakyReLU(),
-                nn.Linear(24, 12),
+                nn.Linear(input_size, 12),
                 nn.LeakyReLU(),
                 nn.Linear(12, 6),
+                nn.LeakyReLU(),
+                nn.Linear(6, 3),
                 nn.ReLU(),
-                nn.Linear(6, 1)
+                nn.Linear(3, 1)
             )
     return model
 
@@ -49,3 +51,13 @@ def find_loss(y_pred: Tensor, y: Tensor, criterion, threshold=0.):
     loss2 = criterion(new_y_pred, y)
     # Return the smaller loss
     return min(loss1, loss2)
+
+
+def harmonic_loss(y_pred, y):
+    """
+    Calculate loss using harmonic function
+    :param y_pred:
+    :param y:
+    :return:
+    """
+    return mean((sin(y_pred) - sin(y))**2)

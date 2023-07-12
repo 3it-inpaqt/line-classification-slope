@@ -490,7 +490,7 @@ class Settings:
                            action='append' if is_sequence(value) else 'store',
                            type=type_mapping(value))
 
-        # Load arguments form file, environment and command line to override the defaults
+        # Load arguments from file, environment and command line to override the defaults
         for name, value in vars(p.parse_args()).items():
             if name == 'settings':
                 continue
