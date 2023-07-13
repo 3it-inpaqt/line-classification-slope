@@ -68,6 +68,7 @@ def init_out_directory() -> None:
     with open(parameter_file, 'w+') as f:
         yaml.dump(yaml_preprocess(settings), f)
 
+
     logger.debug(f'Parameters saved in {parameter_file}')
 
 

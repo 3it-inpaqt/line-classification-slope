@@ -14,7 +14,7 @@ from classes.data_structures import ChargeRegime
 from classes.diagram import Diagram
 from plot.data import plot_diagram
 from utils.logger import logger
-from utils.output import load_normalization
+from utils.output import load_normalization, save_normalization
 from utils.settings import settings
 
 
@@ -449,11 +449,24 @@ class DiagramOffline(Diagram):
         :param diagrams: Diagrams object
         :return: Normalized tensor of size [1, N, N]
         """
+        # Concatenate all the tensors into a single tensor
+        all_tensors = torch.cat([diagram.values for diagram in diagrams], dim=1)
+
+        # Compute the minimum and maximum values across all the tensors
+        min_value = all_tensors.min().item()
+        max_value = all_tensors.max().item()
+        print(max_value)
+        print(min_value)
+
+        save_normalization(min_value=min_value, max_value=max_value)
+
+        # Normalize each tensor in the list using the computed minimum and maximum values
         for diagram in diagrams:
             tensor = diagram.values.clone()
             new_tensor = tensor.view(1, -1)
-            new_tensor -= new_tensor.min(1, keepdim=True)[0]
-            new_tensor /= new_tensor.max(1, keepdim=True)[0]
+            new_tensor -= min_value
+            new_tensor /= max_value
             diagram.values = new_tensor.view(tensor.size(0), tensor.size(1))
+
 
 
