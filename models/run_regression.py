@@ -2,13 +2,12 @@ import copy
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 
 from linegeneration.generate_lines import create_image_set
-from models.model import loss_fn_dic, AngleNet, harmonic_loss
+from models.model import loss_fn_dic, AngleNet
 from plot.lines_visualisation import create_multiplots
 from utils.angle_operations import normalize_angle
 from utils.save_model import save_model
@@ -42,7 +41,12 @@ def main():
         y_path = settings.y_path
         X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
         # Set title for loss evolution with respect to epoch and model name
-        model_name = f'best_model_experimental_{settings.research_group}_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        model_name = f'model_experimental_{settings.research_group}_regression_{settings.loss_fn}'
+        if settings.loss_fn == 'SmoothL1Loss':
+            model_name += f'_{settings.beta}'
+
+        model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}'
+
         if settings.dx:
             model_name += '_Dx'
         ax_title = f'Training on the experimental patches \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Threshold: {settings.threshold_loss}°'
@@ -87,6 +91,8 @@ def main():
 
     pbar = tqdm(range(n_epochs), desc="Training Progress", unit="epoch")
 
+    best_std = np.inf
+
     for epoch in range(n_epochs):
         model.train()
         for start in batch_start:
@@ -117,10 +123,10 @@ def main():
         # Evaluate accuracy at end of each epoch
         model.eval()
         X_test = X_test.flatten(1)
-        y_pred_test = model(X_test)
-        loss1 = criterion(y_pred, y_batch)
+        y_pred = model(X_test)
+        loss1 = criterion(y_pred, y_test)
         loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss * 2 * np.pi / 180)),
-                          y_batch)
+                          y_test)
 
         loss = torch.min(loss1, loss2)
         # loss = harmonic_loss(y_pred_test, y_test)
@@ -139,8 +145,11 @@ def main():
 
     # Restore model and return best accuracy
     model.load_state_dict(best_weights)
-    # Save the state dictionary
-    save_model(model, model_name)
+    # Save the state dictionary if the model is better than the previous one
+    if std < best_std:
+        best_std = std
+        print('best std: ', best_std)
+        save_model(model, model_name)
 
     # Plot accuracy
     fig, ax = plt.subplots()
@@ -159,7 +168,7 @@ def main():
         # r'$Accuracy = {{{acc}}}$'.format(acc=acc, ),
         f'{settings.n_hidden_layers} hidden layers',
         f'{settings.loss_fn}',
-        # r'$\beta = {{{beta}}}$'.format(beta=settings.beta,)
+        r'$\beta = {{{beta}}}$'.format(beta=settings.beta,)
     ))
 
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)

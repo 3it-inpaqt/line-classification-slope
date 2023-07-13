@@ -1,27 +1,57 @@
+from math import prod
 from torch import sin, cos, mean, std_mean, abs, pi
 import torch.nn as nn
 from torch import Tensor, gt, min
-# I don't know if it is useful for the feed-forward on a pretrained network, but it works just fine
-# so if you have any suggestions feel free to share them
+from typing import List
+
+from models.feed_forward import FeedForward
+from utils.settings import settings
 
 loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(), 'MSE': nn.MSELoss(), 'MAE': nn.L1Loss()}
 
 
-def AngleNet(input_size, n_hidden_layers):
+def AngleNet(input_shape: int, n_hidden_layers: int):
+    """
+
+    :param input_shape: Shape of the input (N*N)
+    :param hidden_layers: List of the size for each hidden layer
+    :return:
+    """
+    # Number of neurons per layer
+    # eg: input_size, hidden size 1, hidden size 2, ..., nb_classes
+    # layer_sizes = [input_shape]
+    # layer_sizes.extend(hidden_layers)
+    # layer_sizes.append(1)
+    #
+    # # Create fully connected linear layers
+    # fc_layers = nn.ModuleList()
+    # for i in range(len(layer_sizes) - 1):
+    #     layer = nn.Sequential()
+    #     # Fully connected
+    #     layer.append(nn.Linear(layer_sizes[i], layer_sizes[i + 1]))
+    #     # If this is not the output layer
+    #     if i != len(layer_sizes) - 2:
+    #         # Activation function
+    #         layer.append(nn.ReLU())
+    #
+    #     fc_layers.append(layer)
+    #
+    # return fc_layers
+
     if n_hidden_layers == 1:
         model = nn.Sequential(
-            nn.Linear(input_size, 24),
+            nn.Linear(input_shape, 24),
             nn.LeakyReLU(),
-            nn.Linear(24, 3),
+            nn.Linear(24, 6),
             nn.ReLU(),
-            nn.Linear(3, 1)
+            nn.Linear(6, 1)
         )
 
     elif n_hidden_layers == 2:
         model = nn.Sequential(
-                nn.Linear(input_size, 12),
+                nn.Linear(input_shape, 24),
                 nn.LeakyReLU(),
-                nn.Linear(12, 6),
+                nn.Linear(24, 6),
                 nn.LeakyReLU(),
                 nn.Linear(6, 3),
                 nn.ReLU(),

@@ -5,12 +5,14 @@ import zipfile
 from pathlib import Path
 from typing import List, Tuple
 
+import numpy as np
 import torch
 from shapely.geometry import Point, Polygon
 
 from classes.data_structures import ChargeRegime
 from classes.diagram_offline import DiagramOffline
 from utils.logger import logger
+from utils.misc import renorm_array
 from utils.settings import settings
 
 
@@ -202,3 +204,4 @@ class DiagramOfflineNDot(DiagramOffline):
 
         # print(type(diagrams[0].values))
         return diagrams
+
