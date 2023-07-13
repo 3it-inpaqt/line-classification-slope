@@ -116,6 +116,7 @@ class DiagramOffline(Diagram):
         patch_size_x, patch_size_y = patch_size
         overlap_size_x, overlap_size_y = overlap
         label_offset_x, label_offset_y = label_offset
+        # print(self.values.shape)
         diagram_size_y, diagram_size_x = self.values.shape
 
         patches_intersected = []  # contains the patch where there is at least one line intersecting
@@ -444,15 +445,15 @@ class DiagramOffline(Diagram):
     @staticmethod
     def normalize_diagrams(diagrams: Iterable["DiagramOffline"]) -> None:
         """
-        Normalize the diagram with the same min/max value used during the training.
-        The values are fetch via the normalization_values_path setting.
-        :param diagrams: The diagrams to normalize.
+        Re-normalise a tensor with value between 0 and 1
+        :param diagrams: Diagrams object
+        :return: Normalized tensor of size [1, N, N]
         """
-        if settings.autotuning_use_oracle:
-            return  # No need to normalize if we use the oracle
-
-        min_value, max_value = load_normalization()
-
         for diagram in diagrams:
-            diagram.values -= min_value
-            diagram.values /= max_value - min_value
+            tensor = diagram.values.clone()
+            new_tensor = tensor.view(1, -1)
+            new_tensor -= new_tensor.min(1, keepdim=True)[0]
+            new_tensor /= new_tensor.max(1, keepdim=True)[0]
+            diagram.values = new_tensor.view(tensor.size(0), tensor.size(1))
+
+

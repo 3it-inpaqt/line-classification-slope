@@ -29,8 +29,8 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
         image_set = image_set_input.squeeze(1)  # tensor of shape [n, N*N] required
         # print(image_set.shape)
         if settings.model_type == 'FF':
-            print(image_set.shape)
-            n, _ = image_set.shape
+            # print(image_set.shape)
+            n = image_set.shape[0]
             image_set = image_set.reshape(n, settings.patch_size_x, settings.patch_size_y)
 
         elif settings.model_type == 'CNN':

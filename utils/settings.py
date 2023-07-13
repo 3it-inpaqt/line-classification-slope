@@ -2,7 +2,7 @@ import argparse
 import re
 from dataclasses import asdict, dataclass
 from math import isnan
-from typing import Sequence, Union
+from typing import Sequence, Union, Tuple
 
 import configargparse
 from numpy.distutils.misc_util import is_sequence
@@ -176,7 +176,9 @@ class Settings:
 
     # The type of model to use (could be a neural network).
     # Have to be in the implemented list: FF, BFF, CNN, BCNN.
+    run_number: int = 1
     model_type: str = 'FF'
+    hidden_layers: Sequence = (24, 6, 3)  # can't use mutable variables
     n_hidden_layers: int = 1
 
     # Hyperparameters
