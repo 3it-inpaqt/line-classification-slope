@@ -43,8 +43,6 @@ def main():
             X_path = settings.x_path
             y_path = settings.y_path
             X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
-            print(X.shape)
-            print(len(y))
             # Set title for loss evolution with respect to epoch and model name
             model_name = f'model_experimental_{settings.research_group}_regression_{settings.loss_fn}'
             if settings.loss_fn == 'SmoothL1Loss':

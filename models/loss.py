@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from numpy import sin
 
 from utils.settings import settings
 
@@ -66,8 +67,8 @@ class HarmonicFunctionLoss(nn.Module):
         self.num_harmonics = num_harmonics
 
     def forward(self, y_pred, y_batch):
-        harmonics = torch.tensor([torch.sin((n + 1) * torch.pi * y_pred) for n in range(self.num_harmonics)], dtype=torch.float32)
-        target_harmonics = torch.tensor([torch.sin((n + 1) * torch.pi * y_batch) for n in range(self.num_harmonics)], dtype=torch.float32)
+        harmonics = torch.stack([torch.sin((n + 1) * y_pred) for n in range(self.num_harmonics)])
+        target_harmonics = torch.stack([torch.sin((n + 1) * y_batch) for n in range(self.num_harmonics)])
         loss = torch.mean(torch.abs(harmonics - target_harmonics))
         return loss
 
@@ -78,4 +79,5 @@ loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(),
                'MAE': nn.L1Loss(),
                'AngleDiff': AngleDifferenceLoss(),
                'WeightedSmoothL1': WeightedSmoothL1Loss(beta=settings.beta),
-               'HarmonicLoss': HarmonicMeanLoss()}
+               'HarmonicMeanLoss': HarmonicMeanLoss(),
+               'HarmonicFunctionLoss': HarmonicFunctionLoss()}
