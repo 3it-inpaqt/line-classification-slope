@@ -37,10 +37,10 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
 
     # Check if directory exists, create if it does not
     if os.path.exists(path):
-        print(f'Output directory {path} exists, saving file')
+        logger.info(f'Output directory {path} exists, saving file')
     else:
         os.makedirs(path)
-        print(f'Output directory created: {path}')
+        logger.warning(f'Output directory missing. Creating directory: {path}')
 
     # Append index to filename to avoid overwriting previously saved models
     index = 0
