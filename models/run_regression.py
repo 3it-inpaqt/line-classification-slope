@@ -30,8 +30,9 @@ def main():
             # Read Synthetic data
             N = settings.patch_size_x
             n = settings.n_synthetic
-            X, y = create_image_set(n, N, gaussian_blur=settings.sigma, background=settings.background, aa=settings.anti_alias)  # n images of size NxN
-            X = X.reshape(n, N*N)
+            X, y = create_image_set(n, N, gaussian_blur=settings.sigma, background=settings.background,
+                                    aa=settings.anti_alias)  # n images of size NxN
+            X = X.reshape(n, N * N)
             # Set title for loss evolution with respect to epoch and model name
             model_name = f'best_model_synthetic_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
             # custom_suffix = '_new_loss'
@@ -47,6 +48,8 @@ def main():
             model_name = f'model_experimental_{settings.research_group}_regression_{settings.loss_fn}'
             if settings.loss_fn == 'SmoothL1Loss':
                 model_name += f'_{settings.beta}'
+            elif settings.loss_fn == 'HarmonicFunctionLoss':
+                model_name += f'_{settings.num_harmonics}'
 
             model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}'
 
@@ -75,7 +78,8 @@ def main():
         # y_test_gpu = y_test.to(device)
 
         input_size = settings.patch_size_x * settings.patch_size_y
-        model = AngleNet(input_size, settings.n_hidden_layers)  # CHANGE THE STRUCTURE OF THE NETWORK IN THE 'ANGLENET' CLASS
+        model = AngleNet(input_size,
+                         settings.n_hidden_layers)  # CHANGE THE STRUCTURE OF THE NETWORK IN THE 'ANGLENET' CLASS
 
         # Loss function and optimizer
         learning_rate = settings.learning_rate
@@ -83,12 +87,12 @@ def main():
         criterion = loss_fn_dic[name_criterion]
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-        n_epochs = settings.n_epochs   # number of epochs to run
+        n_epochs = settings.n_epochs  # number of epochs to run
         batch_size = settings.batch_size  # size of each batch
         batch_start = torch.arange(0, len(X_train), batch_size)
 
         # Hold the best model
-        best_loss = np.inf   # init to infinity
+        best_loss = np.inf  # init to infinity
         best_weights = None
         history = []
 
@@ -98,8 +102,8 @@ def main():
             model.train()
             for start in batch_start:
                 # Take a batch
-                X_batch = X_train[start:start+batch_size]
-                y_batch = y_train[start:start+batch_size]
+                X_batch = X_train[start:start + batch_size]
+                y_batch = y_train[start:start + batch_size]
                 X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
                 # Forward pass
                 y_pred = model(X_batch)
@@ -173,7 +177,12 @@ def main():
 
         if settings.loss_fn == 'SmoothL1Loss':
             textstr = '\n'.join((textstr,
-                                r'$\beta = {{{beta}}}$'.format(beta=settings.beta,)
+                                 r'$\beta = {{{beta}}}$'.format(beta=settings.beta, )
+                                 ))
+
+        elif settings.loss_fn == 'HarmonicFunctionLoss':
+            textstr = '\n'.join((textstr,
+                                r'$\n = {{{num_harmonic}}}$'.format(num_harmonic=settings.num_harmonics,)
                                 ))
 
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -196,4 +205,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

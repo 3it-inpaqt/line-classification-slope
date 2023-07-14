@@ -80,4 +80,4 @@ loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(),
                'AngleDiff': AngleDifferenceLoss(),
                'WeightedSmoothL1': WeightedSmoothL1Loss(beta=settings.beta),
                'HarmonicMeanLoss': HarmonicMeanLoss(),
-               'HarmonicFunctionLoss': HarmonicFunctionLoss()}
+               'HarmonicFunctionLoss': HarmonicFunctionLoss(num_harmonics=settings.num_harmonics)}
