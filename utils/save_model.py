@@ -85,12 +85,11 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
     ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
 
     # Save the figure to a file
-    os.chdir(path)
-    plt.savefig(f'{model_filename}.png')
+    plt.savefig(f'{path}/{indexed_plot_name}')
     logger.info(f"Plot saved to {indexed_plot_name}")
     plt.show()
 
     # Save the model to a file
     # filepath = os.path.join(path, indexed_model_name)
-    torch.save(model.state_dict(), indexed_model_name)
+    torch.save(model.state_dict(), f'{path}/{indexed_model_name}')
     logger.info(f"Model saved to {indexed_model_name}")

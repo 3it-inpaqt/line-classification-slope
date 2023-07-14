@@ -1,4 +1,6 @@
 import copy
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -25,38 +27,39 @@ plt.rcParams.update({
 def main():
     best_std = np.inf
 
-    for _ in range(settings.run_number):
-        if settings.synthetic:
-            # Read Synthetic data
-            N = settings.patch_size_x
-            n = settings.n_synthetic
-            X, y = create_image_set(n, N, gaussian_blur=settings.sigma, background=settings.background,
-                                    aa=settings.anti_alias)  # n images of size NxN
-            X = X.reshape(n, N * N)
-            # Set title for loss evolution with respect to epoch and model name
-            model_name = f'best_model_synthetic_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
-            # custom_suffix = '_new_loss'
-            # if len(custom_suffix) > 0:
-            #     model_name += custom_suffix
-            ax_title = f'Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Threshold: {settings.threshold_loss}°'
 
-        else:
-            X_path = settings.x_path
-            y_path = settings.y_path
-            X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
-            # Set title for loss evolution with respect to epoch and model name
-            model_name = f'experimental_{settings.research_group}_regression_{settings.loss_fn}'
-            if settings.loss_fn == 'SmoothL1Loss':
-                model_name += f'_{settings.beta}'
-            elif settings.loss_fn == 'HarmonicFunctionLoss':
-                model_name += f'_{settings.num_harmonics}'
+    if settings.synthetic:
+        # Read Synthetic data
+        N = settings.patch_size_x
+        n = settings.n_synthetic
+        X, y = create_image_set(n, N, gaussian_blur=settings.sigma, background=settings.background,
+                                aa=settings.anti_alias)  # n images of size NxN
+        X = X.reshape(n, N * N)
+        # Set title for loss evolution with respect to epoch and model name
+        model_name = f'best_model_synthetic_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        # custom_suffix = '_new_loss'
+        # if len(custom_suffix) > 0:
+        #     model_name += custom_suffix
+        ax_title = f'Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Threshold: {settings.threshold_loss}°'
 
-            model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}'
+    else:
+        X_path = settings.x_path
+        y_path = settings.y_path
+        X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
+        # Set title for loss evolution with respect to epoch and model name
+        model_name = f'experimental_{settings.research_group}_regression_{settings.loss_fn}'
+        if settings.loss_fn == 'SmoothL1Loss':
+            model_name += f'{settings.beta}'
+        elif settings.loss_fn == 'HarmonicFunctionLoss':
+            model_name += f'{settings.num_harmonics}'
 
-            if settings.dx:
-                model_name += '_Dx'
+        model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}'
 
-            saving_dir = f'./saved/'
+        if settings.dx:
+            model_name += '_Dx'
+
+        saving_dir = f'./saved/'
+
 
         # train-test split for model evaluation
         X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
@@ -84,82 +87,83 @@ def main():
         batch_size = settings.batch_size  # size of each batch
         batch_start = torch.arange(0, len(X_train), batch_size)
 
-        # Hold the best model
-        best_loss = np.inf  # init to infinity
-        best_weights = None
-        history = []
+        for _ in range(settings.run_number):
+            # Hold the best model
+            best_loss = np.inf  # init to infinity
+            best_weights = None
+            history = []
 
-        pbar = tqdm(range(n_epochs), desc="Training Progress", unit="epoch")
+            pbar = tqdm(range(n_epochs), desc="Training Progress", unit="epoch")
 
-        for epoch in range(n_epochs):
-            model.train()
-            for start in batch_start:
-                # Take a batch
-                X_batch = X_train[start:start + batch_size]
-                y_batch = y_train[start:start + batch_size]
-                X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
-                # Forward pass
-                y_pred = model(X_batch)
+            for epoch in range(n_epochs):
+                model.train()
+                for start in batch_start:
+                    # Take a batch
+                    X_batch = X_train[start:start + batch_size]
+                    y_batch = y_train[start:start + batch_size]
+                    X_batch = X_batch.flatten(1)  # flatten array for matrix multiplication
+                    # Forward pass
+                    y_pred = model(X_batch)
 
-                # Loss
-                # loss1 = criterion(y_pred, y_batch)
+                    # Loss
+                    # loss1 = criterion(y_pred, y_batch)
+                    # loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss * 2 * np.pi / 180)),
+                    #                   y_batch)
+                    # loss = torch.min(loss1, loss2)
+
+                    loss = criterion(y_pred, y_batch)
+
+                    # Backward pass
+                    optimizer.zero_grad()
+                    loss.backward()
+                    # Update weights
+                    optimizer.step()
+
+                # Update progress bar
+                pbar.update(1)
+                # Evaluate accuracy at end of each epoch
+                model.eval()
+                X_test = X_test.flatten(1)
+                y_pred = model(X_test)
+
+                # loss1 = criterion(y_pred, y_test)
                 # loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss * 2 * np.pi / 180)),
-                #                   y_batch)
-                #
+                #                   y_test)
                 # loss = torch.min(loss1, loss2)
 
-                loss = criterion(y_pred, y_batch)
+                loss = criterion(y_pred, y_test)
+                loss = float(loss)
+                history.append(loss)
+                pbar.set_postfix({name_criterion: loss})
 
-                # Backward pass
-                optimizer.zero_grad()
-                loss.backward()
-                # Update weights
-                optimizer.step()
+                if loss < best_loss:
+                    best_loss = loss
+                    best_weights = copy.deepcopy(model.state_dict())
+                    y_pred_best = model(X_test)
+                    std = calculate_std_dev(y_pred_best, y_test)
+                    acc = accuracy(y_test, y_pred_best)
 
-            # Update progress bar
-            pbar.update(1)
-            # Evaluate accuracy at end of each epoch
-            model.eval()
-            X_test = X_test.flatten(1)
-            y_pred = model(X_test)
-            # loss1 = criterion(y_pred, y_test)
-            # loss2 = criterion(resymmetrise_tensor(y_pred, normalize_angle(settings.threshold_loss * 2 * np.pi / 180)),
-            #                   y_test)
-            #
-            # loss = torch.min(loss1, loss2)
-            loss = criterion(y_pred, y_test)
-            loss = float(loss)
-            history.append(loss)
-            pbar.set_postfix({name_criterion: loss})
+            pbar.close()
 
-            if loss < best_loss:
-                best_loss = loss
-                best_weights = copy.deepcopy(model.state_dict())
-                y_pred_best = model(X_test)
-                std = calculate_std_dev(y_pred_best, y_test)
-                acc = accuracy(y_test, y_pred_best)
+            # Restore model and return best accuracy
+            model.load_state_dict(best_weights)
+            # Save the state dictionary if the model is better than the previous one
+            if std < best_std:
+                best_std = std
+                print('best std: ', best_std)
 
-        pbar.close()
+                save_model(model, filename=model_name, directory_path=saving_dir, loss_history=history, best_loss=best_loss, accuracy=acc, standard_deviation=best_std)
 
-        # Restore model and return best accuracy
-        model.load_state_dict(best_weights)
-        # Save the state dictionary if the model is better than the previous one
-        if std < best_std:
-            best_std = std
-            print('best std: ', best_std)
+            # Plot some lines and patches
+            # if torch.cuda.is_available():
+            #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
+            # else:
+            #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
 
-            save_model(model, filename=model_name, directory_path=saving_dir, loss_history=history, best_loss=best_loss, accuracy=acc, standard_deviation=best_std)
-
-        # Plot some lines and patches
-        # if torch.cuda.is_available():
-        #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
-        # else:
-        #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
-
-        # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='copper', normalize=True)
-        # plt.tight_layout()
-        # # plt.savefig(f".\saved\plot\{model_name}_patches.png")
-        # plt.show()
+            # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='copper', normalize=True)
+            # plt.tight_layout()
+            # # plt.savefig(f".\saved\plot\{model_name}_patches.png")
+            # plt.show()
 
 
 if __name__ == '__main__':
