@@ -450,11 +450,13 @@ class DiagramOffline(Diagram):
         :return: Normalized tensor of size [1, N, N]
         """
         # Concatenate all the tensors into a single tensor
-        all_tensors = torch.cat([diagram.values for diagram in diagrams], dim=1)
+        print([diagram.values.shape for diagram in diagrams])
+        all_max = [diagram.values.max().item() for diagram in diagrams]
+        all_min = [diagram.values.min().item() for diagram in diagrams]
 
         # Compute the minimum and maximum values across all the tensors
-        min_value = all_tensors.min().item()
-        max_value = all_tensors.max().item()
+        min_value = min(all_min)
+        max_value = max(all_max)
         print(max_value)
         print(min_value)
 
