@@ -23,9 +23,9 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
     # Define path to 'saved' folder
     run_type = settings.model_type
     if run_type == "FF":
-        path = f"./{directory_path}/{settings.research_group}/regression/{settings.loss_fn}"
+        path = f"{directory_path}/{settings.research_group}/regression/{settings.loss_fn}"
     elif run_type == "CNN":
-        path = f"./{directory_path}/{settings.research_group}/convolution/{settings.loss_fn}"
+        path = f"{directory_path}/{settings.research_group}/convolution/{settings.loss_fn}"
     else:
         while run_type != "ff" and run_type != "cnn":
             logger.warning(f'Run type invalid.')
@@ -53,7 +53,9 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
 
     # Plot accuracy
     fig, ax = plt.subplots()
-    ax_title = f'Training on the experimental patches \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}' #  | Threshold: {settings.threshold_loss}°
+    ax_title = f'Training on the experimental patches \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
+    if settings.use_threshold_loss:
+        ax_title += ' | Threshold: {settings.threshold_loss}°'
 
     ax.set_title(ax_title)
     # print("Loss: %.4f" % best_loss)
@@ -71,7 +73,7 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
         f'{settings.loss_fn}'
     ))
 
-    if settings.loss_fn == 'SmoothL1Loss':
+    if settings.loss_fn == 'SmoothL1Loss' or settings.loss_fn == 'WeightedSmoothL1':
         textstr = '\n'.join((textstr,
                              r'$\beta = {{{beta}}}$'.format(beta=settings.beta, )
                              ))
