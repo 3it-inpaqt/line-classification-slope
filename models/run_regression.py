@@ -182,8 +182,8 @@ def main():
 
         elif settings.loss_fn == 'HarmonicFunctionLoss':
             textstr = '\n'.join((textstr,
-                                r'$\n = {{{num_harmonic}}}$'.format(num_harmonic=settings.num_harmonics,)
-                                ))
+                                r'$n = {{{num_harmonic}}}$'.format(num_harmonic=settings.num_harmonics, )
+                                 ))
 
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
