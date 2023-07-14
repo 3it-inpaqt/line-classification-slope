@@ -7,37 +7,14 @@ from typing import List
 from models.feed_forward import FeedForward
 from utils.settings import settings
 
-loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(), 'MSE': nn.MSELoss(), 'MAE': nn.L1Loss()}
-
 
 def AngleNet(input_shape: int, n_hidden_layers: int):
     """
 
     :param input_shape: Shape of the input (N*N)
-    :param hidden_layers: List of the size for each hidden layer
+    :param n_hidden_layers: Number of hidden layers
     :return:
     """
-    # Number of neurons per layer
-    # eg: input_size, hidden size 1, hidden size 2, ..., nb_classes
-    # layer_sizes = [input_shape]
-    # layer_sizes.extend(hidden_layers)
-    # layer_sizes.append(1)
-    #
-    # # Create fully connected linear layers
-    # fc_layers = nn.ModuleList()
-    # for i in range(len(layer_sizes) - 1):
-    #     layer = nn.Sequential()
-    #     # Fully connected
-    #     layer.append(nn.Linear(layer_sizes[i], layer_sizes[i + 1]))
-    #     # If this is not the output layer
-    #     if i != len(layer_sizes) - 2:
-    #         # Activation function
-    #         layer.append(nn.ReLU())
-    #
-    #     fc_layers.append(layer)
-    #
-    # return fc_layers
-
     if n_hidden_layers == 1:
         model = nn.Sequential(
             nn.Linear(input_shape, 24),

@@ -58,6 +58,7 @@ def load_patches(diagrams):
     lines = []
 
     for diagram in diagrams:
+        torch.save(diagram.values[669:687, 139:157], 'test_bastien.pt')
         diagram_patches, lines_patches = diagram.get_patches((settings.patch_size_x, settings.patch_size_y), (6, 6),
                                                              (0, 0))
         patches.extend(diagram_patches)
@@ -75,19 +76,19 @@ if __name__ == '__main__':
 
     for patch, line_list in zip(patches_list, lines_list):
         if len(line_list) == 1:  # takes patch into account only if it has one line crossing it
-            # if settings.dx:
-            #     Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
-            #     selected_patches.append(renorm_array(Dx))  # convert numpy array back to torch tensor and normalize it
-            # else:
-            #     # print(patch.shape)
-            #     selected_patches.append((renorm_array(patch)))
-            selected_patches.append(patch)
+            if settings.dx:
+                # print(patch.shape)
+                Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
+                # print(Dx.shape)
+                # print('---------------')
+                selected_patches.append(Dx)  # convert numpy array back to torch tensor and normalize it
+            else:
+                selected_patches.append(patch)
             selected_lines.append(line_list)
 
     # print(lines_list)
 
     plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
-    print(selected_patches[0])
     # Calculate angles by hand for verification
     plt.rcParams.update({
         "text.usetex": True,
@@ -95,39 +96,43 @@ if __name__ == '__main__':
     })
     angles_lines = angles_from_list(selected_lines, normalize=True)
     # get_angle_stat(angles_lines)
+    print(len(angles_lines))
     # #
     # # # Resampling of the dataset
     # # # resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
     # # # get_angle_stat(resampled_angles)
     # #
-    # # Reshape patches for neural network
-    # # Get the number of images
+    # Reshape patches for neural network
+    # Get the number of images
     # n = len(selected_patches)
     # #
     # # # Create an empty tensor with the desired shape
-    # # stacked_patches = torch.empty(n, settings.patch_size_x, settings.patch_size_y, dtype=torch.float32)
+    # stacked_patches = torch.empty(n, settings.patch_size_x, settings.patch_size_y, dtype=torch.float32)
     #
     # # Fill the 3D tensor with the image data
     # # for i, image_tensor in enumerate(selected_patches):
     # #     # print(image_tensor.shape)
     # #     stacked_patches[i, :, :] = image_tensor[0, :, :]
     # # #
-    stacked_patches = torch.stack(selected_patches)
-    tensor_patches = stacked_patches.unsqueeze(1)
-    # #
-    # # # # prepro_tensor = renorm_all_tensors(tensor_patches, True)
-    print(stacked_patches.shape)
-    print(len(angles_lines))
-    # #
+    # if type(selected_patches[0]) == np.ndarray:
+    #     stacked_array = np.stack(selected_patches)
+    #     stacked_patches = torch.from_numpy(stacked_array)
+    # else:
+    #     stacked_patches = torch.stack(selected_patches)
+    # tensor_patches = stacked_patches.unsqueeze(1)
+
+    # prepro_tensor = renorm_all_tensors(tensor_patches, True)
+
     # Save patches and angles to file for later use
-    path_torch = f'./saved/double_dot_{settings.research_group}_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
+    # path_torch = f'./saved/double_dot_{settings.research_group}_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
     # if settings.dx:
     #     path_torch += "_Dx"
-    path_torch += ".pt"
-    torch.save(stacked_patches, path_torch)
-
-    fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
-    plt.tight_layout()
-    plt.show()
-
-    save_list_to_file(angles_lines, f'./saved/double_dot_{settings.research_group}_angles_{settings.patch_size_x}_{settings.patch_size_y}.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
+    # path_torch += ".pt"
+    # torch.save(stacked_patches, path_torch)
+    #
+    # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
+    # plt.tight_layout()
+    # plt.show()
+    # print(tensor_patches.shape)
+    # print(len(angles_lines))
+    # save_list_to_file(angles_lines, f'./saved/double_dot_{settings.research_group}_angles_{settings.patch_size_x}_{settings.patch_size_y}.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
