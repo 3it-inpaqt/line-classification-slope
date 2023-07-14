@@ -9,12 +9,12 @@ from sklearn.model_selection import train_test_split
 from linegeneration.generate_lines import create_image_set
 from models.model import AngleNet
 from models.loss import loss_fn_dic
-from plot.lines_visualisation import create_multiplots
-from utils.angle_operations import normalize_angle
+# from plot.lines_visualisation import create_multiplots
+# from utils.angle_operations import normalize_angle
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev, accuracy
 from utils.settings import settings
-from utils.misc import load_list_from_file, dec_to_sci, resymmetrise_tensor
+from utils.misc import load_list_from_file  # , dec_to_sci, resymmetrise_tensor
 
 plt.rcParams.update({
     "text.usetex": True,
@@ -45,7 +45,7 @@ def main():
             y_path = settings.y_path
             X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
             # Set title for loss evolution with respect to epoch and model name
-            model_name = f'model_experimental_{settings.research_group}_regression_{settings.loss_fn}'
+            model_name = f'experimental_{settings.research_group}_regression_{settings.loss_fn}'
             if settings.loss_fn == 'SmoothL1Loss':
                 model_name += f'_{settings.beta}'
             elif settings.loss_fn == 'HarmonicFunctionLoss':
@@ -55,11 +55,8 @@ def main():
 
             if settings.dx:
                 model_name += '_Dx'
-            ax_title = f'Training on the experimental patches \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size} | Threshold: {settings.threshold_loss}°'
 
-        # fig, axes = create_multiplots(X, y, number_sample=16)
-        # plt.tight_layout()
-        # plt.show()
+            saving_dir = f'./saved/'
 
         # train-test split for model evaluation
         X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
@@ -72,10 +69,6 @@ def main():
 
         # Move network and data tensors to device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        # X_train_gpu = X_train.to(device)
-        # y_train_gpu = y_train.to(device)
-        # X_test_gpu = X_test.to(device)
-        # y_test_gpu = y_test.to(device)
 
         input_size = settings.patch_size_x * settings.patch_size_y
         model = AngleNet(input_size,
@@ -154,42 +147,8 @@ def main():
         if std < best_std:
             best_std = std
             print('best std: ', best_std)
-            save_model(model, model_name)
 
-        # Plot accuracy
-        fig, ax = plt.subplots()
-
-        ax.set_title(ax_title)
-        # print("Loss: %.4f" % best_loss)
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-
-        plt.plot(history)
-
-        # Add a text box to the plot
-        textstr = '\n'.join((
-            r'$Best Loss = {{{loss}}}$'.format(loss=dec_to_sci(best_loss), ),
-            r'$\sigma = {{{deviation}}} $'.format(deviation=dec_to_sci(std), ),
-            # r'$Accuracy = {{{acc}}}$'.format(acc=acc, ),
-            f'{settings.n_hidden_layers} hidden layers',
-            f'{settings.loss_fn}'
-        ))
-
-        if settings.loss_fn == 'SmoothL1Loss':
-            textstr = '\n'.join((textstr,
-                                 r'$\beta = {{{beta}}}$'.format(beta=settings.beta, )
-                                 ))
-
-        elif settings.loss_fn == 'HarmonicFunctionLoss':
-            textstr = '\n'.join((textstr,
-                                r'$n = {{{num_harmonic}}}$'.format(num_harmonic=settings.num_harmonics, )
-                                 ))
-
-        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-        ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
-
-        # plt.savefig(f".\saved\plot\{model_name}_loss.png")
-        plt.show()
+            save_model(model, filename=model_name, directory_path=saving_dir, loss_history=history, best_loss=best_loss, accuracy=acc, standard_deviation=best_std)
 
         # Plot some lines and patches
         # if torch.cuda.is_available():
