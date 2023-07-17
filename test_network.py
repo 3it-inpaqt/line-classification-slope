@@ -56,6 +56,8 @@ if __name__ == '__main__':
     # print('Standard deviation (rotated set): ', std_dev_rotated)
 
     X = torch.load('test_bastien.pt')
+    plt.imshow(X, cmap='copper')
+    plt.show()
     print(X.shape)
     path_model = '.\\saved\\louis_gaudreau\\regression\\WeightedSmoothL1\\experimental_louis_gaudreau_regression_WeightedSmoothL1005_batch18_epoch200_Dx_1.pt'
     input_size = settings.patch_size_x * settings.patch_size_y  # image size
@@ -67,4 +69,4 @@ if __name__ == '__main__':
     angles_test_prediction = model(tensor_patches)  # feedforward of the test images
     angles_test_prediction_numpy = angles_test_prediction.detach().numpy()  # convert to numpy array (remove gradient)
 
-    print(angles_test_prediction_numpy * 360 - 180)
+    print(angles_test_prediction_numpy * 360, angles_test_prediction_numpy)

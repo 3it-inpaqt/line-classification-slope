@@ -55,7 +55,7 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
     fig, ax = plt.subplots()
     ax_title = f'Training on the experimental patches \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
     if settings.use_threshold_loss:
-        ax_title += ' | Threshold: {settings.threshold_loss}°'
+        ax_title += f' | Threshold: {settings.threshold_loss}°'
 
     ax.set_title(ax_title)
     # print("Loss: %.4f" % best_loss)

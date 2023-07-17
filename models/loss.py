@@ -44,10 +44,10 @@ class HarmonicMeanLoss(nn.Module):
     This loss function calculates the harmonic mean of the SmoothL1Loss and the Angle Difference Loss. It can help the
     network balance between minimizing the angle difference and the SmoothL1Loss.
     """
-    def __init__(self):
+    def __init__(self, beta):
         super(HarmonicMeanLoss, self).__init__()
         self.angle_difference_loss = AngleDifferenceLoss()
-        self.smooth_l1_loss = nn.SmoothL1Loss()
+        self.smooth_l1_loss = nn.SmoothL1Loss(beta=beta)
 
     def forward(self, y_pred, y_batch):
         angle_diff_loss = self.angle_difference_loss(y_pred, y_batch)
@@ -79,5 +79,5 @@ loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(),
                'MAE': nn.L1Loss(),
                'AngleDiff': AngleDifferenceLoss(),
                'WeightedSmoothL1': WeightedSmoothL1Loss(beta=settings.beta),
-               'HarmonicMeanLoss': HarmonicMeanLoss(),
+               'HarmonicMeanLoss': HarmonicMeanLoss(beta=settings.beta),
                'HarmonicFunctionLoss': HarmonicFunctionLoss(num_harmonics=settings.num_harmonics)}

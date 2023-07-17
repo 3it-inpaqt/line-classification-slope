@@ -5,6 +5,7 @@ import torch
 from typing import Tuple, List, Any
 
 from utils.misc import random_select_elements, generate_random_indices, dec_to_sci
+from utils.settings import settings
 
 np.seterr(divide='ignore')
 
@@ -70,6 +71,29 @@ def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
             return angle
 
 
+def calculate_angle_full_circle(x1: float, y1: float, x2: float, y2: float) -> float:
+    """
+    Calculate the angle of a line
+    :param x1: x position of first point
+    :param y1: y position of first point
+    :param x2: x position of second point
+    :param y2: y position of second point
+    :return: angle of a line between (x1,y1) and (x2,y2) with respect to the x-axis
+    """
+
+    a, b, c, d = get_point_above_horizontal(x1, y1, x2, y2)
+
+    dx = a - c
+    dy = b - d
+
+    if dx == 0:
+        return np.pi/2  # way to handle geometrically division by 0 in the formula of the slope
+    else:
+        slope = dy/dx
+        angle = np.arctan(slope) % (2 * np.pi)
+        return angle
+
+
 def normalize_angle(angle: Any):
     """
     Normalize angle in radian to a value between 0 and 1.
@@ -95,10 +119,15 @@ def angles_from_list(lines: List[Tuple[List]], normalize: bool = False) -> ndarr
         line = line_list[0]  # when generated, the lines for each patch are in a list (of one element if you choose one intersecting line per patch)
         x1, x2 = line[0][0], line[0][1]
         y1, y2 = line[1][0], line[1][1]
-        if normalize:
-            angle = normalize_angle(calculate_angle(x1, y1, x2, y2))
+
+        if settings.full_circle:
+            angle = calculate_angle_full_circle(x1, y1, x2, y2)
         else:
             angle = calculate_angle(x1, y1, x2, y2)
+
+        if normalize:
+            angle = normalize_angle(angle)
+
         angle_list.append(angle)
 
     return np.array(angle_list)

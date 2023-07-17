@@ -11,8 +11,9 @@ from sklearn.model_selection import train_test_split
 from linegeneration.generate_lines import create_image_set
 from models.model import AngleNet
 from models.loss import loss_fn_dic
-from plot.lines_visualisation import create_multiplots
+# from plot.lines_visualisation import create_multiplots
 from utils.angle_operations import normalize_angle
+from utils.create_csv import init_csv
 from utils.save_model import save_model
 from utils.statistics import calculate_std_dev, accuracy
 from utils.settings import settings
@@ -71,7 +72,8 @@ def main():
         # Move network and data tensors to device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        for _ in range(settings.run_number):
+        for i in range(settings.run_number):
+            print('-------------------')
             # Reset the model
             input_size = settings.patch_size_x * settings.patch_size_y
             model = AngleNet(input_size,
@@ -153,20 +155,24 @@ def main():
             # Save the state dictionary if the model is better than the previous one
             if std < best_std:
                 best_std = std
+
                 print('best std: ', best_std)
 
                 save_model(model, filename=model_name, directory_path=saving_dir, loss_history=history, best_loss=best_loss, accuracy=acc, standard_deviation=best_std)
+                init_csv(loss=best_loss, std_dev=best_std)
+
+            print(f'Run {i+1} over')
 
             # Plot some lines and patches
-            if torch.cuda.is_available():
-                y_pred_numpy = y_pred_best.cpu().detach().numpy()
-            else:
-                y_pred_numpy = y_pred_best.cpu().detach().numpy()
-
-            fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='copper', normalize=True)
-            plt.tight_layout()
-            # plt.savefig(f".\saved\plot\{model_name}_patches.png")
-            plt.show()
+            # if torch.cuda.is_available():
+            #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
+            # else:
+            #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
+            #
+            # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='copper', normalize=True)
+            # plt.tight_layout()
+            # # plt.savefig(f".\saved\plot\{model_name}_patches.png")
+            # plt.show()
 
 
 if __name__ == '__main__':
