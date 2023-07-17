@@ -3,7 +3,7 @@
 Regression task to identify angles on charge stability diagrams of double quantum dots. However, you can also apply this
 model to single dot, make sure you change the setting accordingly.
 
-_**<span style="color:lime;">DISCLAIMER:</span> most of the experimental data used to run the trainings are under NDA and therefore cannot be shared. The plots you might have could not correspond to the one I obtained during my internship. If you wish to obtain the data, please send me an e-mail on my university mailbox or at chriszethird.contact@gmail.com**_
+_**<span style="color:lime;">DISCLAIMER:</span> most of the experimental data used to run the trainings are under NDA and therefore cannot be shared. The plots you might have could not correspond to the one I obtained during my internship. If you wish to obtain the data, please e-mail me on my university mailbox or at chriszethird.contact@gmail.com**_
 
 # Install
 
@@ -32,10 +32,20 @@ If you are using Pycharm follow these simple steps:
 
 # Created files
 
+## Folders 
+
 * `data\` : Contains diagrams data (**should be downloaded by the user**) and generated cache files
 * `out\ ` : Generated directory that contains run results log and plots if `run_name` setting field is defined
 * `saved\` : Loss evolution plot, CSV files, `.pt` model files, etc. should be stored in this folder.
-* `settings.yaml` : Project configuration file (**should be created by the user**)
+
+## CSV files
+
+CSV files contain the settings of each run you will perform, given they were the best runs, with the best loss and
+standard deviation. These files are stored in `\saved\csv_files`. For each loss function, one file is created. Make sure
+you are working on one specific research group, otherwise you risk mixing all the data. The purpose of these files is to
+study the correlation between the hyperparameters and the metrics obtained. You can find a plotting function at the end
+of `.\utils\statistics.py` if you are interested. Simply note this function was not developed further, but can provide
+a basis for future work.
 
 # Settings
 
@@ -47,7 +57,7 @@ Create a file `settings.yaml` to override settings documented in `utils\settings
 ### Example
 
 Below is an example of the parameters you can set to train a neural network. You will be able to see what values each
-parameters can take and what they mean.
+parameter can take and what they mean.
 
 ```yaml
 # Related to the diagrams
@@ -134,7 +144,7 @@ account
 * `dx` : Take the derivative of the patches, used in `load_diagram.py` (make sure to change it according to your
 simulation)
 * `run_name` : If you set this parameter to `tmp`, the target directory will be reset each time you load the diagrams.
-* `run_number` : This parameter sets the amount of time a network will be train. Note only the best values of standard
+* `run_number` : This parameter sets the amount of time a network will be trained. Note only the best values of standard
 deviation will let the program save the model, meaning you can run the model 20 times and only save 3 models, as they
 got the best performance.
  
@@ -227,8 +237,10 @@ Once the training is over, a graph should appear with the evolution of the loss 
 
 You can use these data yourself and try obtaining similar results.
 
-_<span style="color:gold;">Note:</span> Sigma indicates the standard deviation, a much more accurate representation of the accuracy of the network.
-A value of `0.1` for example is actually not good since the values of the angles are normalised over `2*pi`. Therefore you have to multiply by 360 to get it in degree, giving a standard deviation of 36°._
+_<span style="color:gold;">Note:</span> Sigma indicates the standard deviation, a much more accurate representation of 
+the accuracy of the network.
+A value of `0.1` for example is actually not good since the values of the angles are normalised over `2*pi`. Therefore, 
+you have to multiply by 360 to get it in degree, giving a standard deviation of 36°._
 
 ### Prediction on some patches
 
