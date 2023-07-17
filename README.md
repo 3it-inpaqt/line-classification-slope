@@ -134,7 +134,10 @@ account
 * `dx` : Take the derivative of the patches, used in `load_diagram.py` (make sure to change it according to your
 simulation)
 * `run_name` : If you set this parameter to `tmp`, the target directory will be reset each time you load the diagrams.
-
+* `run_number` : This parameter sets the amount of time a network will be train. Note only the best values of standard
+deviation will let the program save the model, meaning you can run the model 20 times and only save 3 models, as they
+got the best performance.
+ 
 # Files structure
 
 ### Classes and methods
@@ -220,11 +223,12 @@ compute the standard deviation to know if the network works as intended.
 During the training period you should see a bar indicating the number of batch already used, and the value of the loss.
 Once the training is over, a graph should appear with the evolution of the loss during the training, like the one below:
 
-![best_model_experimental_Dx_regression_SmoothL1Loss_batch32_epoch2500_loss](https://github.com/3it-inpaqt/line-classification-slope/assets/86256324/1412d443-f847-42d9-b173-717fed307ca1)
+![MicrosoftTeams-image](https://github.com/3it-inpaqt/line-classification-slope/assets/86256324/7193e4c8-2e54-4002-8090-58b3aa719c3e)
 
-Sigma indicates the standard deviation, a much more accurate representation of the accuracy of the network in this case.
-Be aware that a value of `0.1` is actually not good since the values of the angles are normalised over `2*pi`. You have
-to first multiply by `2*pi` to get the standard deviation in radian and then by `180 / pi` to get it in degree.
+You can use these data yourself and try obtaining similar results.
+
+_<span style="color:gold;">Note:</span> Sigma indicates the standard deviation, a much more accurate representation of the accuracy of the network.
+A value of `0.1` for example is actually not good since the values of the angles are normalised over `2*pi`. Therefore you have to multiply by 360 to get it in degree, giving a standard deviation of 36°._
 
 ### Prediction on some patches
 
