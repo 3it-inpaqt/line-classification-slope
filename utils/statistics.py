@@ -1,11 +1,14 @@
 from collections import Counter
+import matplotlib.pyplot as plt
 import numpy as np
 from numpy import ndarray
+import os
+import pandas as pd
 from sklearn.metrics import mean_absolute_error
 import torch
 from typing import Any
 
-# import matplotlib.pyplot as plt
+from utils.logger import logger
 # from utils.angle_operations import get_angle_stat
 
 
@@ -111,3 +114,61 @@ def resample_dataset(patch_list, angle_list, line_list, threshold):
     resampled_lines = remove_elements_exceeding_count(np.around(angle_list, 2), line_list, threshold)
 
     return resampled_patch, resampled_angles, resampled_lines
+
+
+# -- Study relations between standard deviation/loss and settings
+def plot_metrics():
+    """
+    Create plots for each setting to characterize relationships between accuracy metrics
+    """
+    plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": "serif"
+    })
+    # Define the folder name where the CSV files are saved
+    folder = './saved/csv_files'
+
+    # Get the list of CSV files in the folder
+    csv_files = [file for file in os.listdir(folder) if file.endswith('.csv')]
+
+    # Iterate over the CSV files and plot the data
+    for csv_file in csv_files:
+        # Read the CSV file into a DataFrame
+        df = pd.read_csv(os.path.join(folder, csv_file))
+        column_names = df.columns.tolist()[:-2]
+        num_cols = df.shape[1] - 2
+        # print(column_names)
+
+        # Get the setting name from the file name
+        setting_name = os.path.splitext(csv_file)[0]
+        # print(setting_name)
+
+        # Create subplots for each setting
+        fig, axes = plt.subplots(num_cols, 2, figsize=(num_cols*2, num_cols*2))
+        fig.suptitle(setting_name, fontsize=28)
+
+        # Plot the standard deviation
+        for i in range(num_cols):
+            df = df.sort_values(by=column_names[i])
+
+            ax_left = axes[i, 0]
+            ax_left.plot(df[column_names[i]], df['Standard Deviation'])
+            ax_left.set_xlabel(column_names[i], fontsize=16)
+            ax_left.set_ylabel('STD Deviation', fontsize=16)
+
+            # Plot the loss
+            ax_right = axes[i, 1]
+            ax_right.plot(df[column_names[i]], df['Loss'])
+            ax_right.set_xlabel(column_names[i], fontsize=16)
+            ax_right.set_ylabel('Loss', fontsize=16)
+
+    # Adjust the spacing between subplots
+    plt.tight_layout()
+    # Save the figure
+    # plt.savefig('./saved/plots/accuracy_metrics.png')
+    # Show the plot
+    plt.show()
+
+    logger.info('Plots created for accuracy metrics')
+
+
