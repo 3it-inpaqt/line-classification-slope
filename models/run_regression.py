@@ -72,7 +72,7 @@ def main():
 
         # Move network and data tensors to device
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(device)
+        # print(device)
         X_train = X_train.to(device=device)
         y_train = y_train.to(device=device)
         X_test = X_test.to(device=device)

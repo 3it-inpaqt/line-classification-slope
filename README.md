@@ -34,6 +34,7 @@ If you are using Pycharm follow these simple steps:
 
 * `data\` : Contains diagrams data (**should be downloaded by the user**) and generated cache files
 * `out\ ` : Generated directory that contains run results log and plots if `run_name` setting field is defined
+* `saved\` : Loss evolution plot, CSV files, `.pt` model files, etc. should be stored in this folder.
 * `settings.yaml` : Project configuration file (**should be created by the user**)
 
 # Settings
@@ -43,44 +44,104 @@ done manually in either `models/model.py` (feed-forward) or `models/cnn.py` (con
 
 Create a file `settings.yaml` to override settings documented in `utils\settings.py`. From there, you can decide what model to use (feed-forward, CNN, etc.), and set the different hyperparameters. 
 
-### For example:
+### Example
 
-The following settings set the dataset as synthetic with argument `synthetic: True`. You should obtain a very small
-standard deviation (between `1e-7` and `1e-8`).
+Below is an example of the parameters you can set to train a neural network. You will be able to see what values each
+parameters can take and what they mean.
 
 ```yaml
 # Related to the diagrams
 run_name: 'tmp'
-research_group: 'eva_dupont_ferrier'
-pixel_size: 0.002
+research_group: 'louis_gaudreau'
+pixel_size: 0.001
 dot_number: 2
 logger_console_level: info
 
-# Related to the simulation
-dx: False
-x_path: './saved/double_dot_patches_Dx_normalized.pt'
-y_path: './saved/double_dot_normalized_angles.txt'
+patch_size_x: 18
+patch_size_y: 18
 
+# Related to angles calculation
+full_circle: False
+
+# Related to the simulation
+dx: True
+x_path: './saved/double_dot_louis_gaudreau_patches_normalized_18_18_Dx.pt'
+y_path: './saved/double_dot_louis_gaudreau_angles_18_18.txt'
+
+run_number: 10
 model_type: 'FF'
-n_hidden_layers: 1
+n_hidden_layers: 2
 loss_fn: 'SmoothL1Loss'
-threshold_loss: 0.48
+beta: 0.04
+num_harmonics: 10
+use_threshold_loss: True
+threshold_loss: 110
 learning_rate: 0.0001
-n_epochs: 350   # number of epochs to run
+n_epochs: 100   # number of epochs to run
 batch_size: 18  # size of each batch
+
 kernel_size_conv:  8  # for convolution
 
 # Related to synthetic data
 synthetic: False
 n_synthetic: 1000  # number of synthetic data to create
-anti_alias: True
-background: True
+anti_alias: False
+background: False
 sigma: 0.
 ```
+
+#### Loss function
+In this example the `SmoothL1Loss` is used for the training. You can change it by checking the name of available
+functions in `.\models\loss.py` and setting `loss_fn` to one of the following values:
+
+* SmoothL1Loss (*pytorch*)
+* MSE (*pytorch*)
+* MAE (*pytorch*)
+* AngleDiff (*Custom*)
+* WeightedSmoothL1 (*Custom + Pytorch*)
+* HarmonicMeanLoss (*Custom + Pytorch*)
+* HarmonicFunctionLoss (*Custom*)
+
+The name of the function should be given as a *string*. From there two extra parameters should be defined: `beta` for
+the *SmoothL1Loss*, *WeightedSmoothL1* and *HarmonicMeanLoss*
+(see [definition](https://pytorch.org/docs/stable/generated/torch.nn.SmoothL1Loss.html)); and `num_harmonics` for 
+*HarmonicFunctionLoss*.
+
+#### Model type
+
+Two types of model exists: regression (`'FF'`) and convolution (`'CNN'`). Entering a different name without specifying it
+in the `settings.py` file in `/utils` will result in an error.
+
+#### Network size
+
+The implementation of the network is really simple, and hard-coded. You can switch to a single to two hidden layers
+network with the `n_hidden_layers` parameters. Feel free to modify the layers input size in `model.py`, or add more
+options, or simply change the definition of the model. 
+
+#### Loss threshold
+
+It is possible to change the method of loss calculation. The network can indeed take into account two loss values: one
+between the prediction and expected value, and one between re-symmetrize prediction and expected value. Then it will
+keep the lowest value. To enable this option, set `use_threshold_loss` to `True` and adjust the `threshold_loss` to your
+liking. Note it makes more sense to take value above 110° when considering line symmetry.
+
+#### Misc parameters
+
+Here is a list of some interesting but not essential parameters:
+
+* `full_circle` : If `True`, the angles will be calculated between 0° and 360° instead of taking the symmetry into
+account
+* `dx` : Take the derivative of the patches, used in `load_diagram.py` (make sure to change it according to your
+simulation)
+* `run_name` : If you set this parameter to `tmp`, the target directory will be reset each time you load the diagrams.
 
 # Files structure
 
 ### Classes and methods
+
+_<span style="color:gold;">Note:</span> If a file is not mentioned, consider it is not relevant/useful. So you should
+not worry about. Feel free to contact me if you think there is a mistake._
+
 
 * `classes\` : Custom classes and data structure definition
   * `data_structure.py`: bunch of dataclasses and enumerations to structure information and simplify code
@@ -95,6 +156,8 @@ sigma: 0.
 
 * `models\` : Neural network models
   * `cnn.py` : simple class to generate a CNN model
+  * `loss.py` : definition of custom loss function. Feel free to add your own, simply add it to the dictionary defined
+  below the classes' definition.
   * `model.py` : simple class to generate a NN model
   * `run_cnn.py` : perform convolution task and save the model generated
   * `run_regression.py` : perform regression task and save the model generated
@@ -116,7 +179,8 @@ sigma: 0.
 ### Additional files:
 
 * `load_dataset.py`: Load the dataset and save the tensors and lists in separated files for later use if specified.
-* `run.py`: Controls the training of the network. Centralized the script execution (<span style="color:skyblue;">main script</span>)
+* `run.py`: Controls the training of the network. Centralized the script execution (<span style="color:skyblue;">main 
+script</span>)
 * `test_network.py`: Train pre-trained network on a dataset (<span style="color:gold;">not relevant</span>)
 # Workflow
 
@@ -140,14 +204,15 @@ sample of patches with lines drawn on top of them and the associated angles to s
 
 _<span style="color:coral;">Warning:</span> The data structure changes whether you perform the regression or the 
 convolution task. When loading the diagrams you have to make sure to set up the tensor accordingly. Make sure you have 
-set up the right directory to store the output file. This script generates a dataset itself to train the network on. 
-The model is stored in `.\saved\model`._
+set up the right directory to store the output file._
+ 
+The model will be stored in a folder located in `./saved/` named after the `research_group`. In this folder, each model
+is sorted after the type of network (regression, convolution) and loss function for more clarity. With each model comes 
+a loss evolution plot to summarize the settings and the best loss/standard deviation obtained.
 
 ## Feedforward
 
-After training your network, you can use `test_network.py` to test the network on the data. Make sure whenever you change 
-the network structure in `run_regression.py` to also change it in `model.py` for compatibility. Otherwise, you will get 
-layer size related errors. The file also generates a plot to see if the predicted angle is correct, but I suggest you
+After training your network, you can use `test_network.py` to test the network on the data. The file also generates a plot to see if the predicted angle is correct, but I suggest you
 compute the standard deviation to know if the network works as intended.
 
 ### Training period

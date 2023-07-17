@@ -149,18 +149,29 @@ def plot_metrics():
 
         # Plot the standard deviation
         for i in range(num_cols):
-            df = df.sort_values(by=column_names[i])
+            df_sorted = df.sort_values(by=column_names[i])
 
-            ax_left = axes[i, 0]
-            ax_left.plot(df[column_names[i]], df['Standard Deviation'])
-            ax_left.set_xlabel(column_names[i], fontsize=16)
-            ax_left.set_ylabel('STD Deviation', fontsize=16)
+            # Group the data by the fixed parameters
+            fixed_params = [col for col in column_names if col != column_names[i]]
+            grouped_data = df_sorted.groupby(fixed_params)
 
-            # Plot the loss
-            ax_right = axes[i, 1]
-            ax_right.plot(df[column_names[i]], df['Loss'])
-            ax_right.set_xlabel(column_names[i], fontsize=16)
-            ax_right.set_ylabel('Loss', fontsize=16)
+            for group_name, group_data in grouped_data:
+                ax_left = axes[i, 0]
+                ax_left.plot(group_data[column_names[i]], group_data['Standard Deviation'], label=str(group_name))
+                ax_left.set_xlabel(column_names[i], fontsize=16)
+                ax_left.set_ylabel('STD Deviation', fontsize=16)
+
+                ax_right = axes[i, 1]
+                ax_right.plot(group_data[column_names[i]], group_data['Loss'], label=str(group_name))
+                ax_right.set_xlabel(column_names[i], fontsize=16)
+                ax_right.set_ylabel('Loss', fontsize=16)
+
+            # Add the legend with the specified properties
+            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+            axes[i, 0].legend(title='Fixed Params', bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.,
+                              prop=props)
+            axes[i, 1].legend(title='Fixed Params', bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.,
+                              prop=props)
 
     # Adjust the spacing between subplots
     plt.tight_layout()

@@ -18,7 +18,7 @@ def init_csv(loss, std_dev):
     filename = os.path.join(folder, f'{settings.loss_fn}.csv')
     fields = ['Learning Rate', 'Epochs', 'Batch Size', 'Hidden layers', 'Threshold loss']
     values = [settings.learning_rate, settings.n_epochs, settings.batch_size, settings.n_hidden_layers, settings.threshold_loss]
-    if settings.loss_fn in ['SmoothL1Loss', 'HarmonicMeanLoss', 'WeightedSmoothL1Loss']:
+    if settings.loss_fn in ['SmoothL1Loss', 'HarmonicMeanLoss', 'WeightedSmoothL1']:
         fields.append('Beta')
         values.append(settings.beta)
     elif settings.loss_fn == 'HarmonicFunctionLoss':
