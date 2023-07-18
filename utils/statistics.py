@@ -9,6 +9,9 @@ import torch
 from typing import Any
 
 from utils.logger import logger
+from utils.settings import settings
+
+
 # from utils.angle_operations import get_angle_stat
 
 
@@ -57,7 +60,7 @@ def accuracy(known_angles, pred_angles, tol=0.1):
     return 1 - mean_absolute_error(known_angles, pred_angles)
 
 
-def mean_square_error(observed_value: ndarray, predicted_value:ndarray) -> ndarray:
+def mean_square_error(observed_value: ndarray, predicted_value: ndarray) -> ndarray:
     """
     Calculate the mean square error, input are expected to be 1D arrays of same length
     :param observed_value:
@@ -123,7 +126,9 @@ def plot_metrics():
     """
     plt.rcParams.update({
         "text.usetex": True,
-        "font.family": "serif"
+        "font.family": "serif",
+        "xtick.labelsize": 16,  # Set the font size for x tick labels
+        "ytick.labelsize": 16  # Set the font size for y tick labels
     })
     # Define the folder name where the CSV files are saved
     folder = './saved/csv_files'
@@ -131,47 +136,47 @@ def plot_metrics():
     # Get the list of CSV files in the folder
     csv_files = [file for file in os.listdir(folder) if file.endswith('.csv')]
 
+    # Create plot for each setting
+    fig, axes = plt.subplots(1, 2, figsize=(16, 9))
+    fig.suptitle('Metrics correlation with Beta parameter', fontsize=28)
+
+    ax_left = axes[0]
+    ax_right = axes[1]
+
     # Iterate over the CSV files and plot the data
     for csv_file in csv_files:
         # Read the CSV file into a DataFrame
         df = pd.read_csv(os.path.join(folder, csv_file))
         column_names = df.columns.tolist()[:-2]
         num_cols = df.shape[1] - 2
-        # print(column_names)
 
         # Get the setting name from the file name
         setting_name = os.path.splitext(csv_file)[0]
-        # print(setting_name)
 
-        # Create subplots for each setting
-        fig, axes = plt.subplots(num_cols, 2, figsize=(num_cols*2, num_cols*2))
-        fig.suptitle(setting_name, fontsize=28)
+        # Filter the DataFrame to keep only rows with constant parameters
+        constant_params = {'Learning Rate': settings.learning_rate, 'Epochs': settings.n_epochs,
+                           'Batch Size': settings.batch_size, 'Hidden layers': settings.n_hidden_layers,
+                           'Threshold loss': settings.threshold_loss}
+        filtered_df = df[df[list(constant_params)].eq(constant_params).all(axis=1)]
 
-        # Plot the standard deviation
-        for i in range(num_cols):
-            df_sorted = df.sort_values(by=column_names[i])
+        df_sorted = df.sort_values(by='Beta')
 
-            # Group the data by the fixed parameters
-            fixed_params = [col for col in column_names if col != column_names[i]]
-            grouped_data = df_sorted.groupby(fixed_params)
+        # Group the data by the fixed parameters
+        fixed_params = [col for col in column_names if col != 'Beta']
+        grouped_data = df_sorted.groupby(fixed_params)
 
-            for group_name, group_data in grouped_data:
-                ax_left = axes[i, 0]
-                ax_left.plot(group_data[column_names[i]], group_data['Standard Deviation'], label=str(group_name))
-                ax_left.set_xlabel(column_names[i], fontsize=16)
-                ax_left.set_ylabel('STD Deviation', fontsize=16)
+        for group_name, group_data in grouped_data:
 
-                ax_right = axes[i, 1]
-                ax_right.plot(group_data[column_names[i]], group_data['Loss'], label=str(group_name))
-                ax_right.set_xlabel(column_names[i], fontsize=16)
-                ax_right.set_ylabel('Loss', fontsize=16)
+            ax_left.scatter(group_data['Beta'], group_data['Standard Deviation'], label=csv_file[:-3])
+            ax_left.set_xlabel('Beta', fontsize=16)
+            ax_left.set_ylabel('Standard Deviation', fontsize=16)
 
-            # Add the legend with the specified properties
-            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-            axes[i, 0].legend(title='Fixed Params', bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.,
-                              prop=props)
-            axes[i, 1].legend(title='Fixed Params', bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.,
-                              prop=props)
+            ax_right.scatter(group_data['Beta'], group_data['Loss'], label=csv_file[:-3])
+            ax_right.set_xlabel('Beta', fontsize=16)
+            ax_right.set_ylabel('Loss', fontsize=16)
+
+        ax_right.legend(loc='upper right', fontsize=20)
+        ax_left.legend(loc='upper right', fontsize=20)
 
     # Adjust the spacing between subplots
     plt.tight_layout()
@@ -183,3 +188,6 @@ def plot_metrics():
     logger.info('Plots created for accuracy metrics')
 
 
+# -- Run statistics -- #
+if __name__ == '__main__':
+    plot_metrics()

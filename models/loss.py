@@ -29,7 +29,8 @@ class WeightedSmoothL1Loss(nn.Module):
     """
     def __init__(self, beta):
         super(WeightedSmoothL1Loss, self).__init__()
-        self.smooth_l1_loss = nn.SmoothL1Loss(beta=beta)
+        self.beta = beta
+        self.smooth_l1_loss = nn.SmoothL1Loss(beta=self.beta)
 
     def forward(self, y_pred, y_batch):
         loss = self.smooth_l1_loss(y_pred, y_batch)
@@ -46,8 +47,9 @@ class HarmonicMeanLoss(nn.Module):
     """
     def __init__(self, beta):
         super(HarmonicMeanLoss, self).__init__()
+        self.beta = beta
         self.angle_difference_loss = AngleDifferenceLoss()
-        self.smooth_l1_loss = nn.SmoothL1Loss(beta=beta)
+        self.smooth_l1_loss = nn.SmoothL1Loss(beta=self.beta)
 
     def forward(self, y_pred, y_batch):
         angle_diff_loss = self.angle_difference_loss(y_pred, y_batch)
@@ -74,7 +76,7 @@ class HarmonicFunctionLoss(nn.Module):
 
 
 # All the losses to use
-loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(),
+loss_fn_dic = {'SmoothL1Loss': nn.SmoothL1Loss(beta=settings.beta),
                'MSE': nn.MSELoss(),
                'MAE': nn.L1Loss(),
                'AngleDiff': AngleDifferenceLoss(),

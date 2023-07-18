@@ -73,7 +73,7 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
         f'{settings.loss_fn}'
     ))
 
-    if settings.loss_fn == 'SmoothL1Loss' or settings.loss_fn == 'WeightedSmoothL1':
+    if settings.loss_fn == 'SmoothL1Loss' or settings.loss_fn == 'WeightedSmoothL1' or settings.loss_fn == 'HarmonicMeanLoss':
         textstr = '\n'.join((textstr,
                              r'$\beta = {{{beta}}}$'.format(beta=settings.beta, )
                              ))
