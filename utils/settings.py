@@ -104,6 +104,8 @@ class Settings:
     x_path: str = './saved/double_dot_patches_Dx_normalized.pt'
     y_path: str = './saved/double_dot_normalized_angles.txt'
 
+    rotate_patch: bool = False
+
     # The size of a diagram patch send to the network input (number of pixel)
     patch_size_x: int = 18
     patch_size_y: int = 18

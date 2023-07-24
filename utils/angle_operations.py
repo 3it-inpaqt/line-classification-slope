@@ -104,7 +104,28 @@ def normalize_angle(angle: Any):
     return angle / (2 * np.pi)
 
 
-def angles_from_list(lines: List[Tuple[List]], normalize: bool = False) -> ndarray:
+def angle_from_line(line: List[Tuple[List]], normalize: bool = False) -> ndarray:
+    """
+    Find angle of one single line
+    :param line:
+    :param normalize:
+    :return:
+    """
+    x1, x2 = line[0][0][0], line[0][0][1]
+    y1, y2 = line[0][1][0], line[0][1][1]
+
+    if settings.full_circle:
+        angle = calculate_angle_full_circle(x1, y1, x2, y2)
+    else:
+        angle = calculate_angle(x1, y1, x2, y2)
+
+    if normalize:
+        angle = normalize_angle(angle)
+
+    return angle
+
+
+def angles_from_list(lines: List[Any], normalize: bool = False) -> ndarray:
     """
     The list of lines contains tuples of list coordinate of the form ([x1, x2], [y1, y2]). It is a bother to calculate
     directly the angle using calculate_angle, so first we extract coordinates, and then apply the functions
@@ -117,6 +138,7 @@ def angles_from_list(lines: List[Tuple[List]], normalize: bool = False) -> ndarr
     # Iterate through each line and find its angle
     for line_list in lines:
         line = line_list[0]  # when generated, the lines for each patch are in a list (of one element if you choose one intersecting line per patch)
+        # print(line_list)
         x1, x2 = line[0][0], line[0][1]
         y1, y2 = line[1][0], line[1][1]
 
@@ -131,58 +153,6 @@ def angles_from_list(lines: List[Tuple[List]], normalize: bool = False) -> ndarr
         angle_list.append(angle)
 
     return np.array(angle_list)
-
-
-""" 
-Line rotation methods:
-
-This is useful on single dot diagrams as only one orientation of line is possible. The goal is to expend the database 
-with more angle values. However, it raises the issue of pixel modification, as not all rotation angles are allowed,
-only multiples of 90°. It is recommended to work directly on double dots.
-"""
-
-
-def rotate_line(line, theta=np.pi/2):
-    """
-    Rotate line by an angle theta.
-    Ref: https://www.reddit.com/r/askmath/comments/luimi0/equation_for_finding_the_line_end_point_positions/
-    :param line:
-    :param theta:
-    :return:
-    """
-    x1, x2, y1, y2 = line[0][0], line[0][1], line[1][0], line[1][1]
-
-    return [x1 * np.cos(theta) - y1 * np.sin(theta), x2 * np.cos(theta) - y2 * np.sin(theta)], [x1 * np.sin(theta) + y1 * np.cos(theta), x2 * np.sin(theta) + y2 * np.cos(theta)]
-
-
-def random_choice_rotate(images_list, lines_list, nbr_to_rotate):
-    """
-    Randomly rotates image and lines by an angle choosen in [0,90,180,270].
-
-    Tip: 'resample=Image.BILINEAR' argument is added to the F.rotate function. This argument specifies the resampling method used
-    during rotation. Additionally, the 'expand=False' argument is provided to prevent the output image from being expanded
-    to fit the rotated image entirely.
-    :param images_list:
-    :param lines_list:
-    :param nbr_to_rotate: Number of images and lines to rotate
-    :return:
-    """
-    rotated_images_list, rotated_lines_list = images_list.copy(), lines_list.copy()
-
-    random_indices = generate_random_indices(len(images_list), nbr_to_rotate)
-    for i in random_indices:
-        # Select initial image and lines
-        image = images_list[i]
-        line = lines_list[i]
-
-        # Rotate image and line by 90°
-        rotated_image = torch.rot90(image)
-        rotated_images_list[i] = rotated_image
-
-        rotated_line = rotate_line(line)
-        rotated_lines_list[i] = rotated_line
-
-    return rotated_images_list, rotated_lines_list
 
 
 # -- Line decomposition method -- #
