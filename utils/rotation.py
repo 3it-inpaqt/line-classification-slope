@@ -24,32 +24,34 @@ def rotate_patches(patch_list, lines_list, angle_list):
     :return:
     """
     # Find indices of horizontal and vertical lines
-    horizontal_indices = [i for i, angle in enumerate(angle_list) if 0 <= angle*360 <= 45 or 45 <= angle <= 180]
+    horizontal_indices = [i for i, angle in enumerate(angle_list) if 0 <= angle*360 <= 45 or 135 <= angle*360 <= 180]
     vertical_indices = [i for i, angle in enumerate(angle_list) if 45 <= angle*360 <= 135]
 
     horizontal_count, vertical_count = len(horizontal_indices), len(vertical_indices)
-    target_count = (horizontal_count + vertical_count) // 2
+    target_count = max(horizontal_count, vertical_count) - (horizontal_count + vertical_count) // 2
 
-    # print(target_count)
-    # print(horizontal_count)
-    # print(vertical_count)
+    print(target_count)
+    print(horizontal_count)
+    print(vertical_count)
 
     if horizontal_count > vertical_count:
-        sampled_indices = sample(horizontal_indices, k=horizontal_count - target_count)
+        sampled_indices = sample(horizontal_indices, k=target_count)
+        print(len(sampled_indices))
+        for index in sampled_indices:
+            lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
+            # print(lines_list[index])
+            angle_list[index] = angle_from_line(lines_list[index])
+            print(angle_list[index])
+            patch_list[index] = np.rot90(patch_list[sampled_indices])
+
+    else:
+        sampled_indices = sample(vertical_indices, k=target_count)
         # print(sampled_indices)
         for index in sampled_indices:
             lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
             # print(lines_list[index])
             angle_list[index] = angle_from_line(lines_list[index])
-            patch_list[index] = np.rot90(patch_list[sampled_indices])
-
-    else:
-        sampled_indices = sample(vertical_indices, k=vertical_count - target_count)
-        # print(sampled_indices)
-        for index in sampled_indices:
-            lines_list[index] = rotate_line_coordinates(lines_list[index], -90)
-            # print(lines_list[index])
-            angle_list[index] = angle_from_line(lines_list[index])
+            print(angle_list[index])
             patch_list[index] = np.rot90(patch_list[index])
 
     return patch_list, lines_list, angle_list
