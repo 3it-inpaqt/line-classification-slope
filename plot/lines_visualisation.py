@@ -26,7 +26,7 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
         image_set = image_set_input.reshape(n, p, q)
 
     else:  # for experimental diagrams
-        image_set = image_set_input.squeeze(1)  # tensor of shape [n, N*N] required
+        image_set = image_set_input  # .squeeze(1)  # tensor of shape [n, N*N] required
         # print(image_set.shape)
         if settings.model_type == 'FF':
             # print(image_set.shape)

@@ -139,18 +139,27 @@ if __name__ == '__main__':
 
     # prepro_tensor = renorm_all_tensors(tensor_patches, True)
 
-    # Save patches and angles to file for later use
+    # Set patches and angles path
     path_torch = f'./saved/double_dot_{settings.research_group}_rotated_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
+    path_angle = f'./saved/double_dot_{settings.research_group}_rotated_angles_{settings.patch_size_x}_{settings.patch_size_y}'
     if settings.full_circle:
         path_torch += "_fullcircle"
+        path_angle += "_fullcircle"
     if settings.dx:
         path_torch += "_Dx"
+        path_angle += "_Dx"
     path_torch += ".pt"
+    path_angle += ".txt"
+
+    # Save tensor
     torch.save(stacked_patches, path_torch)
 
-    fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
+    # Create multiplot to check some lines
+    # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
     # print(stacked_patches.shape)
     # print(stacked_patches[0, :, :])
     plt.tight_layout()
     plt.show()
-    save_list_to_file(rotated_angle_list, f'./saved/double_dot_{settings.research_group}_rotated_angles_{settings.patch_size_x}_{settings.patch_size_y}.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
+
+    # Save angles list to file
+    save_list_to_file(rotated_angle_list, path_angle)  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
