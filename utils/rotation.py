@@ -28,13 +28,13 @@ def rotate_patches(patch_list, lines_list, angle_list):
     vertical_indices = [i for i, angle in enumerate(angle_list) if 45 <= angle*360 <= 135]
 
     horizontal_count, vertical_count = len(horizontal_indices), len(vertical_indices)
-    target_count = max(horizontal_count, vertical_count) - (horizontal_count + vertical_count) // 2
+    target_count = max(horizontal_count, vertical_count) // 2
 
-    print(max(angle_list))
-
-    print('target_count: ', target_count)
-    print('horizontal_count: ', horizontal_count)
-    print('vertical_count: ', vertical_count)
+    # print(max(angle_list))
+    #
+    # print('target_count: ', target_count)
+    # print('horizontal_count: ', horizontal_count)
+    # print('vertical_count: ', vertical_count)
 
     rotated_patch_list = patch_list
     rotated_lines_list = lines_list

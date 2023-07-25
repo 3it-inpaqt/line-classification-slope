@@ -96,60 +96,57 @@ if __name__ == '__main__':
         rotated_patch_list, rotated_lines_list, rotated_angle_list = rotate_patches(selected_patches, selected_lines, angles_lines)
 
     get_angle_stat(rotated_angle_list)
-    for rot_angle, angle in zip(rotated_angle_list, angles_lines):
-        print('rot: ', rot_angle)
-        print('angle: ', angle)
-        print('----------------')
+
     # Calculate angles by hand for verification
     plt.rcParams.update({
         "text.usetex": True,
         "font.family": "serif"
     })
 
-    # plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
-    # plot_patch_sample(rotated_patch_list, rotated_lines_list, sample_number=16, show_offset=False, name='one_line_rotated_DQD')
+    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
+    plot_patch_sample(rotated_patch_list, rotated_lines_list, sample_number=16, show_offset=False, name='one_line_rotated_DQD')
 
     # get_angle_stat(angles_lines)
     # print(len(angles_lines))
     # print(selected_patches[0])
     #
-    # # # Resampling of the dataset
-    # # # resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
-    # # # get_angle_stat(resampled_angles)
+    # # Resampling of the dataset
+    # # resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
+    # # get_angle_stat(resampled_angles)
+    #
+    # Reshape patches for neural network
+    # Get the number of images
+    n = len(selected_patches)
+    #
+    # # Create an empty tensor with the desired shape
+    stacked_patches = torch.empty(n, settings.patch_size_x, settings.patch_size_y, dtype=torch.float32)
+
+    # Fill the 3D tensor with the image data
+    # for i, image_tensor in enumerate(selected_patches):
+    #     # print(image_tensor.shape)
+    #     stacked_patches[i, :, :] = image_tensor[0, :, :]
     # #
-    # # Reshape patches for neural network
-    # # Get the number of images
-    # n = len(selected_patches)
-    # #
-    # # # Create an empty tensor with the desired shape
-    # stacked_patches = torch.empty(n, settings.patch_size_x, settings.patch_size_y, dtype=torch.float32)
-    #
-    # # Fill the 3D tensor with the image data
-    # # for i, image_tensor in enumerate(selected_patches):
-    # #     # print(image_tensor.shape)
-    # #     stacked_patches[i, :, :] = image_tensor[0, :, :]
-    # # #
-    # if type(selected_patches[0]) == np.ndarray:
-    #     stacked_array = np.stack(selected_patches)
-    #     stacked_patches = torch.from_numpy(stacked_array)
-    # else:
-    #     stacked_patches = torch.stack(selected_patches)
-    # # tensor_patches = stacked_patches.unsqueeze(1)
-    #
-    # # prepro_tensor = renorm_all_tensors(tensor_patches, True)
-    #
-    # # Save patches and angles to file for later use
-    # path_torch = f'./saved/double_dot_{settings.research_group}_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
-    # if settings.full_circle:
-    #     path_torch += "_fullcircle"
-    # if settings.dx:
-    #     path_torch += "_Dx"
-    # path_torch += ".pt"
-    # # torch.save(stacked_patches, path_torch)
-    #
-    # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
-    # # print(stacked_patches.shape)
-    # # print(stacked_patches[0, :, :])
-    # plt.tight_layout()
-    # plt.show()
-    # # save_list_to_file(angles_lines, f'./saved/double_dot_{settings.research_group}_angles_{settings.patch_size_x}_{settings.patch_size_y}_fullcircle.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
+    if type(selected_patches[0]) == np.ndarray:
+        stacked_array = np.stack(selected_patches)
+        stacked_patches = torch.from_numpy(stacked_array)
+    else:
+        stacked_patches = torch.stack(selected_patches)
+    # tensor_patches = stacked_patches.unsqueeze(1)
+
+    # prepro_tensor = renorm_all_tensors(tensor_patches, True)
+
+    # Save patches and angles to file for later use
+    path_torch = f'./saved/double_dot_{settings.research_group}_rotated_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
+    if settings.full_circle:
+        path_torch += "_fullcircle"
+    if settings.dx:
+        path_torch += "_Dx"
+    path_torch += ".pt"
+    # torch.save(stacked_patches, path_torch)
+
+    fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
+    # print(stacked_patches.shape)
+    # print(stacked_patches[0, :, :])
+    plt.tight_layout()
+    plt.show()
+    save_list_to_file(rotated_angle_list, f'./saved/double_dot_{settings.research_group}_rotated_angles_{settings.patch_size_x}_{settings.patch_size_y}_fullcircle.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
