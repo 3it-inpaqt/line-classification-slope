@@ -71,7 +71,7 @@ def main():
         elif settings.loss_fn == 'HarmonicFunctionLoss':
             model_name += f'{settings.num_harmonics}'
 
-        model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}_rotated'
 
         if settings.dx:
             model_name += '_Dx'

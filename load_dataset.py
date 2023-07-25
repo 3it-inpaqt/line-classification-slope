@@ -88,14 +88,14 @@ if __name__ == '__main__':
             selected_lines.append(line_list)
 
     angles_lines = angles_from_list(selected_lines, normalize=True)
-    get_angle_stat(angles_lines)
+    # get_angle_stat(angles_lines)
     # print(angles_lines)
     # print(selected_lines)
     if settings.rotate_patch:
         from utils.rotation import rotate_patches
         rotated_patch_list, rotated_lines_list, rotated_angle_list = rotate_patches(selected_patches, selected_lines, angles_lines)
 
-    get_angle_stat(rotated_angle_list)
+    # get_angle_stat(rotated_angle_list)
 
     # Calculate angles by hand for verification
     plt.rcParams.update({
@@ -129,8 +129,12 @@ if __name__ == '__main__':
     if type(selected_patches[0]) == np.ndarray:
         stacked_array = np.stack(selected_patches)
         stacked_patches = torch.from_numpy(stacked_array)
+    elif type(selected_patches == list):
+        for i in range(len(selected_patches)):
+            stacked_patches[i, :, :] = selected_patches[i]
     else:
         stacked_patches = torch.stack(selected_patches)
+
     # tensor_patches = stacked_patches.unsqueeze(1)
 
     # prepro_tensor = renorm_all_tensors(tensor_patches, True)
@@ -142,11 +146,11 @@ if __name__ == '__main__':
     if settings.dx:
         path_torch += "_Dx"
     path_torch += ".pt"
-    # torch.save(stacked_patches, path_torch)
+    torch.save(stacked_patches, path_torch)
 
     fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
     # print(stacked_patches.shape)
     # print(stacked_patches[0, :, :])
     plt.tight_layout()
     plt.show()
-    save_list_to_file(rotated_angle_list, f'./saved/double_dot_{settings.research_group}_rotated_angles_{settings.patch_size_x}_{settings.patch_size_y}_fullcircle.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
+    save_list_to_file(rotated_angle_list, f'./saved/double_dot_{settings.research_group}_rotated_angles_{settings.patch_size_x}_{settings.patch_size_y}.txt')  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
