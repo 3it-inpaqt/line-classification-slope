@@ -28,8 +28,7 @@ def rotate_patches(patch_list, lines_list, angle_list):
     vertical_indices = [i for i, angle in enumerate(angle_list) if 45 <= angle*360 <= 135]
 
     horizontal_count, vertical_count = len(horizontal_indices), len(vertical_indices)
-    # target_count = max(horizontal_count, vertical_count) - (horizontal_count + vertical_count) // 2
-    target_count = int(max(horizontal_count, vertical_count) * 15/100)
+    target_count = max(horizontal_count, vertical_count) - (horizontal_count + vertical_count) // 2
 
     print(max(angle_list))
 
@@ -37,30 +36,33 @@ def rotate_patches(patch_list, lines_list, angle_list):
     print('horizontal_count: ', horizontal_count)
     print('vertical_count: ', vertical_count)
 
+    rotated_patch_list = patch_list
+    rotated_lines_list = lines_list
+    rotated_angle_list = angle_list
+
     if horizontal_count > vertical_count:
         sampled_indices = sample(horizontal_indices, k=target_count)
         print(len(sampled_indices))
         for index in sampled_indices:
-            lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
+            rotated_lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
             # print(lines_list[index])
-            angle_list[index] = angle_from_line(lines_list[index])
+            rotated_angle_list[index] = angle_from_line(rotated_lines_list[index], normalize=True)
             # print(angle_list[index])
-            patch_list[index] = np.rot90(patch_list[sampled_indices])
+            rotated_patch_list[index] = np.rot90(patch_list[sampled_indices])
 
     else:
         sampled_indices = sample(vertical_indices, k=target_count)
-        print(len(sampled_indices))
         for index in sampled_indices:
-            lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
+            rotated_lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
             # print(lines_list[index])
-            angle_list[index] = angle_from_line(lines_list[index])
+            rotated_angle_list[index] = angle_from_line(rotated_lines_list[index], normalize=True)
             # print(angle_list[index])
-            patch_list[index] = np.rot90(patch_list[index])
+            rotated_patch_list[index] = np.rot90(patch_list[index])
 
-    return patch_list, lines_list, angle_list
+    return rotated_patch_list, rotated_lines_list, rotated_angle_list
 
 
-def rotate_line_coordinates(line: List[Tuple[List[Any]]], angle: float):
+def rotate_line_coordinates(line: List[Tuple[List[Any]]], angle: float = 90):
     """
     Using line coordinates (x1, x2), (y1, y2), rotates a line with a set angle
     :param line:

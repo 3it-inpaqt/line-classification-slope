@@ -95,7 +95,11 @@ if __name__ == '__main__':
         from utils.rotation import rotate_patches
         rotated_patch_list, rotated_lines_list, rotated_angle_list = rotate_patches(selected_patches, selected_lines, angles_lines)
 
-    get_angle_stat([angle / (2 * np.pi) for angle in rotated_angle_list])
+    get_angle_stat(rotated_angle_list)
+    for rot_angle, angle in zip(rotated_angle_list, angles_lines):
+        print('rot: ', rot_angle)
+        print('angle: ', angle)
+        print('----------------')
     # Calculate angles by hand for verification
     plt.rcParams.update({
         "text.usetex": True,
