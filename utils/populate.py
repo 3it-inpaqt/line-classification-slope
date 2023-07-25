@@ -21,7 +21,7 @@ def generate_image_fixed_angle(size: tuple, background: bool = False, sigma: flo
     """
     # Generate gaussian distribution for background if specified
     if background:
-        img = np.random.normal(0.1, 0.01, size) * 255
+        img = np.random.normal(0.9, 0.01, size) * 255
     # Otherwise blank background (black)
     else:
         img = np.zeros(size)
