@@ -1,11 +1,3 @@
-"""
-Line rotation methods:
-
-This is useful on single dot diagrams as only one orientation of line is possible. The goal is to expend the database
-with more angle values. However, it raises the issue of pixel modification, as not all rotation angles are allowed,
-only multiples of 90°. It is recommended to work directly on double dots.
-"""
-
 import numpy as np
 from random import sample
 import torch
@@ -42,13 +34,12 @@ def rotate_patches(patch_list, lines_list, angle_list):
 
     if horizontal_count > vertical_count:
         sampled_indices = sample(horizontal_indices, k=target_count)
-        print(len(sampled_indices))
         for index in sampled_indices:
             rotated_lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
             # print(lines_list[index])
             rotated_angle_list[index] = angle_from_line(rotated_lines_list[index], normalize=True)
             # print(angle_list[index])
-            rotated_patch_list[index] = np.rot90(patch_list[sampled_indices])
+            rotated_patch_list[index] = np.rot90(patch_list[index])
 
     else:
         sampled_indices = sample(vertical_indices, k=target_count)
@@ -82,4 +73,5 @@ def rotate_line_coordinates(line: List[Tuple[List[Any]]], angle: float = 90):
     y2_rot = np.sin(angle_rad) * (x2 - center_x) + np.cos(angle_rad) * (y2 - center_y) + center_y
 
     return [([int(x1_rot), int(x2_rot)], [int(y1_rot), int(y2_rot)])]
+
 
