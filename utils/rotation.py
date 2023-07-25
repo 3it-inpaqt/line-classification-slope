@@ -28,9 +28,9 @@ def rotate_patches(patch_list, lines_list, angle_list):
     # print('horizontal_count: ', horizontal_count)
     # print('vertical_count: ', vertical_count)
 
-    rotated_patch_list = patch_list
-    rotated_lines_list = lines_list
-    rotated_angle_list = angle_list
+    rotated_patch_list = patch_list.copy()
+    rotated_lines_list = lines_list.copy()
+    rotated_angle_list = angle_list.copy()
 
     if horizontal_count > vertical_count:
         sampled_indices = sample(horizontal_indices, k=target_count)

@@ -33,10 +33,10 @@ def generate_image_fixed_angle(size: tuple, background: bool = False, sigma: flo
     center_x = size[0] / 2
     center_y = size[1] / 2
     length = min_length / 2
-    x1 = center_x - length * math.cos(angle_rad)
-    y1 = center_y - length * math.sin(angle_rad)
-    x2 = center_x + length * math.cos(angle_rad)
-    y2 = center_y + length * math.sin(angle_rad)
+    x1 = int(center_x - length * math.cos(angle_rad))
+    y1 = int(center_y - length * math.sin(angle_rad))
+    x2 = int(center_x + length * math.cos(angle_rad))
+    y2 = int(center_y + length * math.sin(angle_rad))
 
     # Create line starting from (x1,y1) and ending at (x2,y2)
     if aa:
@@ -67,12 +67,12 @@ def populate_angles(patch_list, lines_list, angle_list, size: tuple, background:
     :param aa: Anti-alias, creates AA line or not
     :return:
     """
-    # Initialize output
-    new_patch_list, new_lines_list, new_angle_list = patch_list.copy(), lines_list.copy(), angle_list.copy()
-
     # Takes the dataset and apply rotation to create two uniform boundaries
     rotated_patches, rotated_lines_list, rotated_angle_list = rotation.rotate_patches(patch_list, lines_list,
                                                                               angle_list)
+
+    # Initialize output
+    new_patch_list, new_lines_list, new_angle_list = rotated_patches.copy(), rotated_lines_list.copy(), rotated_angle_list.copy()
 
     # Find the boundaries to populate missing angles
         # First sort the list of angles
@@ -83,7 +83,7 @@ def populate_angles(patch_list, lines_list, angle_list, size: tuple, background:
         # Find the index where the maximum difference occurs
     max_diff_index = np.argmax(differences)
         # Split list into two subsets based on the index of maximum difference to get boundaries for missing values
-    bottom_max = sorted_angles_list[max_diff_index + 1]
+    bottom_max = sorted_angles_list[max_diff_index]
     top_min = sorted_angles_list[max_diff_index + 1]
 
     # Find distribution of rotated patches
@@ -91,15 +91,14 @@ def populate_angles(patch_list, lines_list, angle_list, size: tuple, background:
     num_vertical = len([i for i, angle in enumerate(sorted_angles_list) if 45 <= angle * 360 <= 135])
 
     num_to_generate = (num_horizontal + num_vertical) // 2  # set number of synthetic patches to generate
-
     # Generate missing angles
         # Set randomly generated angles within the ranges defined by bottom_max and top_min
     missing_angles = np.random.uniform(low=bottom_max, high=top_min, size=num_to_generate)
         # Iterates through the new angles to add the synthetic patches to the dataset
     for angle in missing_angles:
-        new_patch, new_angle, new_line = generate_image_fixed_angle(size=size, background=background, sigma=sigma, aa=aa, angle=angle)
+        new_patch, new_angle, new_line = generate_image_fixed_angle(size=size, background=background, sigma=sigma, aa=aa, angle=angle*360)
         new_patch_list.append(new_patch)
-        new_angle_list.append(new_angle)
+        new_angle_list = np.append(arr=new_angle_list, values=new_angle)
         new_lines_list.append(new_line)
 
     return new_patch_list, new_lines_list, new_angle_list

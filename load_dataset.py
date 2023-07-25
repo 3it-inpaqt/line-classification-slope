@@ -93,13 +93,23 @@ if __name__ == '__main__':
     # print(selected_lines)
     if settings.rotate_patch:
         from utils.rotation import rotate_patches
-        selected_patches, rotated_lines_list, rotated_angle_list = rotate_patches(selected_patches, selected_lines, angles_lines)
+        selected_patches, rotated_lines_list, rotated_angle_list = rotate_patches(selected_patches,
+                                                                                  selected_lines,
+                                                                                  angles_lines)
 
         get_angle_stat(rotated_angle_list)
-        print(*rotated_angle_list, sep=',')
-        test = rotated_angle_list.copy()
-        test.sort()
-        print(*test, sep=',')
+
+    if settings.include_synthetic:
+        from utils.populate import populate_angles
+        populated_patches, populated_lines_list, populated_angle_list = populate_angles(selected_patches,
+                                                                                   selected_lines,
+                                                                                   angles_lines,
+                                                                                   size=(settings.patch_size_x, settings.patch_size_y),
+                                                                                   background=settings.background,
+                                                                                   sigma=settings.sigma,
+                                                                                   aa=settings.anti_alias)
+        get_angle_stat(populated_angle_list)
+
     # Calculate angles by hand for verification
     plt.rcParams.update({
         "text.usetex": True,
