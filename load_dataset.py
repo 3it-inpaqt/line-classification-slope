@@ -104,7 +104,7 @@ if __name__ == '__main__':
         populated_patches, populated_lines_list, populated_angle_list = populate_angles(selected_patches,
                                                                                    selected_lines,
                                                                                    angles_lines,
-                                                                                   percentage=0.7,
+                                                                                   percentage=0.9,
                                                                                    size=(settings.patch_size_x, settings.patch_size_y),
                                                                                    background=settings.background,
                                                                                    sigma=settings.sigma,
@@ -141,46 +141,48 @@ if __name__ == '__main__':
     #     # print(image_tensor.shape)
     #     stacked_patches[i, :, :] = image_tensor[0, :, :]
 
-    if type(selected_patches[0]) == np.ndarray:
-        stacked_array = np.stack(selected_patches)
+    if type(populated_patches[0]) == np.ndarray:
+        stacked_array = np.stack(populated_patches)
         stacked_patches = torch.from_numpy(stacked_array)
-    elif type(selected_patches == list):
+    elif type(populated_patches == list):
         for i in range(len(selected_patches)):
-            if type(selected_patches[i]) == np.ndarray:
-                selected_patches[i] = (selected_patches[i]).copy()  # make a copy of the numpy array
-                selected_patches[i] = torch.from_numpy(selected_patches[i])
-                stacked_patches[i, :, :] = selected_patches[i]
+            if type(populated_patches[i]) == np.ndarray:
+                selected_patch = (populated_patches[i]).copy()  # make a copy of the numpy array
+                selected_patch = torch.from_numpy(selected_patch)
+                stacked_patches[i, :, :] = selected_patch
             else:
-                stacked_patches[i, :, :] = selected_patches[i]
+                stacked_patches[i, :, :] = populated_patches[i]
     else:
-        stacked_patches = torch.stack(selected_patches)
+        stacked_patches = torch.stack(populated_patches)
 
-    # tensor_patches = stacked_patches.unsqueeze(1)
+    tensor_patches = stacked_patches.unsqueeze(1)
 
     # prepro_tensor = renorm_all_tensors(tensor_patches, True)
 
     # Set patches and angles path
-    # path_torch = f'./saved/double_dot_{settings.research_group}_rotated_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
-    # path_angle = f'./saved/double_dot_{settings.research_group}_rotated_angles_{settings.patch_size_x}_{settings.patch_size_y}'
-    # if settings.full_circle:
-    #     path_torch += "_fullcircle"
-    #     path_angle += "_fullcircle"
-    # if settings.dx:
-    #     path_torch += "_Dx"
-    #     path_angle += "_Dx"
-    # path_torch += ".pt"
-    # path_angle += ".txt"
-    #
-    # # Save tensor
-    # # print(stacked_patches.shape)
-    # torch.save(renorm_array(stacked_patches), path_torch)
-    #
-    # # Create multiplot to check some lines
-    # # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
-    # # print(stacked_patches.shape)
-    # # print(stacked_patches[0, :, :])
-    # plt.tight_layout()
-    # plt.show()
-    #
-    # # Save angles list to file
-    # save_list_to_file(rotated_angle_list, path_angle)  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
+    path_torch = f'./saved/double_dot_{settings.research_group}_populated_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
+    path_angle = f'./saved/double_dot_{settings.research_group}_populated_angles_{settings.patch_size_x}_{settings.patch_size_y}'
+    if settings.full_circle:
+        path_torch += "_fullcircle"
+        path_angle += "_fullcircle"
+    if settings.dx:
+        path_torch += "_Dx"
+        path_angle += "_Dx"
+    path_torch += ".pt"
+    path_angle += ".txt"
+
+    # Save tensor
+    # print(stacked_patches.shape)
+    torch.save(renorm_array(stacked_patches), path_torch)
+
+    print(stacked_patches.shape)
+    print(len(populated_angle_list))
+    # Create multiplot to check some lines
+    # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
+    # print(stacked_patches.shape)
+    # print(stacked_patches[0, :, :])
+    plt.tight_layout()
+    plt.show()
+
+    # Save angles list to file
+    save_list_to_file(populated_angle_list, path_angle)  # comment this line out when the patches are all loaded in a tensor, and you only need to apply Dx over them
