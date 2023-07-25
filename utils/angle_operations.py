@@ -195,7 +195,7 @@ def get_angle_stat(angles_list: List[float]) -> None:
     plt.tick_params(axis='both', which='major', labelsize=14)
     plt.subplots_adjust(bottom=0.15)
     # Adjust the bin size
-    bin_size = 0.01
+    bin_size = 0.005
     len_list = len(angles_list)
     avg = round(sum(angles_list)/len_list, 3)
     # Add a text box to the plot

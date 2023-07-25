@@ -28,11 +28,14 @@ def rotate_patches(patch_list, lines_list, angle_list):
     vertical_indices = [i for i, angle in enumerate(angle_list) if 45 <= angle*360 <= 135]
 
     horizontal_count, vertical_count = len(horizontal_indices), len(vertical_indices)
-    target_count = max(horizontal_count, vertical_count) - (horizontal_count + vertical_count) // 2
+    # target_count = max(horizontal_count, vertical_count) - (horizontal_count + vertical_count) // 2
+    target_count = int(max(horizontal_count, vertical_count) * 15/100)
 
-    print(target_count)
-    print(horizontal_count)
-    print(vertical_count)
+    print(max(angle_list))
+
+    print('target_count: ', target_count)
+    print('horizontal_count: ', horizontal_count)
+    print('vertical_count: ', vertical_count)
 
     if horizontal_count > vertical_count:
         sampled_indices = sample(horizontal_indices, k=target_count)
@@ -41,17 +44,17 @@ def rotate_patches(patch_list, lines_list, angle_list):
             lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
             # print(lines_list[index])
             angle_list[index] = angle_from_line(lines_list[index])
-            print(angle_list[index])
+            # print(angle_list[index])
             patch_list[index] = np.rot90(patch_list[sampled_indices])
 
     else:
         sampled_indices = sample(vertical_indices, k=target_count)
-        # print(sampled_indices)
+        print(len(sampled_indices))
         for index in sampled_indices:
             lines_list[index] = rotate_line_coordinates(lines_list[index], 90)
             # print(lines_list[index])
             angle_list[index] = angle_from_line(lines_list[index])
-            print(angle_list[index])
+            # print(angle_list[index])
             patch_list[index] = np.rot90(patch_list[index])
 
     return patch_list, lines_list, angle_list
