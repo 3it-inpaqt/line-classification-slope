@@ -104,6 +104,7 @@ if __name__ == '__main__':
         populated_patches, populated_lines_list, populated_angle_list = populate_angles(selected_patches,
                                                                                    selected_lines,
                                                                                    angles_lines,
+                                                                                   percentage=0.7,
                                                                                    size=(settings.patch_size_x, settings.patch_size_y),
                                                                                    background=settings.background,
                                                                                    sigma=settings.sigma,
@@ -118,7 +119,7 @@ if __name__ == '__main__':
 
     # Plot a sample of patches with line highlighted
     # plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
-    # plot_patch_sample(rotated_patch_list, rotated_lines_list, sample_number=16, show_offset=False, name='one_line_rotated_DQD')
+    plot_patch_sample(populated_patches, populated_lines_list, sample_number=16, show_offset=False, name='one_line_populated_DQD')
 
     # get_angle_stat(angles_lines)
     # print(len(angles_lines))
@@ -140,25 +141,25 @@ if __name__ == '__main__':
     #     # print(image_tensor.shape)
     #     stacked_patches[i, :, :] = image_tensor[0, :, :]
 
-    # if type(selected_patches[0]) == np.ndarray:
-    #     stacked_array = np.stack(selected_patches)
-    #     stacked_patches = torch.from_numpy(stacked_array)
-    # elif type(selected_patches == list):
-    #     for i in range(len(selected_patches)):
-    #         if type(selected_patches[i]) == np.ndarray:
-    #             selected_patches[i] = (selected_patches[i]).copy()  # make a copy of the numpy array
-    #             selected_patches[i] = torch.from_numpy(selected_patches[i])
-    #             stacked_patches[i, :, :] = selected_patches[i]
-    #         else:
-    #             stacked_patches[i, :, :] = selected_patches[i]
-    # else:
-    #     stacked_patches = torch.stack(selected_patches)
-    #
-    # # tensor_patches = stacked_patches.unsqueeze(1)
-    #
-    # # prepro_tensor = renorm_all_tensors(tensor_patches, True)
-    #
-    # # Set patches and angles path
+    if type(selected_patches[0]) == np.ndarray:
+        stacked_array = np.stack(selected_patches)
+        stacked_patches = torch.from_numpy(stacked_array)
+    elif type(selected_patches == list):
+        for i in range(len(selected_patches)):
+            if type(selected_patches[i]) == np.ndarray:
+                selected_patches[i] = (selected_patches[i]).copy()  # make a copy of the numpy array
+                selected_patches[i] = torch.from_numpy(selected_patches[i])
+                stacked_patches[i, :, :] = selected_patches[i]
+            else:
+                stacked_patches[i, :, :] = selected_patches[i]
+    else:
+        stacked_patches = torch.stack(selected_patches)
+
+    # tensor_patches = stacked_patches.unsqueeze(1)
+
+    # prepro_tensor = renorm_all_tensors(tensor_patches, True)
+
+    # Set patches and angles path
     # path_torch = f'./saved/double_dot_{settings.research_group}_rotated_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
     # path_angle = f'./saved/double_dot_{settings.research_group}_rotated_angles_{settings.patch_size_x}_{settings.patch_size_y}'
     # if settings.full_circle:

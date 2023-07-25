@@ -33,10 +33,10 @@ def generate_image_fixed_angle(size: tuple, background: bool = False, sigma: flo
     center_x = size[0] / 2
     center_y = size[1] / 2
     length = min_length / 2
-    x1 = int(center_x - length * math.cos(angle_rad))
-    y1 = int(center_y - length * math.sin(angle_rad))
-    x2 = int(center_x + length * math.cos(angle_rad))
-    y2 = int(center_y + length * math.sin(angle_rad))
+    x1 = int(center_x - length * math.cos(angle_rad + np.pi))
+    y1 = int(center_y - length * math.sin(angle_rad + np.pi))
+    x2 = int(center_x + length * math.cos(angle_rad + np.pi))
+    y2 = int(center_y + length * math.sin(angle_rad + np.pi))
 
     # Create line starting from (x1,y1) and ending at (x2,y2)
     if aa:
@@ -50,10 +50,10 @@ def generate_image_fixed_angle(size: tuple, background: bool = False, sigma: flo
     if sigma > 0:
         img = gaussian_filter(img, sigma=sigma)
 
-    return img / 255, normalize_angle(angle_rad), [([x1, x2], [y1, y2])]
+    return img / 255, normalize_angle(angle_rad + np.pi), [([x1, x2], [y1, y2])]
 
 
-def populate_angles(patch_list, lines_list, angle_list, size: tuple, background: bool = False, sigma: float = 0, aa: bool = False):
+def populate_angles(patch_list, lines_list, angle_list, percentage: float, size: tuple, background: bool = False, sigma: float = 0, aa: bool = False):
     """
     This function will do two things:
         - first, it will apply rotation to populate the dataset with perpendicular angles
@@ -61,6 +61,7 @@ def populate_angles(patch_list, lines_list, angle_list, size: tuple, background:
     :param patch_list:
     :param lines_list:
     :param angle_list:
+    :param percentage: Percentage of synthetic data to generate with respect to the total number of experimental data
     :param size: Shape of the image
     :param background: Whether to make a noisy background or not
     :param sigma: Add a Gaussian blur to the image if True
@@ -90,7 +91,7 @@ def populate_angles(patch_list, lines_list, angle_list, size: tuple, background:
     num_horizontal = len([i for i, angle in enumerate(sorted_angles_list) if 0 <= angle * 360 <= 45 or 135 <= angle * 360 <= 180])
     num_vertical = len([i for i, angle in enumerate(sorted_angles_list) if 45 <= angle * 360 <= 135])
 
-    num_to_generate = (num_horizontal + num_vertical) // 2  # set number of synthetic patches to generate
+    num_to_generate = int((num_horizontal + num_vertical) * percentage)  # set number of synthetic patches to generate
     # Generate missing angles
         # Set randomly generated angles within the ranges defined by bottom_max and top_min
     missing_angles = np.random.uniform(low=bottom_max, high=top_min, size=num_to_generate)
