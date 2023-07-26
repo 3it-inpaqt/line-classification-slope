@@ -34,23 +34,23 @@ If you are using Pycharm follow these simple steps:
 
 ## Folders 
 
-* `data\` : Contains diagrams data (**should be downloaded by the user**) and generated cache files
+* `data\ ` : Contains diagrams data (**should be downloaded by the user**) and generated cache files
 * `out\ ` : Generated directory that contains run results log and plots if `run_name` setting field is defined
-* `saved\` : Loss evolution plot, CSV files, `.pt` model files, etc. should be stored in this folder.
+* `saved\ ` : Loss evolution plot, CSV files, `.pt` model files, etc. should be stored in this folder.
 
 ## CSV files
 
 CSV files contain the settings of each run you will perform, given they were the best runs, with the best loss and
-standard deviation. These files are stored in `\saved\csv_files`. For each loss function, one file is created. Make sure
+standard deviation. These files are stored in `saved\csv_files`. For each loss function, one file is created. Make sure
 you are working on one specific research group, otherwise you risk mixing all the data. The purpose of these files is to
 study the correlation between the hyperparameters and the metrics obtained. You can find a plotting function at the end
-of `.\utils\statistics.py` if you are interested. Simply note this function was not developed further, but can provide
+of `utils\statistics.py` if you are interested. Simply note this function was not developed further, but can provide
 a basis for future work.
 
 # Settings
 
 _<span style="color:gold;">Note:</span> The settings do not change the structure of the neural network. This has to be
-done manually in either `models/model.py` (feed-forward) or `models/cnn.py` (convolution)_
+done manually in either `models\model.py` (feed-forward) or `models\cnn.py` (convolution)_
 
 Create a file `settings.yaml` to override settings documented in `utils\settings.py`. From there, you can decide what model to use (feed-forward, CNN, etc.), and set the different hyperparameters. 
 
@@ -106,7 +106,7 @@ sigma: 0.1
 
 #### Loss function
 In this example the `SmoothL1Loss` is used for the training. You can change it by checking the name of available
-functions in `.\models\loss.py` and setting `loss_fn` to one of the following values:
+functions in `models\loss.py` and setting `loss_fn` to one of the following values:
 
 * SmoothL1Loss (*pytorch*)
 * MSE (*pytorch*)
@@ -124,7 +124,7 @@ the *SmoothL1Loss*, *WeightedSmoothL1* and *HarmonicMeanLoss*
 #### Model type
 
 Two types of model exists: regression (`'FF'`) and convolution (`'CNN'`). Entering a different name without specifying it
-in the `settings.py` file in `/utils` will result in an error.
+in the `settings.py` file in `utils\ ` will result in an error.
 
 #### Network size
 
@@ -227,7 +227,7 @@ skip this step if you only want to use synthetic diagrams._
 
 You first need to load the diagrams from the files. `load_dataset.py` will extract the data from the interpolated csv folder
 you supposedly added to a folder called data, along with the json file containing the labels' information. Furthermore, 
-the data are then converted to pytorch tensors and stored in a folder (`.\saved`) that you need to create. 
+the data are then converted to pytorch tensors and stored in a folder (`saved\ `) that you need to create. 
 
 Once the diagrams are loaded, you can access them in the folder `out`. With the annotated diagrams you will also find a
 sample of patches with lines drawn on top of them and the associated angles to show you how the angles are calculated.
@@ -238,7 +238,7 @@ _<span style="color:coral;">Warning:</span> The data structure changes whether y
 convolution task. When loading the diagrams you have to make sure to set up the tensor accordingly. Make sure you have 
 set up the right directory to store the output file._
  
-The model will be stored in a folder located in `./saved/` named after the `research_group`. In this folder, each model
+The model will be stored in a folder located in `saved\ ` named after the `research_group`. In this folder, each model
 is sorted after the type of network (regression, convolution) and loss function for more clarity. With each model comes 
 a loss evolution plot to summarize the settings and the best loss/standard deviation obtained.
 
