@@ -2,13 +2,17 @@ import math
 import numpy as np
 from skimage.draw import line, line_aa
 from scipy.ndimage import gaussian_filter
-from typing import Any
+from typing import Any, List, Tuple
 
 from utils.angle_operations import normalize_angle
 import utils.rotation as rotation
 
 
-def generate_image_fixed_angle(size: tuple, background: bool = False, sigma: float = 0, aa: bool = False, angle: float = 0) -> Any:
+def generate_image_fixed_angle(size: tuple,
+                               background: bool = False,
+                               sigma: float = 0,
+                               aa: bool = False,
+                               angle: float = 0) -> Tuple[Any, Any, List[Any]]:
     """
     Generate a binary image with a line of a specified angle (copy of the generate_image function in
     utils.generate_lines.py)
@@ -26,13 +30,18 @@ def generate_image_fixed_angle(size: tuple, background: bool = False, sigma: flo
     else:
         img = np.zeros(size)
 
+    # Set a minimum line length
     min_length = 0.9 * min(size[0], size[1])
 
     # Calculate the endpoints of the line based on the desired angle
+        # Convert angle to radian
     angle_rad = math.radians(angle)
+        # Get line center
     center_x = size[0] / 2
     center_y = size[1] / 2
+        # When drawing from center, need to set the radius to total line length divided by 2
     length = min_length / 2
+        # Generate line coordinates
     x1 = int(center_x + length * math.cos(angle_rad))
     y1 = int(center_y + length * math.sin(angle_rad))
     x2 = int(center_x - length * math.cos(angle_rad))
@@ -40,10 +49,12 @@ def generate_image_fixed_angle(size: tuple, background: bool = False, sigma: flo
 
     # Create line starting from (x1,y1) and ending at (x2,y2)
     if aa:
-        rr, cc, val = line_aa(x1, y1, x2, y2)  # thicc line if anti-alias is on
+        # Generate line with anti-alias
+        rr, cc, val = line_aa(x1, y1, x2, y2)
         img[rr, cc] = 255 * val
     else:
-        rr, cc = line(x1, y1, x2, y2)  # one pixel thicc line otherwise
+        # Generate a 1-pixel thicc line
+        rr, cc = line(x1, y1, x2, y2)
         img[rr, cc] = 255
 
     # Add a Gaussian blur if specified
@@ -55,7 +66,13 @@ def generate_image_fixed_angle(size: tuple, background: bool = False, sigma: flo
     return img / 255, normalize_angle(angle_rad), [([x1, x2], [y1, y2])]
 
 
-def populate_angles(patch_list, lines_list, angle_list, percentage: float, size: tuple, background: bool = False, sigma: float = 0, aa: bool = False):
+def populate_angles(patch_list,
+                    lines_list, angle_list,
+                    percentage: float,
+                    size: tuple,
+                    background: bool = False,
+                    sigma: float = 0,
+                    aa: bool = False) -> Tuple[List[Any], List[Any], List[Any]]:
     """
     This function will do two things:
         - first, it will apply rotation to populate the dataset with perpendicular angles
