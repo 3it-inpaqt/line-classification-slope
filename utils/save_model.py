@@ -22,14 +22,18 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
     """
     # Define path to 'saved' folder
     run_type = settings.model_type
-    if run_type == "FF":
-        path = f"{directory_path}/{settings.research_group}/regression/{settings.loss_fn}"
-    elif run_type == "CNN":
-        path = f"{directory_path}/{settings.research_group}/convolution/{settings.loss_fn}"
+    if not settings.synthetic:
+        if run_type == "FF":
+            path = f"{directory_path}/{settings.research_group}/regression/{settings.loss_fn}"
+        elif run_type == "CNN":
+            path = f"{directory_path}/{settings.research_group}/convolution/{settings.loss_fn}"
+        else:
+            while run_type != "ff" and run_type != "cnn":
+                logger.warning(f'Run type invalid.')
+                run_type = input('Please select a proper run type (cnn or ff): ')
+
     else:
-        while run_type != "ff" and run_type != "cnn":
-            logger.warning(f'Run type invalid.')
-            run_type = input('Please select a proper run type (cnn or ff): ')
+        path = f"{directory_path}/synthetic/regression/{settings.loss_fn}"
 
     # Add extension if not provided
     model_filename = filename + '.pt'  # for tensor file

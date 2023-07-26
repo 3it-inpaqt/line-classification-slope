@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 from linegeneration.generate_lines import create_image_set
 from models.model import AngleNet
 from models.loss import loss_fn_dic
-# from plot.lines_visualisation import create_multiplots
+from plot.lines_visualisation import create_multiplots
 from utils.angle_operations import normalize_angle
 from utils.create_csv import init_csv
 from utils.logger import logger
@@ -27,6 +27,7 @@ plt.rcParams.update({
 
 
 def main():
+    saving_dir = f'./saved/'
     best_std = np.inf
 
     if settings.synthetic:
@@ -36,6 +37,22 @@ def main():
         X, y = create_image_set(n, N, gaussian_blur=settings.sigma, background=settings.background,
                                 aa=settings.anti_alias)  # n images of size NxN
         X = X.reshape(n, N * N)
+        # train-test split for model evaluation
+        X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
+
+        # Convert to 2D PyTorch tensors
+        X_train = torch.tensor(X_train, dtype=torch.float32)
+        y_train = torch.tensor(y_train, dtype=torch.float32).reshape(-1, 1)
+        X_test = torch.tensor(X_test, dtype=torch.float32)
+        y_test = torch.tensor(y_test, dtype=torch.float32).reshape(-1, 1)
+
+        # Move network and data tensors to device
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # print(device)
+        X_train = X_train.to(device=device)
+        y_train = y_train.to(device=device)
+        X_test = X_test.to(device=device)
+        y_test = y_test.to(device=device)
         # Set title for loss evolution with respect to epoch and model name
         model_name = f'best_model_synthetic_regression_{settings.loss_fn}_batch{settings.batch_size}_epoch{settings.n_epochs}'
         # custom_suffix = '_new_loss'
@@ -54,12 +71,10 @@ def main():
         elif settings.loss_fn == 'HarmonicFunctionLoss':
             model_name += f'{settings.num_harmonics}'
 
-        model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}'
+        model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}_rotated'
 
         if settings.dx:
             model_name += '_Dx'
-
-        saving_dir = f'./saved/'
 
         # train-test split for model evaluation
         X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)
@@ -77,6 +92,9 @@ def main():
         y_train = y_train.to(device=device)
         X_test = X_test.to(device=device)
         y_test = y_test.to(device=device)
+
+        # print(X_train.max())
+        # print(X_train.min())
 
     for i in range(settings.run_number):
         # Reset the model
@@ -169,16 +187,14 @@ def main():
             init_csv(loss=best_loss, std_dev=best_std)
             logger.info(f'Run {i+1} ended.')
 
-        # Plot some lines and patches
-        # if torch.cuda.is_available():
-        #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
-        # else:
-        #     y_pred_numpy = y_pred_best.cpu().detach().numpy()
-        #
-        # fig1, axes1 = create_multiplots(X_test, y_test, y_pred_numpy, number_sample=9, cmap='copper', normalize=True)
-        # plt.tight_layout()
-        # # plt.savefig(f".\saved\plot\{model_name}_patches.png")
-        # plt.show()
+            # Plot some lines and patches
+            y_pred_numpy = y_pred_best.cpu().detach().numpy()
+            X_test_numpy = X_test.cpu().detach().numpy()
+            y_test_numpy = y_test.cpu().detach().numpy()
+            fig1, axes1 = create_multiplots(X_test_numpy, y_test_numpy, y_pred_numpy, number_sample=9, cmap='copper', normalize=True)
+            plt.tight_layout()
+            # plt.savefig(f".\saved\plot\{model_name}_patches.png")
+            plt.show()
 
 
 if __name__ == '__main__':

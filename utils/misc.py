@@ -295,9 +295,9 @@ def renorm_array(input_table: Any) -> torch.Tensor:
     new_tensor = tensor.view(1, -1)
     new_tensor -= new_tensor.min(1, keepdim=True)[0]
     new_tensor /= new_tensor.max(1, keepdim=True)[0]
-    new_tensor = new_tensor.view(1, tensor.size(0), tensor.size(1))
-
-    return new_tensor
+    new_tensor = new_tensor.view(tensor.size(0), tensor.size(1), tensor.size(2))
+    # print(new_tensor.shape)
+    return new_tensor.squeeze(1)
 
 
 def resymmetrise_tensor(y_pred: torch.Tensor, threshold=0.):

@@ -450,15 +450,15 @@ class DiagramOffline(Diagram):
         :return: Normalized tensor of size [1, N, N]
         """
         # Concatenate all the tensors into a single tensor
-        print([diagram.values.shape for diagram in diagrams])
+        # print([diagram.values.shape for diagram in diagrams])
         all_max = [diagram.values.max().item() for diagram in diagrams]
         all_min = [diagram.values.min().item() for diagram in diagrams]
 
         # Compute the minimum and maximum values across all the tensors
         min_value = min(all_min)
         max_value = max(all_max)
-        print(max_value)
-        print(min_value)
+        # print(max_value)
+        # print(min_value)
 
         save_normalization(min_value=min_value, max_value=max_value)
 

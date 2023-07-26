@@ -104,6 +104,9 @@ class Settings:
     x_path: str = './saved/double_dot_patches_Dx_normalized.pt'
     y_path: str = './saved/double_dot_normalized_angles.txt'
 
+    rotate_patch: bool = False  # Whether to rotate some patches or not
+    include_synthetic: bool = False  # Whether to include synthetic diagrams in experimental dataset or not
+
     # The size of a diagram patch send to the network input (number of pixel)
     patch_size_x: int = 18
     patch_size_y: int = 18

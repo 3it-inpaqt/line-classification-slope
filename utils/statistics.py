@@ -6,7 +6,7 @@ import os
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
 import torch
-from typing import Any
+from typing import Any, List, Tuple
 
 from utils.logger import logger
 # from utils.angle_operations import get_angle_stat
@@ -84,7 +84,24 @@ def calculate_average_error(actual_values: ndarray, predicted_values: ndarray) -
     return average_error
 
 
-# -- Resampling operations -- #
+# -- Stats and Resampling operations -- #
+def angle_distribution(angle_list):
+    """
+    Find the distribution of angles of the line for a set of patches.
+    :param angle_list: Associated angle of the line
+    :return: The distribution of angles in the form of a tuple giving the statistics of horizontal and vertical lines
+    """
+    horizontal_count = 0
+    vertical_count = 0
+
+    for angle in angle_list:
+        if 45 <= angle <= 135:
+            vertical_count += 1
+        elif 0 <= angle <= 45 or 45 <= angle <= 180:
+            horizontal_count += 1
+
+    return horizontal_count, vertical_count
+
 
 def remove_elements_exceeding_count(list1, list2, n):
     """
