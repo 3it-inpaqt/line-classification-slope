@@ -1,14 +1,14 @@
 from dataclasses import asdict, is_dataclass
-from decimal import Decimal
 from copy import copy
 from math import ceil
 import numpy as np
 import os
 import random
 import torch
-from typing import Any, Dict, Iterable, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from utils.settings import settings
+from utils.logger import logger
 
 
 # -- os process (files, directory, etc.) -- #
@@ -22,10 +22,12 @@ def list_files(directory: str, extension: str = None) -> List[str]:
     """
     os.chdir(directory)
     files = []
+
     for filename in os.listdir():
         if os.path.isfile(os.path.join(os.getcwd(), filename)):
             if extension is None or filename.endswith(extension):
                 files.append(filename)
+
     return files
 
 
@@ -36,9 +38,9 @@ def create_directory(path: str) -> Any:
     """
     try:
         os.mkdir(path)
-        print(f"Directory created at {path}")
+        logger.info(f"Directory created at {path}")
     except FileExistsError:
-        print(f"Directory already exists at {path}")
+        logger.warning(f"Directory already exists at {path}")
 
 
 def create_txt_file(path: str, filename: str) -> Any:
@@ -48,18 +50,19 @@ def create_txt_file(path: str, filename: str) -> Any:
     :param filename: name of the file
     :return:
     """
-    # check if directory path exists and is writable
+    # Check if directory path exists and is writable
     if not os.path.isdir(path) or not os.access(path, os.W_OK):
         raise OSError(
             f"Cannot create file '{filename}' in directory '{path}': directory does not exist or is not writable")
 
-    # create full path of file
+    # Create full path of file
     file_path = os.path.join(path, filename)
 
-    # create new file
+    # Create new file
     with open(file_path, 'w') as f:
         pass  # do nothing, just create empty file
-    print(f"File '{filename}' in directory '{path}' was successfully created ")
+
+    logger.info(f"File '{filename}' in directory '{path}' was successfully created ")
 
 
 def save_list_to_file(list1: list, path: str, list2=None) -> Any:
@@ -70,8 +73,7 @@ def save_list_to_file(list1: list, path: str, list2=None) -> Any:
     :param path: full path of the file (includes name and extension)
     :return:
     """
-    # open file in write mode
-
+    # Open file in write mode
     with open(path, 'w') as fp:
         if list2 is not None:
             for item1, item2 in enumerate(list1, list2):
@@ -81,14 +83,22 @@ def save_list_to_file(list1: list, path: str, list2=None) -> Any:
             for item1 in list1:
                 # write each item on a new line
                 fp.write(f'{item1}\n')
-        print('Done')
+    logger.info('List(s) saved to file')
 
 
-def load_list_from_file(filepath):
+def load_list_from_file(filepath: str) -> List[Any]:
+    """
+    Load a list from a text file
+    :param filepath:
+    :return:
+    """
+    # Prepare the list to store the data
     list_from_file = []
+
     with open(filepath) as f:
         for line in f:
             list_from_file.append(line.strip())
+
     return list_from_file
 
 
@@ -182,29 +192,12 @@ def random_select_elements(list1: List[Any], list2: List[Any], num_elements: int
     """
     # Randomly select indices without replacement
     index = random.randint(0, len(list1) - 1)
-    # print('list 1: ', len(list1))
-    # print('list 2: ', len(list2))
-    # print(list2)
 
-    # Use the selected indices to get the corresponding elements from both lists
+    # Use the selected index to get the corresponding elements from both lists
     selected_elements1 = list1[index]
     selected_elements2 = list2[index]
 
     return selected_elements1, selected_elements2, index
-
-
-def generate_random_boolean():
-    return random.choice([True, False])
-
-
-def generate_random_angle():
-    angles = [0, 90, 180, 270]
-    return random.choice(angles)
-
-
-def generate_random_indices(length, count):
-    indices = random.sample(range(length), count)
-    return indices
 
 
 # -- Related to float and integer -- #
@@ -292,17 +285,18 @@ def renorm_array(input_table: Any) -> torch.Tensor:
         tensor = input_table.clone()
     else:
         tensor = torch.from_numpy(input_table)
+
     new_tensor = tensor.view(1, -1)
     new_tensor -= new_tensor.min(1, keepdim=True)[0]
     new_tensor /= new_tensor.max(1, keepdim=True)[0]
     new_tensor = new_tensor.view(tensor.size(0), tensor.size(1), tensor.size(2))
-    # print(new_tensor.shape)
+
     return new_tensor.squeeze(1)
 
 
 def resymmetrise_tensor(y_pred: torch.Tensor, threshold=0.):
     """
-
+    Takes angle prediction array, and makes sure the angle are withing the range [0°, 180°[
     :param y_pred:
     :param threshold:
     :return:

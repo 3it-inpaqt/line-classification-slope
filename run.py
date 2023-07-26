@@ -1,4 +1,10 @@
+"""
+Easy way to run the model on the data. Just change the parameters in settings.yaml, and then you can run this script to
+train a model.
+"""
+from utils.logger import logger
 from utils.settings import settings
+
 
 if __name__ == '__main__':
 
@@ -13,10 +19,6 @@ if __name__ == '__main__':
         main()
 
     elif run_type == 'EDGE-DETECT':
-        from models.edge_detection import main
-        main()
-
-    # image_set_test, angles_test = create_image_set(n, N, 0.9, aa=True)
-    # fig, axes = create_multiplots(image_set_test, angles_test, number_sample=n)
-    # plt.show()
-
+        # from models.edge_detection import main
+        # main()
+        logger.critical('Method not working, WONT-FIX!')

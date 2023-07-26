@@ -11,7 +11,8 @@ from utils.settings import settings
 def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any = None, number_sample: float = None, cmap: str = 'copper', normalize=True) -> Tuple[Figure, Axes]:
     """
     Generate figures with several plots to see different lines orientation
-
+    Chances are this function don't work depending on the dataset (WONTFIX). Try changing how the image_set is defined,
+    whether by un-commenting the .squeeze(1) or changing the size variable assignment (add or remove one).
     :param image_set_input:
     :param angles: array containing the angles for each image of the set
     :param prediction_angles: optional, value of predicted angles by a neural network (ndarray)
@@ -27,9 +28,7 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
 
     else:  # for experimental diagrams
         image_set = image_set_input  # .squeeze(1)  # tensor of shape [n, N*N] required
-        # print(image_set.shape)
         if settings.model_type == 'FF':
-            # print(image_set.shape)
             n = image_set.shape[0]
             image_set = image_set.reshape(n, settings.patch_size_x, settings.patch_size_y)
 
@@ -49,8 +48,6 @@ def create_multiplots(image_set_input: Any, angles: Any, prediction_angles: Any 
 
     # Create a figure and axis objects
     fig, axes = plt.subplots(nrows=number_rows, ncols=number_columns, figsize=(4 * number_columns, 4 * number_rows))
-
-    # print(image_set.shape)
 
     for i, ax in enumerate(axes.flatten()):
         if i < number_sample:

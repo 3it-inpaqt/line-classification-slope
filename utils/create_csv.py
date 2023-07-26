@@ -6,7 +6,8 @@ from utils.logger import logger
 
 
 def init_csv(loss, std_dev):
-    """ Initialise CSV files for each loss function name and save them in a dedicated folder
+    """ Initialise CSV files for each loss function name and save them in a dedicated folder. This is a nightmare to
+    set up and not really useful. You have to manually set the parameter to fix here in the function.
     :param loss:
     :param std_dev:
     """

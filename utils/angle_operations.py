@@ -4,7 +4,6 @@ from numpy import ndarray
 import torch
 from typing import Tuple, List, Any
 
-from utils.misc import random_select_elements, generate_random_indices, dec_to_sci
 from utils.settings import settings
 
 np.seterr(divide='ignore')
@@ -14,7 +13,7 @@ np.seterr(divide='ignore')
 
 def center_line(x1: float, y1: float, x2: float, y2: float) -> Tuple[float]:
     """
-    Find the center of a line
+    Find the center of a line based on its endpoints coordinates
     :param x1:
     :param y1:
     :param x2:
@@ -29,12 +28,13 @@ def center_line(x1: float, y1: float, x2: float, y2: float) -> Tuple[float]:
 
 def get_point_above_horizontal(x1: float, y1: float, x2: float, y2: float) -> Tuple[float, float, float, float]:
     """
-    Get the point above the horizontal line passing through the center of the line between (x1,y1) and (x2,y2).
+    Get the point above the horizontal line passing through the center of the line between (x1,y1) and (x2,y2). This is
+    to get the line to follow a symmetry rule (180° -> 0°).
     :param x1: x position of first point
     :param y1: y position of first point
     :param x2: x position of second point
     :param y2: y position of second point
-    :return: in order the point above the center and the point under the center
+    :return: In order the point above the center and the point under the center
     """
     # Calculate the y-center of the line
     center_y = (y1 + y2) / 2
@@ -54,26 +54,28 @@ def calculate_angle(x1: float, y1: float, x2: float, y2: float) -> float:
     :param y2: y position of second point
     :return: angle of a line between (x1,y1) and (x2,y2) with respect to the x-axis
     """
-
+    # Re-order the coordinates of the line to ensure the angle is between 0° and 180° later on
     a, b, c, d = get_point_above_horizontal(x1, y1, x2, y2)
 
     dx = a - c
     dy = b - d
 
     if dx == 0:
-        return np.pi/2  # way to handle geometrically division by 0 in the formula of the slope
+        return np.pi/2  # way to geometrically handle division by 0 in the formula of the slope because of tan function
     else:
         slope = dy/dx
         angle = np.arctan(slope)
+        # If the angle is negative, simply add pi to take its value on the other side of the trigonometric circle
         if angle < 0:
             return angle + np.pi
+        # Otherwise the angle is already between 0° and 180°
         else:
             return angle
 
 
 def calculate_angle_full_circle(x1: float, y1: float, x2: float, y2: float) -> float:
     """
-    Calculate the angle of a line
+    Calculate the angle of a line within the range [0°, 360°] (no symmetry)
     :param x1: x position of first point
     :param y1: y position of first point
     :param x2: x position of second point
@@ -94,7 +96,7 @@ def calculate_angle_full_circle(x1: float, y1: float, x2: float, y2: float) -> f
         return angle
 
 
-def normalize_angle(angle: Any):
+def normalize_angle(angle: Any) -> Any:
     """
     Normalize angle in radian to a value between 0 and 1.
     Angle can be a float or a ndarray, it doesn't matter
@@ -106,21 +108,22 @@ def normalize_angle(angle: Any):
 
 def angle_from_line(line: List[Tuple[List]], normalize: bool = False) -> ndarray:
     """
-    Find angle of one single line
+    Find angle of one single line item [([x1, x2], [y1, y2])]
     :param line:
     :param normalize:
     :return:
     """
+    # Get the line coordinates from the list object
     x1, x2 = line[0][0][0], line[0][0][1]
     y1, y2 = line[0][1][0], line[0][1][1]
 
     if settings.full_circle:
-        angle = calculate_angle_full_circle(x1, y1, x2, y2)
+        angle = calculate_angle_full_circle(x1, y1, x2, y2)  # don't take the symmetry into account
     else:
-        angle = calculate_angle(x1, y1, x2, y2)
+        angle = calculate_angle(x1, y1, x2, y2)  # take the symmetry into account
 
     if normalize:
-        angle = normalize_angle(angle)
+        angle = normalize_angle(angle)  # normalize angle values by 2 pi
 
     return angle
 
@@ -128,7 +131,7 @@ def angle_from_line(line: List[Tuple[List]], normalize: bool = False) -> ndarray
 def angles_from_list(lines: List[Any], normalize: bool = False) -> ndarray:
     """
     The list of lines contains tuples of list coordinate of the form ([x1, x2], [y1, y2]). It is a bother to calculate
-    directly the angle using calculate_angle, so first we extract coordinates, and then apply the functions
+    directly the angle using calculate_angle, so first we extract coordinates, and then apply the functions.
     :param lines: List containing lines coordinates
     :param normalize: Whether to normalize the angles or not
     :return: List of angles associated with each line
@@ -157,7 +160,7 @@ def angles_from_list(lines: List[Any], normalize: bool = False) -> ndarray:
 
 # -- Line decomposition method -- #
 
-def decompose_line(line) -> tuple[list[list[tuple[Any, Any]]], list[float]]:
+def decompose_line(line: List[Any]) -> Tuple[List[List[Tuple[Any, Any]]], List[float]]:
     """
     Find angle of all the lines composing a single segment. Sometimes, a single line passes through a patch, but is not
     perfectly straight due to the labeling and/or setup variability.
@@ -192,15 +195,16 @@ def get_angle_stat(angles_list: List[float]) -> None:
         "text.usetex": True,
         "font.family": "serif"
     })
+
     plt.tick_params(axis='both', which='major', labelsize=14)
     plt.subplots_adjust(bottom=0.15)
     # Adjust the bin size
     bin_size = 0.005
     len_list = len(angles_list)
     avg = round(sum(angles_list)/len_list, 3)
+
     # Add a text box to the plot
     textstr = r'$Average: {{{avg}}}$'.format(avg=avg, )
-
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax.text(0.1, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='left', va='top', bbox=props)
 
