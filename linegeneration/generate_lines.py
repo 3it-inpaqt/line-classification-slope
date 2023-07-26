@@ -7,6 +7,8 @@ from typing import Tuple
 
 from utils.angle_operations import calculate_angle, normalize_angle
 
+import math
+
 
 def generate_image(size: tuple, background: bool = False, sigma: float = 0, aa: bool = False, generation_type: str = 'random') -> Tuple[ndarray, float]:
     """
@@ -15,7 +17,7 @@ def generate_image(size: tuple, background: bool = False, sigma: float = 0, aa: 
     :param background: Whether to make a noisy background or not
     :param sigma: Add a gaussian blur to the image if True
     :param aa: Anti-alias, creates AA line or not
-    :param generation_type: Set how the lines are generated (random, vertical, horizontal)
+    :param generation_type: Set how the lines are generated (random, vertical, horizontal, fix)
     :return: A single patch with the angle's value of its line
     """
     # Generate gaussian distribution for background if specified
@@ -27,6 +29,7 @@ def generate_image(size: tuple, background: bool = False, sigma: float = 0, aa: 
 
     min_length = 0.9 * min(size[0], size[1])
 
+    # TODO Fix this because the vertical and horizontal settings won't do anything
     if generation_type == 'random':
         # Select one random position on an edge
         index1 = np.random.choice([0, size[0] - 1]), np.random.choice(size[1])

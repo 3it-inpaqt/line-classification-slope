@@ -73,31 +73,35 @@ patch_size_y: 18
 # Related to angles calculation
 full_circle: False
 
-# Related to the simulation
-dx: True
-x_path: './saved/double_dot_louis_gaudreau_patches_normalized_18_18_Dx.pt'
-y_path: './saved/double_dot_louis_gaudreau_angles_18_18.txt'
+# Related to the dataset
+x_path: './saved/double_dot_louis_gaudreau_populated_patches_normalized_18_18.pt'
+y_path: './saved/double_dot_louis_gaudreau_populated_angles_18_18.txt'
 
-run_number: 10
+dx: False
+rotate_patch: False
+include_synthetic: True
+
+# Related to the network
+run_number: 1
 model_type: 'FF'
 n_hidden_layers: 2
 loss_fn: 'SmoothL1Loss'
-beta: 0.04
+beta: 0.06
 num_harmonics: 10
 use_threshold_loss: True
-threshold_loss: 110
+threshold_loss: 135
 learning_rate: 0.0001
-n_epochs: 100   # number of epochs to run
+n_epochs: 200   # number of epochs to run
 batch_size: 18  # size of each batch
 
 kernel_size_conv:  8  # for convolution
 
 # Related to synthetic data
 synthetic: False
-n_synthetic: 1000  # number of synthetic data to create
-anti_alias: False
-background: False
-sigma: 0.
+n_synthetic: 2000  # number of synthetic data to create
+anti_alias: True
+background: True
+sigma: 0.1
 ```
 
 #### Loss function
@@ -134,6 +138,18 @@ It is possible to change the method of loss calculation. The network can indeed 
 between the prediction and expected value, and one between re-symmetrize prediction and expected value. Then it will
 keep the lowest value. To enable this option, set `use_threshold_loss` to `True` and adjust the `threshold_loss` to your
 liking. Note it makes more sense to take value above 110° when considering line symmetry.
+
+#### Data augmentation
+
+The main issue with the different dataset is the lack of data, and the unbalanced distribution of angles. To solve this,
+one can either rotate randomly chosen patches to get more angles values, or add extra data synthetically generated. This
+**or** is not exclusive meaning you can also do both. In my approach I decided to implement patch rotation on one hand,
+and synthetic data generation with patches rotation together on the other hand. To enable the first one you'll need to
+set `rotate_patch` to `True`, and the second `include_synthetic`. It is preferable you enable one option at a time so
+either have `True/False` xor `False/True`. 
+
+_<span style="color:gold;">Note:</span> When synthetic data are generated, the parameters set in the synthetic data 
+section of `settings.yaml` will be used._
 
 #### Misc parameters
 
@@ -185,6 +201,8 @@ not worry about. Feel free to contact me if you think there is a mistake._
   * `logger.py`: handles log methods to display warning or error messages more clearly
   * `misc.py` : miscellaneous scripts (random numbers, fetching from file, etc.)
   * `output.py` : prepare the output directory when loading diagrams
+  * `populate.py` : manage data augmentation by creating synthetic data for missing angle values in the dataset
+  * `rotation.py` : handle patch and line label rotation 
   * `save_model.py`: save NN model after training
   * `settings.py` : storing all settings for this program with default values
   * `statistics.py` : miscellaneous code to compute statistic
@@ -194,7 +212,8 @@ not worry about. Feel free to contact me if you think there is a mistake._
 * `load_dataset.py`: Load the dataset and save the tensors and lists in separated files for later use if specified.
 * `run.py`: Controls the training of the network. Centralized the script execution (<span style="color:skyblue;">main 
 script</span>)
-* `test_network.py`: Train pre-trained network on a dataset (<span style="color:gold;">not relevant</span>)
+* `test_network.py`: Train pre-trained network on a dataset
+
 # Workflow
 
 If you wish to simply run the program, then use `run.py` after setting proper parameters in the `settings.yaml` file and

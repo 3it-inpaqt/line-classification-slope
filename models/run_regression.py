@@ -93,6 +93,9 @@ def main():
         X_test = X_test.to(device=device)
         y_test = y_test.to(device=device)
 
+        # print(X_train.max())
+        # print(X_train.min())
+
     for i in range(settings.run_number):
         # Reset the model
         input_size = settings.patch_size_x * settings.patch_size_y
