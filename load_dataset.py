@@ -23,6 +23,12 @@ try:
 except ExistingRunName:
     logger.critical(f'Existing run directory: "{run_name}"', exc_info=True)
 
+# Set LaTex for matplotlib
+    plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": "serif"
+    })
+
 
 def load_diagram() -> List["DiagramOffline"]:
     # Load diagrams from files (line and area)
@@ -58,7 +64,7 @@ def load_patches(diagrams):
     lines = []
 
     for diagram in diagrams:
-        # torch.save(diagram.values[678:696, 138:156], 'test_bastien.pt')
+        # torch.save(diagram.values[678:696, 138:156], 'test_bastien.pt')  # example of patch being saved for later use
         diagram_patches, lines_patches = diagram.get_patches((settings.patch_size_x, settings.patch_size_y), (6, 6),
                                                              (0, 0))
         patches.extend(diagram_patches)
@@ -68,7 +74,6 @@ def load_patches(diagrams):
 
 if __name__ == '__main__':
     diagrams_exp = load_diagram()
-    # print('diagram ', len(diagrams_exp))
     patches_list, lines_list = load_patches(diagrams_exp)
 
     selected_patches = []
@@ -77,20 +82,16 @@ if __name__ == '__main__':
     for patch, line_list in zip(patches_list, lines_list):
         if len(line_list) == 1:  # takes patch into account only if it has one line crossing it
             if settings.dx:
-                # print(patch.shape)
                 Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
-                # print(Dx.shape)
-                # print('---------------')
-                selected_patches.append(Dx)  # convert numpy array back to torch tensor and normalize it
+                selected_patches.append(Dx)  # convert numpy array back to torch tensor
 
             else:
                 selected_patches.append(patch)
             selected_lines.append(line_list)
 
     angles_lines = angles_from_list(selected_lines, normalize=True)
-    # get_angle_stat(angles_lines)
-    # print(angles_lines)
-    # print(selected_lines)
+    # get_angle_stat(angles_lines)  # un-comment this line if you want to see the angle statistical distribution
+
     if settings.rotate_patch:
         from utils.rotation import rotate_patches
         selected_patches, rotated_lines_list, rotated_angle_list = rotate_patches(selected_patches,
@@ -109,38 +110,27 @@ if __name__ == '__main__':
                                                                                    background=settings.background,
                                                                                    sigma=settings.sigma,
                                                                                    aa=settings.anti_alias)
-        get_angle_stat(populated_angle_list)
 
-    # Calculate angles by hand for verification
-    plt.rcParams.update({
-        "text.usetex": True,
-        "font.family": "serif"
-    })
+        get_angle_stat(populated_angle_list)  # plot the angle statistical distribution for the new dataset
+
+        # Plot a sample of patches to see an example of lines
+        plot_patch_sample(populated_patches,
+                          populated_lines_list,
+                          sample_number=16,
+                          show_offset=False,
+                          name='one_line_populated_DQD')
 
     # Plot a sample of patches with line highlighted
-    # plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
-    plot_patch_sample(populated_patches, populated_lines_list, sample_number=16, show_offset=False, name='one_line_populated_DQD')
+    plot_patch_sample(selected_patches, selected_lines, sample_number=16, show_offset=False, name='one_line_DQD')
 
-    # get_angle_stat(angles_lines)
-    # print(len(angles_lines))
-    # print(selected_patches[0])
-    #
-    # # Resampling of the dataset
-    # # resampled_patch, resampled_angles, resampled_lines = resample_dataset(selected_patches, angles_lines_normalized, selected_lines, 20)
-    # # get_angle_stat(resampled_angles)
-    #
     # Reshape patches for neural network
-    # Get the number of images
+        # Get the number of images
     n = len(selected_patches)
-    #
-    # # Create an empty tensor with the desired shape
+
+    # Create an empty tensor with the desired shape
     stacked_patches = torch.empty(n, settings.patch_size_x, settings.patch_size_y, dtype=torch.float32)
 
-    # Fill the 3D tensor with the image data
-    # for i, image_tensor in enumerate(selected_patches):
-    #     # print(image_tensor.shape)
-    #     stacked_patches[i, :, :] = image_tensor[0, :, :]
-
+    # Fill the tensor with stacked patches
     if type(populated_patches[0]) == np.ndarray:
         stacked_array = np.stack(populated_patches)
         stacked_patches = torch.from_numpy(stacked_array)
@@ -157,30 +147,26 @@ if __name__ == '__main__':
 
     tensor_patches = stacked_patches.unsqueeze(1)
 
-    # prepro_tensor = renorm_all_tensors(tensor_patches, True)
-
-    # Set patches and angles path
+    # Set patches and angles path with extra parameters if defined
     path_torch = f'./saved/double_dot_{settings.research_group}_populated_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
     path_angle = f'./saved/double_dot_{settings.research_group}_populated_angles_{settings.patch_size_x}_{settings.patch_size_y}'
+
     if settings.full_circle:
         path_torch += "_fullcircle"
         path_angle += "_fullcircle"
     if settings.dx:
         path_torch += "_Dx"
         path_angle += "_Dx"
+
+    # Add extension to file path
     path_torch += ".pt"
     path_angle += ".txt"
 
     # Save tensor
-    # print(stacked_patches.shape)
     torch.save(renorm_array(stacked_patches), path_torch)
 
-    print(stacked_patches.shape)
-    print(len(populated_angle_list))
     # Create multiplot to check some lines
-    # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)
-    # print(stacked_patches.shape)
-    # print(stacked_patches[0, :, :])
+    # fig, axes = create_multiplots(stacked_patches, angles_lines, number_sample=16)  # un-comment this line to see an example of patches
     plt.tight_layout()
     plt.show()
 

@@ -8,7 +8,13 @@ from utils.misc import dec_to_sci
 from utils.settings import settings
 
 
-def save_model(model, filename: str, directory_path: str, loss_history: List[Any], best_loss: float, accuracy: float, standard_deviation: float) -> None:
+def save_model(model: Any,
+               filename: str,
+               directory_path: str,
+               loss_history: List[Any],
+               best_loss: float,
+               accuracy: float,
+               standard_deviation: float) -> None:
     """
     Save a machine learning model in a .pt file.
     :param model: Pytorch model to save, by default simply 'model'
@@ -22,6 +28,8 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
     """
     # Define path to 'saved' folder
     run_type = settings.model_type
+
+    # For experimental data
     if not settings.synthetic:
         if run_type == "FF":
             path = f"{directory_path}/{settings.research_group}/regression/{settings.loss_fn}"
@@ -32,14 +40,16 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
                 logger.warning(f'Run type invalid.')
                 run_type = input('Please select a proper run type (cnn or ff): ')
 
+    # For synthetic data
     else:
         path = f"{directory_path}/synthetic/regression/{settings.loss_fn}"
+        logger.warning('Synthetic path set up not implemented yet')
 
     # Add extension if not provided
     model_filename = filename + '.pt'  # for tensor file
     plot_filename = filename + '.png'  # for plot file
 
-    # Check if directory exists, create if it does not
+    # Check if directory exists, create it otherwise
     if os.path.exists(path):
         logger.info(f'Output directory {path} exists, saving file')
     else:
@@ -57,12 +67,17 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
 
     # Plot accuracy
     fig, ax = plt.subplots()
-    ax_title = f'Training on the experimental patches \n Learning rate: {settings.learning_rate} | Epochs: {settings.n_epochs} | Batch: {settings.batch_size}'
+
+    ax_title = f'Training on the experimental patches \n ' \
+               f'Learning rate: {settings.learning_rate} ' \
+               f'| Epochs: {settings.n_epochs} ' \
+               f'| Batch: {settings.batch_size}'
+
+    # If loss is calculated using the angle threshold
     if settings.use_threshold_loss:
         ax_title += f' | Threshold: {settings.threshold_loss}°'
 
     ax.set_title(ax_title)
-    # print("Loss: %.4f" % best_loss)
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
@@ -77,16 +92,19 @@ def save_model(model, filename: str, directory_path: str, loss_history: List[Any
         f'{settings.loss_fn}'
     ))
 
+    # Add beta parameter to the text box if the loss function uses it
     if settings.loss_fn == 'SmoothL1Loss' or settings.loss_fn == 'WeightedSmoothL1':
         textstr = '\n'.join((textstr,
                              r'$\beta = {{{beta}}}$'.format(beta=settings.beta, )
                              ))
 
+    # Add the harmonic number parameter to the text box if the loss function uses it
     elif settings.loss_fn == 'HarmonicFunctionLoss':
         textstr = '\n'.join((textstr,
                              r'$n = {{{num_harmonic}}}$'.format(num_harmonic=settings.num_harmonics, )
                              ))
 
+    # Create textbox object
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax.text(0.9, 0.9, textstr, transform=ax.transAxes, fontsize=14, ha='right', va='top', bbox=props)
 

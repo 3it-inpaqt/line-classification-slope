@@ -27,6 +27,8 @@ def calculate_std_dev(pred_angles: Any, known_angles: Any) -> float:
             pred_angles = pred_angles.cpu().detach().numpy()
         if isinstance(known_angles, torch.Tensor):
             known_angles = known_angles.cpu().detach().numpy()
+
+    # Otherwise simply detach the gradient to the tensor
     else:
         if isinstance(pred_angles, torch.Tensor):
             pred_angles = pred_angles.detach().numpy()
@@ -34,20 +36,28 @@ def calculate_std_dev(pred_angles: Any, known_angles: Any) -> float:
             known_angles = known_angles.detach().numpy()
 
     # Calculate standard deviation
-    residuals = pred_angles - known_angles
-    mean_residuals = np.mean(residuals)
-    variance_residuals = np.sum((residuals - mean_residuals) ** 2) / (len(residuals) - 1)
-    std_dev_residuals = np.sqrt(variance_residuals)
+    residuals = pred_angles - known_angles  # simple error
+    mean_residuals = np.mean(residuals)  # average of the errors
+    variance_residuals = np.sum((residuals - mean_residuals) ** 2) / (len(residuals) - 1)  # calculate the variance
+    std_dev_residuals = np.sqrt(variance_residuals)  # get standard deviation
     return std_dev_residuals
 
 
-def accuracy(known_angles, pred_angles, tol=0.1):
+def accuracy(known_angles, pred_angles):
+    """
+    Calculate the accuracy of the network.
+    :param known_angles:
+    :param pred_angles:
+    :return:
+    """
     # Convert input to NumPy arrays if they are PyTorch tensors
     if torch.cuda.is_available():
         if isinstance(pred_angles, torch.Tensor):
             pred_angles = pred_angles.cpu().detach().numpy()
         if isinstance(known_angles, torch.Tensor):
             known_angles = known_angles.cpu().detach().numpy()
+
+    # Otherwise simply detach the gradient to the tensor
     else:
         if isinstance(pred_angles, torch.Tensor):
             pred_angles = pred_angles.detach().numpy()
@@ -85,7 +95,7 @@ def calculate_average_error(actual_values: ndarray, predicted_values: ndarray) -
 
 
 # -- Stats and Resampling operations -- #
-def angle_distribution(angle_list):
+def angle_distribution(angle_list: List[Any]) -> Tuple[int, int]:
     """
     Find the distribution of angles of the line for a set of patches.
     :param angle_list: Associated angle of the line
@@ -103,26 +113,29 @@ def angle_distribution(angle_list):
     return horizontal_count, vertical_count
 
 
-def remove_elements_exceeding_count(list1, list2, n):
+def remove_elements_exceeding_count(list1: List[Any], list2: List[Any], n: int):
     """
-    Remove elements from list2 for which amount of element in list 1 exceeds n
+    Remove elements from list2 for which amount of element in list 1 exceeds a number n
     :param list1:
     :param list2:
-    :param n:
+    :param n: Maximum of elements above which, said element will be removed
     :return:
     """
     counts = Counter(list1)
     return [element2 for element1, element2 in zip(list1, list2) if counts[element1] <= n]
 
 
-def resample_dataset(patch_list, angle_list, line_list, threshold):
+def resample_dataset(patch_list: List[Any],
+                     angle_list: List[Any],
+                     line_list: List[Any],
+                     threshold: int) -> Tuple[List[Any], List[Any], List[Any]]:
     """
     Resample dataset to have an even distribution of angles
     :param line_list:
     :param patch_list:
     :param angle_list:
     :param threshold:
-    :return: Tuple od resampled patches, angles anf lines
+    :return: Tuple of resampled patches, angles anf lines
     """
     # Remove values above the threshold
 
@@ -136,12 +149,17 @@ def resample_dataset(patch_list, angle_list, line_list, threshold):
 # -- Study relations between standard deviation/loss and settings
 def plot_metrics():
     """
-    Create plots for each setting to characterize relationships between accuracy metrics
+    Create plots for each setting to characterize relationships between accuracy metrics. The studied parameter has to
+    be changed manually. This function isn't useful as no correlation can be made between the hyperparameters and the
+    standard deviation as far I know.
+    You also need a CSV file to use this function. The CSV are generated whenever you train a network if you enable it.
     """
+    # Get LaTex for matplotlib
     plt.rcParams.update({
         "text.usetex": True,
         "font.family": "serif"
     })
+
     # Define the folder name where the CSV files are saved
     folder = './saved/csv_files'
 
@@ -154,11 +172,9 @@ def plot_metrics():
         df = pd.read_csv(os.path.join(folder, csv_file))
         column_names = df.columns.tolist()[:-2]
         num_cols = df.shape[1] - 2
-        # print(column_names)
 
         # Get the setting name from the file name
         setting_name = os.path.splitext(csv_file)[0]
-        # print(setting_name)
 
         # Create subplots for each setting
         fig, axes = plt.subplots(num_cols, 2, figsize=(num_cols*2, num_cols*2))
