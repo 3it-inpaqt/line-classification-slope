@@ -102,6 +102,11 @@ n_synthetic: 2000  # number of synthetic data to create
 anti_alias: True
 background: True
 sigma: 0.1
+minimum_length: 0.95  # minimum length of line to draw on synthetic patches
+
+# Gaussian distribution for synthetic data parameters
+mean_gaussian: 0.9
+scale_gaussian: 0.05
 ```
 
 #### Loss function
