@@ -89,9 +89,6 @@ if __name__ == '__main__':
             if settings.dx:
                 Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
                 selected_patches.append(Dx)  # convert numpy array back to torch tensor
-                # Update file name if derivative of patch is True
-                path_torch += "_Dx"
-                path_angle += "_Dx"
 
             else:
                 selected_patches.append(patch)
@@ -99,6 +96,11 @@ if __name__ == '__main__':
 
     angles_lines = angles_from_list(selected_lines, normalize=True)
     # get_angle_stat(angles_lines)  # un-comment this line if you want to see the angle statistical distribution
+
+    if settings.dx:
+        # Update file name if derivative of patch is True
+        path_torch += "_Dx"
+        path_angle += "_Dx"
 
     if settings.rotate_patch:
         # Update file name
@@ -141,7 +143,7 @@ if __name__ == '__main__':
 
     # Reshape patches for neural network
         # Get the number of images
-    n = len(selected_patches)
+    n = len(populated_patches)
 
     # Create an empty tensor with the desired shape
     stacked_patches = torch.empty(n, settings.patch_size_x, settings.patch_size_y, dtype=torch.float32)

@@ -32,7 +32,7 @@ def generate_image_fixed_angle(size: tuple,
         img = np.zeros(size)
 
     # Set a minimum line length
-    min_length = 0.9 * min(size[0], size[1])
+    min_length = settings.minimum_length * min(size[0], size[1])
 
     # Calculate the endpoints of the line based on the desired angle
         # Convert angle to radian
