@@ -172,6 +172,8 @@ class Settings:
     anti_alias: bool = False
     sigma: float = 0.1
     background: bool = False
+    mean_gaussian: float = 0.9
+    scale_gaussian: float = 0.01
 
     # Angle calculation
     full_circle: bool = False  # if you want the angle to be either between 0 and 180 or 360

@@ -6,6 +6,7 @@ from typing import Any, List, Tuple
 
 from utils.angle_operations import normalize_angle
 import utils.rotation as rotation
+from utils.settings import settings
 
 
 def generate_image_fixed_angle(size: tuple,
@@ -25,7 +26,7 @@ def generate_image_fixed_angle(size: tuple,
     """
     # Generate gaussian distribution for background if specified
     if background:
-        img = np.random.normal(0.9, 0.01, size) * 255
+        img = np.random.normal(settings.mean_gaussian, settings.scale_gaussian, size) * 255
     # Otherwise blank background (black)
     else:
         img = np.zeros(size)

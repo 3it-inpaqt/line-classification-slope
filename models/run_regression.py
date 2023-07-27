@@ -64,6 +64,8 @@ def main():
         X_path = settings.x_path
         y_path = settings.y_path
         X, y = torch.load(X_path), [float(x) for x in load_list_from_file(y_path)]
+        print(X.shape)
+        print(len(y))
         # Set title for loss evolution with respect to epoch and model name
         model_name = f'experimental_{settings.research_group}_regression_{settings.loss_fn}'
         if settings.loss_fn == 'SmoothL1Loss' or settings.loss_fn == 'WeightedSmoothL1':
@@ -71,10 +73,16 @@ def main():
         elif settings.loss_fn == 'HarmonicFunctionLoss':
             model_name += f'{settings.num_harmonics}'
 
-        model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}_rotated'
+        model_name += f'_batch{settings.batch_size}_epoch{settings.n_epochs}'
 
         if settings.dx:
             model_name += '_Dx'
+
+        elif settings.rotate_patch:
+            model_name += '_rotated'
+
+        elif settings.include_synthetic:
+            model_name += f'_populated{str(settings.mean_gaussian).replace(".", "")}_{str(settings.scale_gaussian).replace(".", "")}'
 
         # train-test split for model evaluation
         X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, shuffle=True)

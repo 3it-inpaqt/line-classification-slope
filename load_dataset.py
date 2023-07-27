@@ -73,6 +73,11 @@ def load_patches(diagrams):
 
 
 if __name__ == '__main__':
+
+    # Set patches and angles path with extra parameters if defined
+    path_torch = f'./saved/double_dot_{settings.research_group}_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
+    path_angle = f'./saved/double_dot_{settings.research_group}_angles_{settings.patch_size_x}_{settings.patch_size_y}'
+
     diagrams_exp = load_diagram()
     patches_list, lines_list = load_patches(diagrams_exp)
 
@@ -84,6 +89,9 @@ if __name__ == '__main__':
             if settings.dx:
                 Dx = np.gradient(patch)[0]  # derivative with respect to the x-axis
                 selected_patches.append(Dx)  # convert numpy array back to torch tensor
+                # Update file name if derivative of patch is True
+                path_torch += "_Dx"
+                path_angle += "_Dx"
 
             else:
                 selected_patches.append(patch)
@@ -93,6 +101,9 @@ if __name__ == '__main__':
     # get_angle_stat(angles_lines)  # un-comment this line if you want to see the angle statistical distribution
 
     if settings.rotate_patch:
+        # Update file name
+        path_torch += "_rotate"
+        path_angle += "_rotate"
         from utils.rotation import rotate_patches
         selected_patches, rotated_lines_list, rotated_angle_list = rotate_patches(selected_patches,
                                                                                   selected_lines,
@@ -101,6 +112,11 @@ if __name__ == '__main__':
         get_angle_stat(rotated_angle_list)
 
     if settings.include_synthetic:
+        # Update file path if user requires the population of the dataset with synthetic data
+        path_torch += f'_populated{str(settings.mean_gaussian).replace(".", "")}_{str(settings.scale_gaussian).replace(".", "")}'
+        path_angle += f'_populated{str(settings.mean_gaussian).replace(".", "")}_{str(settings.scale_gaussian).replace(".", "")}'
+
+        # Only load module if necessary
         from utils.populate import populate_angles
         populated_patches, populated_lines_list, populated_angle_list = populate_angles(selected_patches,
                                                                                    selected_lines,
@@ -147,16 +163,9 @@ if __name__ == '__main__':
 
     tensor_patches = stacked_patches.unsqueeze(1)
 
-    # Set patches and angles path with extra parameters if defined
-    path_torch = f'./saved/double_dot_{settings.research_group}_populated_patches_normalized_{settings.patch_size_x}_{settings.patch_size_y}'
-    path_angle = f'./saved/double_dot_{settings.research_group}_populated_angles_{settings.patch_size_x}_{settings.patch_size_y}'
-
     if settings.full_circle:
         path_torch += "_fullcircle"
         path_angle += "_fullcircle"
-    if settings.dx:
-        path_torch += "_Dx"
-        path_angle += "_Dx"
 
     # Add extension to file path
     path_torch += ".pt"
